@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="GivingChampion.Application/GivingChampion.Application.csproj" />
+    <Project Path="GivingChampion.Domain/GivingChampion.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Host/">
+    <Project Path="GivingChampion/GivingChampion.AppHost/GivingChampion.AppHost.csproj" />
+    <Project Path="GivingChampion/GivingChampion.ServiceDefaults/GivingChampion.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="GivingChampion.Infrastructure/GivingChampion.Persistance.csproj" />
+    <Project Path="GivingChampion.Migrator/GivingChampion.Migrator.csproj" />
+    <Project Path="GivingChampion.Seeder/GivingChampion.Seeder.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="GivingChampion.API/GivingChampion.API.csproj" />
+  </Folder>
+</Solution>

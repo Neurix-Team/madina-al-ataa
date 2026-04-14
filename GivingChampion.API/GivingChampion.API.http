@@ -1,0 +1,6 @@
+@GivingChampion.API_HostAddress = http://localhost:5128
+
+GET {{GivingChampion.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
