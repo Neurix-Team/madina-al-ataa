@@ -17,6 +17,10 @@ namespace GivingChampion.Application.Interfaces.Auth
             ExternalUserInfo externalUser,
             CancellationToken cancellationToken = default);
 
+        Task<ServiceResult<TokenResponse>> CompleteSocialRegistrationAsync(
+            CompleteSocialRegistrationRequest request,
+            CancellationToken cancellationToken = default);
+
         Task<ServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
             string code,
             CancellationToken cancellationToken = default);

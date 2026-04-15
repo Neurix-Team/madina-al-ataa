@@ -1,4 +1,5 @@
-﻿using GivingChampion.Seeder.Contracts;
+﻿using GivingChampion.Domain.Entities;
+using GivingChampion.Seeder.Contracts;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -22,15 +23,15 @@ namespace GivingChampion.Seeder.Seeders
             try
             {
                 using var scope = services.CreateScope();
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-                string[] roles = ["Admin", "Volunteer", "Donor", "Parent", "Child", "Partner"];
+                string[] roles = ["Admin", "User", "Volunteer", "Donor", "Child", "Partner"];
 
                 foreach (var role in roles)
                 {
                     if (!await roleManager.RoleExistsAsync(role))
                     {
-                        await roleManager.CreateAsync(new IdentityRole(role));
+                        await roleManager.CreateAsync(new ApplicationRole(role));
                         logger.LogInformation($"Role '{role}' created successfully.");
                     }
                 }

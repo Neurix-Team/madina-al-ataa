@@ -138,5 +138,40 @@ namespace GivingChampion.Persistance.Repositories
                 }
             }
         }
+
+        public Task<ApplicationUser?> FindByIdAsync(
+            string userId,
+            CancellationToken cancellationToken = default)
+            => _userManager.FindByIdAsync(userId);
+
+        public Task<bool> HasPasswordAsync(
+            ApplicationUser user,
+            CancellationToken cancellationToken = default)
+            => _userManager.HasPasswordAsync(user);
+
+        public async Task<ServiceResult> AddPasswordAsync(
+            ApplicationUser user,
+            string newPassword,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _userManager.AddPasswordAsync(user, newPassword);
+
+            return result.Succeeded
+                ? ServiceResult.Success()
+                : ServiceResult.Failure(
+                    result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
+        }
+
+        public async Task<ServiceResult> UpdateAsync(
+            ApplicationUser user,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded
+                ? ServiceResult.Success()
+                : ServiceResult.Failure(
+                    result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
+        }
     }
 }

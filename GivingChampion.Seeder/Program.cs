@@ -1,4 +1,5 @@
 using GivingChampion.Domain.Contexts;
+using GivingChampion.Domain.Entities;
 using GivingChampion.Seeder;
 using GivingChampion.Seeder.Seeders;
 using Microsoft.AspNetCore.Identity;
@@ -15,8 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
 
 builder.Services.AddIdentityCore<IdentityUser>()
-    .AddRoles<IdentityRole>()
-    .AddRoleManager<RoleManager<IdentityRole>>()
+    .AddRoles<ApplicationRole>()
+    .AddRoleManager<RoleManager<ApplicationRole>>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 

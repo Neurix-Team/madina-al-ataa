@@ -49,4 +49,21 @@ public interface IIdentityRepository
     Task EnsureRolesExistAsync(
         IEnumerable<string> roles,
         CancellationToken cancellationToken = default);
+
+    Task<ApplicationUser?> FindByIdAsync(
+        string userId,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> HasPasswordAsync(
+        ApplicationUser user,
+        CancellationToken cancellationToken = default);
+
+    Task<ServiceResult> AddPasswordAsync(
+        ApplicationUser user,
+        string newPassword,
+        CancellationToken cancellationToken = default);
+
+    Task<ServiceResult> UpdateAsync(
+        ApplicationUser user,
+        CancellationToken cancellationToken = default);
 }

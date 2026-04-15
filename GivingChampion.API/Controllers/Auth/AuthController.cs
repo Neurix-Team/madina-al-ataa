@@ -30,10 +30,33 @@ namespace GivingChampion.API.Controllers.Auth
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<IActionResult> Register(
-            [FromBody] RegisterRequest request,
+            RegisterRequest request,
             CancellationToken cancellationToken)
         {
             var result = await _authService.RegisterAsync(request, cancellationToken);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new { errors = result.Errors });
+            }
+
+            return Ok(result.Data);
+        }
+
+        [HttpPost("continue-registration")]
+        [Authorize]
+        public async Task<IActionResult> ContinueRegistration(
+            CompleteSocialRegistrationRequest request,
+            CancellationToken cancellationToken)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            //if (string.IsNullOrWhiteSpace(currentUserId) || currentUserId != request.Userid)
+            //{
+            //    return Forbid();
+            //}
+
+            var result = await _authService.CompleteSocialRegistrationAsync(request, cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -111,11 +134,12 @@ namespace GivingChampion.API.Controllers.Auth
                 return Redirect($"{frontendCallbackUrl}?error=ProviderKeyMissing");
             }
 
-            var externalUser = new ExternalUserInfo(
-                Provider: "Google",
-                ProviderKey: providerKey,
-                Email: principal.FindFirstValue(ClaimTypes.Email),
-                FullName: principal.FindFirstValue(ClaimTypes.Name));
+            var externalUser = new ExternalUserInfo {
+                Provider = "Google",
+                ProviderKey = providerKey,
+                Email = principal.FindFirstValue(ClaimTypes.Email),
+                FullName = principal.FindFirstValue(ClaimTypes.Name) 
+            };
 
             var result = await _authService.CompleteGoogleLoginAsync(externalUser, cancellationToken);
 
@@ -127,7 +151,7 @@ namespace GivingChampion.API.Controllers.Auth
                 return Redirect($"{frontendCallbackUrl}?error={Uri.EscapeDataString(error)}");
             }
 
-            return Redirect($"{frontendCallbackUrl}?code={Uri.EscapeDataString(result.Data.Code)}");
+            return Redirect($"{frontendCallbackUrl}?code={Uri.EscapeDataString(result.Data.Code)}&needsregistration={result.Data.NeedsRegistration}");
         }
 
         [HttpPost("google/exchange")]

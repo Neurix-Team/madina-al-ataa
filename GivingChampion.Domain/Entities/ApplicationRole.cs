@@ -13,6 +13,7 @@ namespace GivingChampion.Domain.Entities
 
         public ApplicationRole(string roleName) : base(roleName)
         {
+            NormalizedName = roleName?.ToUpperInvariant();
         }
     }
 }

@@ -51,12 +51,12 @@ namespace GivingChampion.Application.Services
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return new TokenResponse(
-                accessToken,
-                expiresAtUtc,
-                user.Id,
-                user.Email ?? string.Empty,
-                roles.ToArray());
+            return new TokenResponse {
+                AccessToken = accessToken,
+                ExpiresAtUtc = expiresAtUtc,
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                Roles = roles.ToArray()};
         }
     }
 }

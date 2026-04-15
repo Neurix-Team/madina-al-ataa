@@ -36,7 +36,7 @@ namespace GivingChampion.Application.Services
             var createResult = await _identityRepository.CreateLocalUserAsync(
                 request.Email,
                 request.Password,
-                request.FullName,
+                request.Fullname,
                 cancellationToken);
 
             if (!createResult.Succeeded || createResult.Data is null)
@@ -46,7 +46,7 @@ namespace GivingChampion.Application.Services
 
             var user = createResult.Data;
 
-            var addRoleResult = await _identityRepository.AddToRoleAsync(user, "Parent", cancellationToken);
+            var addRoleResult = await _identityRepository.AddToRoleAsync(user, "User", cancellationToken);
             if (!addRoleResult.Succeeded)
             {
                 return ServiceResult<TokenResponse>.Failure(addRoleResult.Errors);
@@ -159,13 +159,73 @@ namespace GivingChampion.Application.Services
                 {
                     return ServiceResult<ExternalLoginCodeResponse>.Failure(addRoleResult.Errors);
                 }
+                else
+                {
+                    await _identityRepository.AddToRoleAsync(user, "Donor", cancellationToken);
+                    await _identityRepository.AddToRoleAsync(user, "Volunteer", cancellationToken);
+                }
             }
 
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
             var token = _jwtTokenFactory.Create(user, roles);
             var code = _externalLoginCodeStore.Store(token);
 
-            return ServiceResult<ExternalLoginCodeResponse>.Success(new ExternalLoginCodeResponse(code));
+            var hasPassword = await _identityRepository.HasPasswordAsync(user);
+
+            return ServiceResult<ExternalLoginCodeResponse>.Success(new ExternalLoginCodeResponse { Code = code, NeedsRegistration = !hasPassword });
+        }
+
+        public async Task<ServiceResult<TokenResponse>> CompleteSocialRegistrationAsync(
+            CompleteSocialRegistrationRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            var user = await _identityRepository.FindByIdAsync(request.Userid, cancellationToken);
+
+            if (user is null)
+            {
+                return ServiceResult<TokenResponse>.Failure(
+                    new ServiceError("UserNotFound", "User was not found."));
+            }
+
+            if (!user.isExternal)
+            {
+                return ServiceResult<TokenResponse>.Failure(
+                    new ServiceError("InvalidUserType", "This action is only allowed for external users."));
+            }
+
+            var hasPassword = await _identityRepository.HasPasswordAsync(user, cancellationToken);
+
+            if (hasPassword)
+            {
+                return ServiceResult<TokenResponse>.Failure(
+                    new ServiceError("PasswordAlreadyExists", "This user already has a local password."));
+            }
+
+            var addPasswordResult = await _identityRepository.AddPasswordAsync(
+                user,
+                request.Newpassword,
+                cancellationToken);
+
+            if (!addPasswordResult.Succeeded)
+            {
+                return ServiceResult<TokenResponse>.Failure(addPasswordResult.Errors);
+            }
+
+            // Keep IsExternal = true if you want to preserve the source of registration.
+            // If you want this flag to mean "still needs completion", set it to false here.
+            //user.isExternal = false;
+
+            var updateResult = await _identityRepository.UpdateAsync(user, cancellationToken);
+
+            if (!updateResult.Succeeded)
+            {
+                return ServiceResult<TokenResponse>.Failure(updateResult.Errors);
+            }
+
+            var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
+            var token = _jwtTokenFactory.Create(user, roles);
+
+            return ServiceResult<TokenResponse>.Success(token);
         }
 
         public Task<ServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
