@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
-namespace GivingChampion.Application.Common.Pagination;
+namespace GivingChampion.Common.Pagination;
 
 [DebuggerDisplay("PageNumber = {PageNumber}, PageSize = {PageSize}")]
 public sealed class PageParameters

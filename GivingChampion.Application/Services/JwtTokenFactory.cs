@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Application.Interfaces.Auth;
+using GivingChampion.Common.Auth;
+using GivingChampion.Domain.Entities;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+
+namespace GivingChampion.Application.Services
+{
+    public sealed class JwtTokenFactory : IJwtTokenFactory
+    {
+        private readonly JwtOptions _jwtOptions;
+
+        public JwtTokenFactory(IOptions<JwtOptions> jwtOptions)
+        {
+            _jwtOptions = jwtOptions.Value;
+        }
+
+        public TokenResponse Create(ApplicationUser user, IList<string> roles)
+        {
+            var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.Name, user.UserName ?? user.Email ?? user.Id),
+            new(ClaimTypes.Email, user.Email ?? string.Empty)
+        };
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expiresAtUtc = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenMinutes);
+
+            var token = new JwtSecurityToken(
+                issuer: _jwtOptions.Issuer,
+                audience: _jwtOptions.Audience,
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: expiresAtUtc,
+                signingCredentials: credentials);
+
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return new TokenResponse(
+                accessToken,
+                expiresAtUtc,
+                user.Id,
+                user.Email ?? string.Empty,
+                roles.ToArray());
+        }
+    }
+}

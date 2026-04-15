@@ -1,4 +1,4 @@
-﻿using GivingChampion.Application.Common.Pagination;
+﻿using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.Application.Extensions.Pagination;
 

@@ -26,6 +26,9 @@ builder.AddProject<Projects.GivingChampion_API>("api")
     .WithReference(defaultConnection, "DefaultConnection")
     .WithReference(db)
     .WithReference(seeder)
+    .WithEnvironment("Jwt__Issuer", "GivingChampion")
+    .WithEnvironment("Jwt__Audience", "GivingChampion.Client")
+    .WithEnvironment("Jwt__AccessTokenMinutes", "60")
     .WaitFor(db)
     .WaitForCompletion(seeder);
 

@@ -12,15 +12,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GivingChampion.Common\GivingChampion.Common.csproj" />
     <ProjectReference Include="..\GivingChampion.Domain\GivingChampion.Domain.csproj" />
     <ProjectReference Include="..\GivingChampion.Infrastructure\GivingChampion.Persistance.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

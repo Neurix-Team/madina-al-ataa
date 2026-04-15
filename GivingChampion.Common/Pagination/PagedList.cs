@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace GivingChampion.Application.Common.Pagination;
+namespace GivingChampion.Common.Pagination;
 
 public sealed class PagedList<T>
 {

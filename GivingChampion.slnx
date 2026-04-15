@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Core/">
     <Project Path="GivingChampion.Application/GivingChampion.Application.csproj" />
+    <Project Path="GivingChampion.Common/GivingChampion.Common.csproj" Id="9d5e90db-96e1-4db4-bc34-bb7435423fc2" />
     <Project Path="GivingChampion.Domain/GivingChampion.Domain.csproj" />
   </Folder>
   <Folder Name="/Host/">
