@@ -27,11 +27,11 @@ namespace GivingChampion.Application.Services
         {
             var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Name, user.UserName ?? user.Email ?? user.Id),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.UserName ?? user.Email ?? user.Id.ToString()),
             new(ClaimTypes.Email, user.Email ?? string.Empty)
         };
 
@@ -54,7 +54,7 @@ namespace GivingChampion.Application.Services
             return new TokenResponse {
                 AccessToken = accessToken,
                 ExpiresAtUtc = expiresAtUtc,
-                UserId = user.Id,
+                UserId = user.Id.ToString(),
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray()};
         }
