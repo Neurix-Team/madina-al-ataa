@@ -15,7 +15,7 @@ namespace GivingChampion.Domain.Entities
         public string OrgName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Type of organization (NGO, Foundation, Corporate)
+        /// Type of organization (Foundation, Corporate)
         /// </summary>
         [Required(ErrorMessage = "Organization type is required")]
         public OrgType OrgType { get; set; }   
