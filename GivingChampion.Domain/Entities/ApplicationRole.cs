@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class ApplicationRole : IdentityRole
+    public class ApplicationRole : IdentityRole<Guid>
     {
         public ApplicationRole()
         {
