@@ -16,7 +16,8 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Reviewer")]
         public Guid ReviewerId { get; set; }
         public ApplicationUser Reviewer { get; set; }
+        [ForeignKey("Profile")]
         public Guid ProfileId { get; set; }
-        //public Profile Profile { get; set; }
+        public Profile Profile { get; set; }
     }
 }

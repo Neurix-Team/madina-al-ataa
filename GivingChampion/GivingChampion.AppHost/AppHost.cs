@@ -3,7 +3,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 var db_username = builder.AddParameter("username", "postgres", secret: true);
 var db_password = builder.AddParameter("password", "postgres", secret: true);
 
-var postgres = builder.AddPostgres("postgres", db_username, db_password, 5432);
+var postgres = builder.AddPostgres("postgres", db_username, db_password, 5432)
+    .WithPgAdmin();
 
 var db = postgres.AddDatabase("givingchampion");
 
