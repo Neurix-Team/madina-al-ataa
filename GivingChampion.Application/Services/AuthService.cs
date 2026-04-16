@@ -187,7 +187,7 @@ namespace GivingChampion.Application.Services
                     new ServiceError("UserNotFound", "User was not found."));
             }
 
-            if (!user.isExternal)
+            if (!user.IsExternal)
             {
                 return ServiceResult<TokenResponse>.Failure(
                     new ServiceError("InvalidUserType", "This action is only allowed for external users."));
@@ -213,7 +213,7 @@ namespace GivingChampion.Application.Services
 
             // Keep IsExternal = true if you want to preserve the source of registration.
             // If you want this flag to mean "still needs completion", set it to false here.
-            //user.isExternal = false;
+            //user.IsExternal = false;
 
             var updateResult = await _identityRepository.UpdateAsync(user, cancellationToken);
 

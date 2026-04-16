@@ -21,6 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 var _conf = builder.Configuration;
+var _env = builder.Environment;
+
 
 var jwtOptions = builder.Configuration
     .GetSection(JwtOptions.SectionName)
@@ -29,14 +31,19 @@ var jwtOptions = builder.Configuration
 
 // Add services to the container.
 
-// for testing
-//builder.AddNpgsqlDbContext<AppDbContext>("givingchampion");
-
-var connectionstring = _conf.GetConnectionString("DefaultConnection") 
+if (_env.IsDevelopment())
+{
+    // for testing
+    builder.AddNpgsqlDbContext<AppDbContext>("givingchampion");
+}
+else
+{
+    var connectionstring = _conf.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-// for live
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
+    // for live
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
+}
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
