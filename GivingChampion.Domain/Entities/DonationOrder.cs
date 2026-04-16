@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Domain.Entities
@@ -50,7 +51,7 @@ namespace GivingChampion.Domain.Entities
         /// (Pending, Approved, Rejected)
         /// </summary>
         [Required]
-        public OrderStatus Status { get; set; } = DonationOrderStatus.Pending;
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         /// <summary>
         /// Receipt of payment (file path or URL)
@@ -68,6 +69,12 @@ namespace GivingChampion.Domain.Entities
         /// Foreign key to Donor
         /// </summary>
         public Guid DonorId { get; set; }
+
+        /// <summary>
+        /// Donor Reference
+        /// </summary>
+        [ForeignKey("DonorId")]
+        public Donor Donor { get; set; }
 
         /// <summary>
         /// Foreign key to Donation Request

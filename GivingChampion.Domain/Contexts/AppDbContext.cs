@@ -30,6 +30,13 @@ namespace GivingChampion.Domain.Contexts
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<UserMission> UserMissions { get; set; }
+        public DbSet<Partner> Partners { get; set; }
+        public DbSet<Volunteer> Volunteers { get; set; }
+        public DbSet<DonationOrder> DonationOrders { get; set; }
+        public DbSet<DonationRequest> DonationRequests { get; set; }
+        public DbSet<VolunteerOrder> VolunteerOrders { get; set; }
+        public DbSet<ServiceRequest> ServiceRequests { get; set; }
+        public DbSet<Certificate> Certificates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

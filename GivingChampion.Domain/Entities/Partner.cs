@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Domain.Entities
@@ -25,14 +26,14 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [Phone(ErrorMessage = "Invalid phone number format")]
         [MaxLength(20)]
-        public override string? PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Official email address of the organization
         /// </summary>
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [MaxLength(200)]
-        public override string? Email { get; set; }
+        public string? Email { get; set; }
 
         /// <summary>
         /// Indicates whether the partner is verified or not

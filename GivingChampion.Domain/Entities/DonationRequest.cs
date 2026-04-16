@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Domain.Entities
