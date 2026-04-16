@@ -5,10 +5,11 @@ using System.Text;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser<Guid>
     {
         public string? FullName { get; set; }
+        public DateTime BirthDay { get; set; }
 
-        public bool isExternal { get; set; } = false;
+        public bool IsExternal { get; set; } = false;
     }
 }
