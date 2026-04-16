@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Domain.Enums;
