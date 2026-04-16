@@ -16,6 +16,13 @@ namespace GivingChampion.Domain.Contexts
 
         public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<ApplicationRole> Roles { get; set; }
+        public DbSet<Profile> Profiles { get; set; }
+        public DbSet<Avatar> Avatars { get; set; }
+        public DbSet<Badge> Badges { get; set; }
+        public DbSet<Level> Levels { get; set; }
+        public DbSet<AiAvatar> AiAvatars { get; set; }
+        public DbSet<UserBadge> UserBadges { get; set; }
+        public DbSet<UserLevel> UserLevels { get; set; }
         public DbSet<Child> Children { get; set; }
         public DbSet<Donor> Donors { get; set; }
         public DbSet<Location> Locations { get; set; }
