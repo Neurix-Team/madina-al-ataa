@@ -16,6 +16,8 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using GivingChampion.Application.Interfaces.ServiceRequestService;
+using GivingChampion.Persistance.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,7 +119,9 @@ builder.Services.Configure<JwtOptions>(
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
-
+// Service Request dependencies
+builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
+builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
