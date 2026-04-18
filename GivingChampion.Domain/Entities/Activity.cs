@@ -3,19 +3,22 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class UserBadge
+    public class Activity
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public Guid ProfileId { get; set; }
-        public Profile Profile { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; } = string.Empty;
 
-        public Guid BadgeId { get; set; }
-        public Badge Badge { get; set; }
+        [StringLength(500)]
+        public string Description { get; set; } 
 
-        public DateTime EarnedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public bool IsDeleted { get; set; } = false;
+
         public DateTime? DeletedAt { get; set; }
     }
 }
