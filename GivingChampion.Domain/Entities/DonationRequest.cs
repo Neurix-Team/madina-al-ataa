@@ -6,7 +6,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Enums;
-
 namespace GivingChampion.Domain.Entities
 {
     /// <summary>
@@ -53,10 +52,10 @@ namespace GivingChampion.Domain.Entities
 		public RequestStatus Status { get; set; } 
         
 
-        /// <summary>
-        /// Urgency level of the request (Low, Medium, High)
-        /// </summary>
-        [Required(ErrorMessage = "Urgency level is required")]
+		/// <summary>
+		/// Urgency level of the request (Low, Medium, High)
+		/// </summary>
+		[Required(ErrorMessage = "Urgency level is required")]
         public UrgencyLevel UrgencyLevel { get; set; }
 
         /// <summary>
