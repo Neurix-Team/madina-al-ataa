@@ -26,7 +26,9 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [Phone(ErrorMessage = "Invalid phone number format")]
         [MaxLength(20)]
-        public string? PhoneNumber { get; set; }
+        //////// Updated upstream
+
+        public  string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Official email address of the organization
