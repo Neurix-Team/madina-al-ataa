@@ -104,7 +104,7 @@ namespace GivingChampion.API.Controllers.Auth
         [ProducesResponseType(typeof(Result<TokenResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(
-            [FromBody] LoginRequest request,
+            LoginRequest request,
             CancellationToken cancellationToken)
         {
             var result = await _authService.LoginAsync(request, cancellationToken);

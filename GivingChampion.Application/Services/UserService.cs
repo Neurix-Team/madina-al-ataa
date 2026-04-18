@@ -399,7 +399,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("At least one role is required.");
 
             foreach (var role in roleList)
-            {
+        {
                 var roleExists = await _roleManager.RoleExistsAsync(role);
 
                 if (!roleExists)
