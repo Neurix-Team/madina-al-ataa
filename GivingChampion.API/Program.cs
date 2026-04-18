@@ -3,7 +3,8 @@ using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
-using GivingChampion.Common.Auth;
+using GivingChampion.Application.Transformers;
+using GivingChampion.Common.DTO.Auth;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Repositories;
@@ -30,6 +31,11 @@ var jwtOptions = builder.Configuration
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
 
 // Add services to the container.
+
+//if (!builder.Environment.IsDevelopment())
+//{
+//    builder.Configuration.AddUserSecrets<Program>();
+//}
 
 if (_env.IsDevelopment())
 {
@@ -122,13 +128,12 @@ builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCode
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-    }); ;
+builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi("v1");
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 //builder.Services.AddOpenApi("v2");
 
 builder.Services.AddProblemDetails();
@@ -148,7 +153,12 @@ if (app.Environment.IsDevelopment())
 
         option
             .AddDocument("v1", "API Version 1.0", "/openapi/v1.json", isDefault: true);
-            //.AddDocument("v2", "API Version 2.0", "/openapi/v2.json");
+        //.AddDocument("v2", "API Version 2.0", "/openapi/v2.json");
+        option.AddPreferredSecuritySchemes("Bearer")
+        .AddHttpAuthentication("Bearer", auth =>
+        {
+            auth.Token = "00000000.00000.0000000";
+        }).EnablePersistentAuthentication();
     });
 }
 

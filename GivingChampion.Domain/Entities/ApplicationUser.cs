@@ -9,6 +9,8 @@ namespace GivingChampion.Domain.Entities
     {
         public string? FullName { get; set; }
         public DateTime BirthDay { get; set; }
+        public string City { get; set; } = "";
+        public string Address { get; set; } = "";
 
         public bool IsExternal { get; set; } = false;
     }

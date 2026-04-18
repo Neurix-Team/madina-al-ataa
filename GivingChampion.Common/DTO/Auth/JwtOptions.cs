@@ -1,4 +1,4 @@
-﻿namespace GivingChampion.Common.Auth;
+﻿namespace GivingChampion.Common.DTO.Auth;
 
 public sealed class JwtOptions
 {
