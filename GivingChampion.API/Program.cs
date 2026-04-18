@@ -19,6 +19,8 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using GivingChampion.Application.Interfaces.ServiceRequestService;
+using GivingChampion.Persistance.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
