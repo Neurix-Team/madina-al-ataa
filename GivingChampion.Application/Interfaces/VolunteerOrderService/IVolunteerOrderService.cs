@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Interfaces.VolunteerOrderService
 {
-    public interface IVolunteerOrderService
-    {
+         public interface IVolunteerOrderService { 
+
             #region Query Methods
 
             // Gets all volunteer orders that are not soft deleted
@@ -20,9 +20,7 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
             Task<VolunteerOrderDto?> GetByIdAsync(Guid id);
         #endregion
 
-        Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id);
-        // Added string rejectionReason to match business logic
-        Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason);
+            #endregion
 
             #region Command Methods
 
