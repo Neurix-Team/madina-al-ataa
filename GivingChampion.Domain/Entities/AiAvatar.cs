@@ -8,7 +8,7 @@ namespace GivingChampion.Domain.Entities
     public class AiAvatar
     {
         [Key] 
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         [StringLength(100)]
         public string FavoriteCategory { get; set; }
@@ -18,6 +18,7 @@ namespace GivingChampion.Domain.Entities
         [StringLength(500)]
 
         public string LastSuggestion { get; set; }
-
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }

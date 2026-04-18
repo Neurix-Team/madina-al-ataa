@@ -16,6 +16,10 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using GivingChampion.API.Interfaces;
+using GivingChampion.Persistance.Repositories;
+using GivingChampion.API.Services;
+using GivingChampion.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +65,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
+builder.Services.AddScoped<IAvatarService, AvatarService>();
 builder.Services
     .AddAuthentication(options =>
     {

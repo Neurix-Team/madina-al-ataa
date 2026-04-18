@@ -1,14 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
-
-namespace GivingChampion.Domain.Entities
+namespace GivingChampion.Common.DTO.AvatarDto
 {
-    public class Avatar
+    public class CreateAvatarDto
     {
-        [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
-
         [Required]
         public GenderType Gender { get; set; }
 
@@ -26,14 +21,10 @@ namespace GivingChampion.Domain.Entities
 
         [Required]
         [StringLength(50)]
-        public string ClothesColor { get; set; } 
+        public string ClothesColor { get; set; }
 
         [Required]
         [StringLength(100)]
         public string CharacterName { get; set; } 
-
-        public bool IsDeleted { get; set; } = false;
-
-        public DateTime? DeletedAt { get; set; }
     }
 }

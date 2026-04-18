@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GivingChampion.Domain.Entities
+namespace GivingChampion.Common.DTO.BadgeDto
 {
-    public class Badge
+    public class CreateBadgeDto
     {
-        [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
-
         [Required]
         [StringLength(100)]
         public string Name { get; set; } 
@@ -19,9 +16,6 @@ namespace GivingChampion.Domain.Entities
 
         [Required]
         [StringLength(50)]
-        public string Category { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
-        public DateTime? DeletedAt { get; set; }
+        public string? Category { get; set; } 
     }
 }
