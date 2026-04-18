@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Enums;
-
 namespace GivingChampion.Domain.Entities
 {
 	/// <summary>
@@ -57,7 +56,7 @@ namespace GivingChampion.Domain.Entities
 		/// Urgency level of the request (Low, Medium, High)
 		/// </summary>
 		[Required(ErrorMessage = "Urgency level is required")]
-		public UrgencyLevel UrgencyLevel { get; set; }
+        public UrgencyLevel UrgencyLevel { get; set; }
 
 		/// <summary>
 		/// Optional short description of the donation request

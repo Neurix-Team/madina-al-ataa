@@ -21,7 +21,7 @@ namespace GivingChampion.Domain.Entities
 
 		// Urgency level (Low, Medium, High)
 		[Required]
-		public UrgencyLevel UrgencyLevel { get; set; }
+        public UrgencyLevel UrgencyLevel { get; set; }
 
 		// Scheduled date for the service
 		[Required]
@@ -34,9 +34,12 @@ namespace GivingChampion.Domain.Entities
 		// Status of the request (Pending, Approved, Completed, etc.)
 		[Required]
 		public RequestStatus Status { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
-		// Short description
-		[MaxLength(1000)]
+        public DateTime? DeletedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // Short description
+        [MaxLength(1000)]
 		public string? BriefDescription { get; set; }
 
 		// Foreign Key
