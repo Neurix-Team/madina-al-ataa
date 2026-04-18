@@ -1,7 +1,10 @@
+using GivingChampion.Common.Enums;
+using GivingChampion.Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GivingChampion.Domain.Enums;
+
 
 namespace GivingChampion.Domain.Entities
 {
