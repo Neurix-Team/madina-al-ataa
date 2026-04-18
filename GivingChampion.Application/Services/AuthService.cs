@@ -1,6 +1,6 @@
-﻿using global::GivingChampion.Application.Auth.Interfaces;
+﻿using GivingChampion.Common.DTO.Auth;
+using global::GivingChampion.Application.Auth.Interfaces;
 using global::GivingChampion.Application.Interfaces.Auth;
-using global::GivingChampion.Common.Auth;
 using global::GivingChampion.Common.Results;
 using global::GivingChampion.Domain.Entities;
 

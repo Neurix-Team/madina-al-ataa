@@ -1,7 +1,7 @@
 ﻿using GivingChampion.Application.Auth;
 using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Common.DTO.Auth;
 using global::GivingChampion.Application.Interfaces.Auth;
-using global::GivingChampion.Common.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
@@ -69,7 +69,7 @@ namespace GivingChampion.API.Controllers.Auth
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(
-            [FromBody] LoginRequest request,
+            LoginRequest request,
             CancellationToken cancellationToken)
         {
             var result = await _authService.LoginAsync(request, cancellationToken);
