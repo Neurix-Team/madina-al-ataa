@@ -1,0 +1,136 @@
+﻿using AutoMapper;
+using GivingChampion.Application.Interfaces.ServiceRequestService;
+using GivingChampion.Common.DTO.ServiceRequestDto;
+using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
+
+namespace GivingChampion.Application.Services
+{
+    public class ServiceRequestService : IServiceRequestService
+    {
+        #region Fields
+
+        // Repository used to access service request data from the persistence layer.
+        private readonly IServiceRequestRepository _serviceRequestRepository;
+
+        // AutoMapper used to map between DTOs and Entities.
+        private readonly IMapper _mapper;
+
+        #endregion
+
+        #region Constructor
+
+        // Injects the service request repository and AutoMapper.
+        public ServiceRequestService(
+            IServiceRequestRepository serviceRequestRepository,
+            IMapper mapper)
+        {
+            _serviceRequestRepository = serviceRequestRepository;
+            _mapper = mapper;
+        }
+
+        #endregion
+
+        #region Get Methods
+
+        // Gets all service requests and maps them from Entity list to DTO list.
+        public async Task<List<ServiceRequestDto>> GetAllAsync()
+        {
+            var serviceRequests = await _serviceRequestRepository.GetAllAsync();
+
+            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        }
+
+        // Gets a single service request by id.
+        // Returns null if the service request does not exist.
+        public async Task<ServiceRequestDto?> GetByIdAsync(Guid id)
+        {
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+
+            if (serviceRequest == null)
+                return null;
+
+            return _mapper.Map<ServiceRequestDto>(serviceRequest);
+        }
+
+        // Gets all service requests with Pending status.
+        public async Task<List<ServiceRequestDto>> GetPendingAsync()
+        {
+            var serviceRequests = await _serviceRequestRepository.GetPendingAsync();
+
+            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        }
+
+        // Gets all service requests related to a specific partner.
+        public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)
+        {
+            var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
+
+            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        }
+
+        #endregion
+
+        #region Create Method
+
+        // Creates a new service request.
+        // Maps CreateServiceRequestDto to ServiceRequest entity, saves it, then returns it as ServiceRequestDto.
+        public async Task<ServiceRequestDto> CreateAsync(CreateServiceRequestDto dto)
+        {
+            var serviceRequest = _mapper.Map<ServiceRequest>(dto);
+
+            await _serviceRequestRepository.AddAsync(serviceRequest);
+            await _serviceRequestRepository.SaveChangesAsync();
+
+            // Reload the created entity to include related data such as Partner.
+            var createdServiceRequest = await _serviceRequestRepository.GetByIdAsync(serviceRequest.Id);
+
+            if (createdServiceRequest == null)
+                throw new InvalidOperationException("Service request was created but could not be retrieved.");
+            return _mapper.Map<ServiceRequestDto>(createdServiceRequest);
+        }
+
+        #endregion
+
+        #region Update Method
+
+        // Updates an existing service request.
+        // Returns false if the service request does not exist.
+        public async Task<bool> UpdateAsync(Guid id, UpdateServiceRequestDto dto)
+        {
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+
+            if (serviceRequest == null)
+                return false;
+
+            // Maps the new values from the DTO into the existing entity.
+            _mapper.Map(dto, serviceRequest);
+
+            _serviceRequestRepository.Update(serviceRequest);
+            await _serviceRequestRepository.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+
+        #region Delete Method
+
+        // Soft deletes an existing service request.
+        // Returns false if the service request does not exist.
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+
+            if (serviceRequest == null)
+                return false;
+
+            _serviceRequestRepository.SoftDelete(serviceRequest);
+            await _serviceRequestRepository.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+    }
+}

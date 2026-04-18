@@ -1,11 +1,14 @@
 using GivingChampion.API.Handlers;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
+using GivingChampion.Application.Interfaces.ServiceRequestService;
+using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Common.Auth;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Persistance.Repositories;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -117,7 +120,11 @@ builder.Services.Configure<JwtOptions>(
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
-
+// Service Request dependencies
+builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
+builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
+builder.Services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
+builder.Services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
