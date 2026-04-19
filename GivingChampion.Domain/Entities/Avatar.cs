@@ -1,3 +1,6 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using GivingChampion.Common.Enums;
 ﻿using GivingChampion.Common.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,14 +9,14 @@ namespace GivingChampion.Domain.Entities
     public class Avatar : ISoftDeletable
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         public GenderType Gender { get; set; }
 
         [Required]
         [StringLength(50)]
-        public string SkinColor { get; set; }
+        public string SkinColor { get; set; } 
 
         [Required]
         [StringLength(50)]
@@ -34,9 +37,8 @@ namespace GivingChampion.Domain.Entities
         public DateTime? DeletedAt { get; set; }
     }
 
-    public enum GenderType
-    {
-        Male,
-        Female
+        public bool IsDeleted { get; set; } = false;
+
+        public DateTime? DeletedAt { get; set; }
     }
 }

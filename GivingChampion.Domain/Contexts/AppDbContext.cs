@@ -40,10 +40,40 @@ namespace GivingChampion.Domain.Contexts
         public DbSet<VolunteerOrder> VolunteerOrders { get; set; }
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Certificate> Certificates { get; set; }
-
+        public DbSet<Activity> Activities { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Activity>()
+                .HasQueryFilter(a => !a.IsDeleted);
+            modelBuilder.Entity<AiAvatar>()
+                .HasQueryFilter(a => !a.IsDeleted);
+            modelBuilder.Entity<Avatar>()
+                .HasQueryFilter(a => !a.IsDeleted);
+            modelBuilder.Entity<Badge>()
+                .HasQueryFilter(b => !b.IsDeleted);
+            modelBuilder.Entity<Level>()
+                .HasQueryFilter(l => !l.IsDeleted);
+            modelBuilder.Entity<Profile>()
+                .HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<UserBadge>()
+                .HasQueryFilter(ub => !ub.IsDeleted);
+            modelBuilder.Entity<UserLevel>()
+                .HasQueryFilter(ul => !ul.IsDeleted);
+            modelBuilder.Entity<Review>()
+                .HasQueryFilter(r => !r.IsDeleted);
+            modelBuilder.Entity<Profile>()
+                .HasMany(p => p.UserBadges)
+                .WithOne(ub => ub.Profile)
+                .HasForeignKey(ub => ub.ProfileId);
+           modelBuilder.Entity<Profile>()
+                .HasMany(p => p.UserLevels)
+                .WithOne(ul => ul.Profile)
+                .HasForeignKey(ul => ul.ProfileId);
+           modelBuilder.Entity<Profile>()
+                .HasMany(p => p.Reviews)
+                .WithOne(r => r.Profile)
+                .HasForeignKey(r => r.ProfileId);
 
             // Apply global query filter to ALL entities that implement ISoftDeletable
             modelBuilder.ApplySoftDeleteQueryFilter();

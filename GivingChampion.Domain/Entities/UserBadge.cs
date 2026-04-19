@@ -7,7 +7,7 @@ namespace GivingChampion.Domain.Entities
     public class UserBadge : ISoftDeletable
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }
