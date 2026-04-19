@@ -1,4 +1,5 @@
 ﻿using GivingChampion.Common.DTO.Auth;
+using GivingChampion.Persistance.Interfaces;
 using global::GivingChampion.Application.Auth.Interfaces;
 using global::GivingChampion.Application.Interfaces.Auth;
 using global::GivingChampion.Common.Results;
@@ -11,15 +12,18 @@ namespace GivingChampion.Application.Services
         private readonly IIdentityRepository _identityRepository;
         private readonly IJwtTokenFactory _jwtTokenFactory;
         private readonly IExternalLoginCodeStore _externalLoginCodeStore;
+        private readonly IDonorRepository _donorRepository;
 
         public AuthService(
             IIdentityRepository identityRepository,
             IJwtTokenFactory jwtTokenFactory,
-            IExternalLoginCodeStore externalLoginCodeStore)
+            IExternalLoginCodeStore externalLoginCodeStore,
+            IDonorRepository donorRepository)
         {
             _identityRepository = identityRepository;
             _jwtTokenFactory = jwtTokenFactory;
             _externalLoginCodeStore = externalLoginCodeStore;
+            _donorRepository = donorRepository;
         }
 
         public async Task<ServiceResult<TokenResponse>> RegisterAsync(
@@ -125,6 +129,17 @@ namespace GivingChampion.Application.Services
                     {
                         return ServiceResult<ExternalLoginCodeResponse>.Failure(createUserResult.Errors);
                     }
+
+                    var donor = new Donor
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id,
+                        TotalDonated = 0,
+                        PreferedCategory = 0,           // or default value
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _donorRepository.CreateAsync(donor);
 
                     user = createUserResult.Data;
                     isNewUser = true;

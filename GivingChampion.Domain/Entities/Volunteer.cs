@@ -2,9 +2,10 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
+using GivingChampion.Common.Interfaces;
 namespace GivingChampion.Domain.Entities
 {
-    public class Volunteer
+    public class Volunteer : ISoftDeletable
     {
 		/// <summary>
 		/// Primary key for Volunteer entity
@@ -39,8 +40,7 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [ForeignKey(nameof(UserId))]
         public ApplicationUser? User { get; set; }
-
-
-
-	}
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+    }
 }
