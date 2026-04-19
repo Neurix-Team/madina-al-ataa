@@ -35,7 +35,10 @@ namespace GivingChampion.Common.DTO.PartnerDto
         /// </summary>
         public string? Email { get; set; }
 
-        
+        /// <summary>
+        /// Indicates whether the partner has been verified by admin.
+        /// </summary>
+        public bool Verified { get; set; }
 
         /// <summary>
         /// Number of projects related to this partner.

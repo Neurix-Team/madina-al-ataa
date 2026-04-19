@@ -11,12 +11,12 @@ namespace GivingChampion.Application.Interfaces.Volunteer
 
         #region Query Methods
 
-        //#region GetAllVolunteers
+        #region GetAllVolunteers
 
-        ///// <summary>
-        ///// Gets all volunteers and returns them as DTOs.
-        ///// </summary>
-        //Task<List<VolunteerDto>> GetAllAsync();
+        /// <summary>
+        /// Gets all volunteers and returns them as DTOs.
+        /// </summary>
+        Task<List<VolunteerDto>> GetAllAsync();
 
         #endregion
 
@@ -31,33 +31,35 @@ namespace GivingChampion.Application.Interfaces.Volunteer
 
         #endregion
 
+        #endregion
 
         #region Command Methods
 
-        //#region CreateVolunteer
+        #region CreateVolunteer
 
-        ///// <summary>
-        ///// Creates a new volunteer.
-        ///// This operation should be allowed for Admin only in the Controller.
-        ///// </summary>
-        ///// <param name="dto">Volunteer creation data.</param>
-        //Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto);
+        /// <summary>
+        /// Creates a new volunteer.
+        /// This operation should be allowed for Admin only in the Controller.
+        /// </summary>
+        /// <param name="dto">Volunteer creation data.</param>
+        Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto);
 
         #endregion
 
         #region UpdateVolunteer
 
-        ///// <summary>
-        ///// Updates an existing volunteer.
-        ///// Returns null if the volunteer does not exist.
-        ///// This operation should be allowed for Admin only in the Controller.
-        ///// </summary>
-        ///// <param name="id">Volunteer id.</param>
-        ///// <param name="dto">Volunteer update data.</param>
-        //Task<VolunteerDto?> UpdateAsync(Guid id, UpdateVolunteerDto dto);
+        /// <summary>
+        /// Updates an existing volunteer.
+        /// Returns null if the volunteer does not exist.
+        /// This operation should be allowed for Admin only in the Controller.
+        /// </summary>
+        /// <param name="id">Volunteer id.</param>
+        /// <param name="dto">Volunteer update data.</param>
+        Task<VolunteerDto?> UpdateAsync(Guid id, UpdateVolunteerDto dto);
 
         #endregion
 
+        #endregion
     }
 }
 

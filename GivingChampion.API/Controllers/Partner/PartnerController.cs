@@ -47,6 +47,7 @@ namespace GivingChampion.API.Controllers
                 // If partner is not found, return 404 Not Found
                 if (partner == null)
                 {
+                    _logger.LogWarning($"Partner with ID {id} not found.");
                     return NotFound($"Partner with ID {id} not found.");
                 }
 
@@ -126,6 +127,7 @@ namespace GivingChampion.API.Controllers
                 // If partner not found, return 404 Not Found
                 if (updatedPartner == null)
                 {
+                    _logger.LogWarning($"Partner with ID {id} not found for update.");
                     return NotFound($"Partner with ID {id} not found.");
                 }
 
