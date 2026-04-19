@@ -53,10 +53,10 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 
 // Add services to the container.
 
-//if (!builder.Environment.IsDevelopment())
-//{
-//    builder.Configuration.AddUserSecrets<Program>();
-//}
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
 
 if (_env.IsDevelopment())
 {
