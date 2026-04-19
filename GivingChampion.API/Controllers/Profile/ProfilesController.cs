@@ -90,7 +90,7 @@ namespace GivingChampion.API.Controllers
             if (userAlreadyHasProfile)
                 return BadRequest("This user already has a profile");
 
-            var profile = new Profile
+            var profile = new Domain.Entities.Profile
             {
                 Rating = dto.Rating,
                 Impact = dto.Impact,
