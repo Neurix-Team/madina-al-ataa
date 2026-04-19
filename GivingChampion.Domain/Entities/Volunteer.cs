@@ -42,8 +42,9 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [ForeignKey(nameof(UserId))]
         public ApplicationUser? User { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
 
 
-
-	}
+    }
 }
