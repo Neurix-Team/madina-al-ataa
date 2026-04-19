@@ -17,7 +17,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using GivingChampion.API.Interfaces;
-using GivingChampion.Persistance.Repositories;
 using GivingChampion.API.Services;
 using GivingChampion.API.Repositories;
 
@@ -64,9 +63,21 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
-
+//builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
 builder.Services.AddScoped<IAvatarService, AvatarService>();
+builder.Services.AddScoped<IAiAvatarRepository, AiAvatarRepository>();
+builder.Services.AddScoped<IAiAvatarService, AiAvatarService>();
+builder.Services.AddScoped<ILevelRepository, LevelRepository>();
+builder.Services.AddScoped<ILevelService, LevelService>();
+builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
+builder.Services.AddScoped<IBadgeService, BadgeService>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
+builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
+builder.Services.AddScoped<IUserLevelRepository, UserLevelRepository>();
+builder.Services.AddScoped<IUserLevelService, UserLevelService>();
 builder.Services
     .AddAuthentication(options =>
     {
