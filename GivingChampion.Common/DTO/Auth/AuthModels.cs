@@ -1,7 +1,7 @@
 ﻿using GivingChampion.Common.Attributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace GivingChampion.Common.Auth;
+namespace GivingChampion.Common.DTO.Auth;
 
 public sealed record RegisterRequest
 {
@@ -13,6 +13,10 @@ public sealed record RegisterRequest
     public string Fullname { get; set; }
     [MinimumAge(18, ErrorMessage = "Your Age must be 18 Years or Older")]
     public DateTime BirthDate { get; set; }
+    //[Required(ErrorMessage = "City Must be Entered")]
+    //public string City { get; set; }
+    //[Required(ErrorMessage = "Address Must be Entered")]
+    //public string Address { get; set; }
 }
 
 public sealed record CompleteSocialRegistrationRequest

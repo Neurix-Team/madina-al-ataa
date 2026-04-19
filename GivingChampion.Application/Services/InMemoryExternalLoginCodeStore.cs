@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.Auth;
-using GivingChampion.Common.Auth;
+using GivingChampion.Common.DTO.Auth;
 using System.Collections.Concurrent;
 
 namespace GivingChampion.Application.Services
