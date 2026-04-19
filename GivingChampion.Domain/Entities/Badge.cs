@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GivingChampion.Common.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Badge
+    public class Badge : ISoftDeletable
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -20,8 +21,7 @@ namespace GivingChampion.Domain.Entities
         [Required]
         [StringLength(50)]
         public string Category { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
+        public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }
     }
 }

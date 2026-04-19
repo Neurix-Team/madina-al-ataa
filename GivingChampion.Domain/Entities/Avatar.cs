@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
+﻿using GivingChampion.Common.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Avatar
+    public class Avatar : ISoftDeletable
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -30,7 +32,10 @@ namespace GivingChampion.Domain.Entities
 
         [Required]
         [StringLength(100)]
-        public string CharacterName { get; set; } 
+        public string CharacterName { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+    }
 
         public bool IsDeleted { get; set; } = false;
 

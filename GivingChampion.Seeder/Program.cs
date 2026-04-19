@@ -7,13 +7,27 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.AddServiceDefaults();
+// Bind the DefaultAdminUser section (optional but recommended)
+builder.Services.Configure<DefaultAdminUserConfig>(
+    builder.Configuration.GetSection("DefaultAdminUser"));
 
-var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection")
+builder.AddServiceDefaults();
+var _conf = builder.Configuration;
+var _env = builder.Environment;
+
+if (_env.IsDevelopment())
+{
+    // for testing
+    builder.AddNpgsqlDbContext<AppDbContext>("givingchampion");
+}
+else
+{
+    var connectionstring = _conf.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-// for live
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
+    // for live
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
+}
 
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<ApplicationRole>()
@@ -24,6 +38,7 @@ builder.Services.AddIdentityCore<ApplicationUser>()
 builder.Services.AddDataProtection();
 
 builder.Services.AddSingleton<RoleSeeder>();
+builder.Services.AddSingleton<UserSeeder>();
 
 builder.Services.AddHostedService<SeedingWorker>();
 

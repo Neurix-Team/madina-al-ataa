@@ -8,6 +8,6 @@ namespace GivingChampion.Common.Enums
     {
         Open = 0,
         InProgress = 1,
-        Done = 2
+        Completed = 2
     }
 }
