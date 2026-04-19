@@ -19,8 +19,8 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using GivingChampion.Application.Interfaces.ServiceRequestService;
-using GivingChampion.Persistance.Interfaces;
+using GivingChampion.Application.Interfaces.Partner;
+using GivingChampion.Application.Interfaces.Volunteer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,6 +127,11 @@ builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>(
 builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
 builder.Services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
 builder.Services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
+builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();    
+builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<IVolunteerRepository, VolunteerRepository>();
+builder.Services.AddScoped<IVolunteerService, VolunteerService>();
+
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
