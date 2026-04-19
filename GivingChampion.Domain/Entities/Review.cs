@@ -14,6 +14,8 @@ namespace GivingChampion.Domain.Entities
         public double Rating { get; set; }
         public string Comment { get; set; } = string.Empty;
         public DateTime ReviewDate { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
         [ForeignKey("Reviewer")]
         public Guid ReviewerId { get; set; }
         public ApplicationUser Reviewer { get; set; }
