@@ -1,19 +1,22 @@
-﻿using GivingChampion.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using GivingChampion.Common.Extensions.SoftDelete;
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GivingChampion.Domain.Contexts
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
-        public AppDbContext(DbContextOptions options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
+        // Your existing DbSets...
         public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<ApplicationRole> Roles { get; set; }
         public DbSet<Profile> Profiles { get; set; }
@@ -42,7 +45,33 @@ namespace GivingChampion.Domain.Contexts
         {
             base.OnModelCreating(modelBuilder);
 
-            
+            // Apply global query filter to ALL entities that implement ISoftDeletable
+            modelBuilder.ApplySoftDeleteQueryFilter();
+        }
+
+        public override int SaveChanges()
+        {
+            HandleSoftDeletes();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            HandleSoftDeletes();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void HandleSoftDeletes()
+        {
+            var deletedEntries = ChangeTracker.Entries<ISoftDeletable>()
+                .Where(e => e.State == EntityState.Deleted);
+
+            foreach (var entry in deletedEntries)
+            {
+                entry.State = EntityState.Modified;
+                entry.Entity.IsDeleted = true;
+                entry.Entity.DeletedAt = DateTime.UtcNow;
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ namespace GivingChampion.Common.Pagination;
 
 public sealed class PagedList<T>
 {
-    private PagedList(
+    public PagedList(
         IReadOnlyList<T> items,
         int pageNumber,
         int pageSize,

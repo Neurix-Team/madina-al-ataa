@@ -1,13 +1,19 @@
 using GivingChampion.API.Handlers;
 using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
+using GivingChampion.Application.Interfaces.Location;
+using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Application.Transformers;
 using GivingChampion.Common.DTO.Auth;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Infrastructure.Persistence.Repositories;
+using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Persistance.Repositories;
+using GivingChampion.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -30,12 +36,14 @@ var jwtOptions = builder.Configuration
     .Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new string[] { "http://localhost:5173" };
+
 // Add services to the container.
 
-//if (!builder.Environment.IsDevelopment())
-//{
-//    builder.Configuration.AddUserSecrets<Program>();
-//}
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
 
 if (_env.IsDevelopment())
 {
@@ -107,10 +115,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:5173", "https://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins(allowedOrigins) // Use the loaded array here
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -121,6 +128,20 @@ builder.Services.Configure<JwtOptions>(
             _conf.GetSection(JwtOptions.SectionName));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDonorRepository, DonorRepository>();
+builder.Services.AddScoped<IDonorService, DonorService>(); 
+builder.Services.AddScoped<IChildRepository, EfChildRepository>();
+builder.Services.AddScoped<IChildService, ChildService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IMissionRepository, MissionRepository>();
+builder.Services.AddScoped<IMissionService, MissionService>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+
+
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
 
@@ -142,6 +163,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+app.UseCors("Frontend");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

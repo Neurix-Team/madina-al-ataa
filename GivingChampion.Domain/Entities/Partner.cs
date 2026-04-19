@@ -1,11 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Interfaces;
 using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Partner
+    public class Partner : ISoftDeletable
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         /// <summary>
@@ -55,5 +56,7 @@ namespace GivingChampion.Domain.Entities
         /// Last update timestamp (UTC)
         /// </summary>
         public DateTime? UpdatedAt { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }

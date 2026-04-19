@@ -1,9 +1,10 @@
-﻿using System;
+﻿using GivingChampion.Common.Interfaces;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class UserLevel
+    public class UserLevel : ISoftDeletable
     {
         [Key]
         public Guid Id { get; set; }
@@ -15,6 +16,8 @@ namespace GivingChampion.Domain.Entities
         public int Kp { get; set; }
 
         public Guid LevelId { get; set; }
-        public Level Level { get; set; } 
+        public Level Level { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }
