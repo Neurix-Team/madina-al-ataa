@@ -1,10 +1,11 @@
-﻿using System;
+﻿using GivingChampion.Common.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Profile
+    public class Profile : ISoftDeletable
     {
         [Key]
         public Guid Id { get; set; }
@@ -24,6 +25,8 @@ namespace GivingChampion.Domain.Entities
         public Guid LevelId { get; set; }
         public Level Level { get; set; } 
 
-        public ICollection<Badge> Badges { get; set; } 
+        public ICollection<Badge> Badges { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }

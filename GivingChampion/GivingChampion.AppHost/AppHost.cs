@@ -4,7 +4,9 @@ var db_username = builder.AddParameter("username", "postgres", secret: true);
 var db_password = builder.AddParameter("password", "postgres", secret: true);
 
 var postgres = builder.AddPostgres("postgres", db_username, db_password, 5432)
-    .WithPgAdmin();
+    .WithPgAdmin()
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume();
 
 var db = postgres.AddDatabase("givingchampion");
 

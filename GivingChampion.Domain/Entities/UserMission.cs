@@ -1,4 +1,5 @@
 ﻿using GivingChampion.Common.Enums;
+using GivingChampion.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 namespace GivingChampion.Domain.Entities
 {
     [PrimaryKey("Id")]
-    public class UserMission
+    public class UserMission : ISoftDeletable
     {
         public Guid Id { get; set; }
         public int Progress { get; set; }
@@ -21,5 +22,7 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Mission")]
         public Guid MissionId { get; set; }
         public Mission Mission { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }
