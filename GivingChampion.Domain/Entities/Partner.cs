@@ -56,6 +56,10 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Last update timestamp (UTC)
         /// </summary>
+        /// // Soft Delete
+        public bool IsDeleted { get; set; } = false;
+
+        public DateTime? DeletedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -1,0 +1,108 @@
+﻿using GivingChampion.Domain.Contexts;
+using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using GivingChampion.Domain.Entities;
+
+namespace GivingChampion.Persistance.Repositories
+{
+    public class PartnerRepository : IPartnerRepository
+    {
+
+            #region Constructor
+
+            // Constructor initializes the AppDbContext for the PartnerRepository
+            private readonly AppDbContext _context;
+
+            public PartnerRepository(AppDbContext context)
+            {
+                _context = context; // Initialize the context to interact with the database
+            }
+
+        #endregion
+
+        #region CRUD Operations
+
+        #region Create
+        /// <summary>
+        /// Adds a new Partner to the database asynchronously.
+        /// </summary>
+        public async Task AddAsync(Partner partner)
+        {
+            // Adding the partner to the Partners DbSet
+            await _context.Partners.AddAsync(partner);
+        }
+
+        #endregion
+
+        #region Update
+        /// <summary>
+        /// Updates an existing Partner in the database.
+        /// </summary>
+        public void Update(Partner partner)
+        {
+            // Updating the partner in the Partners DbSet
+            _context.Partners.Update(partner);
+        }
+
+        #endregion
+
+        #region SoftDelete
+        /// <summary>
+        /// Soft deletes a Partner by marking it as deleted.
+        /// </summary>
+        public void SoftDelete(Partner partner)
+        {
+            // Marking the partner as deleted (soft delete)
+            partner.IsDeleted = true;
+            partner.DeletedAt = DateTime.UtcNow; // Set the current time for the deletion timestamp
+            _context.Partners.Update(partner); // Updating the record after modification
+        }
+        #endregion
+
+
+        #region GetById
+        /// <summary>
+        /// Retrieves a Partner by its unique identifier (ID).
+        /// It ensures that the partner is not deleted (soft deleted).
+        /// </summary>
+        public async Task<Partner?> GetByIdAsync(Guid id)
+        {
+            // Retrieving the partner using the ID, ensuring it's not deleted
+            return await _context.Partners
+                .Where(p => p.Id == id && !p.IsDeleted) // Ensure the partner is not soft-deleted
+                .FirstOrDefaultAsync(); // Retrieve the first matching partner
+        } 
+        #endregion
+
+        #region GetAll
+        /// <summary>
+        /// Retrieves all Partners from the database, excluding soft-deleted ones.
+        /// </summary>
+        public async Task<List<Partner>> GetAllAsync()
+        {
+            // Retrieving all partners that are not soft-deleted
+            return await _context.Partners
+                .Where(p => !p.IsDeleted) // Filter out the deleted partners
+                .ToListAsync(); // Convert the result into a list
+        }
+        #endregion
+
+        #region SaveChange
+        /// <summary>
+        /// Saves all changes to the database asynchronously.
+        /// </summary>
+        public async Task SaveChangesAsync()
+        {
+            // Saving all the changes made to the DbContext
+            await _context.SaveChangesAsync();
+        } 
+        #endregion
+
+        #endregion
+    }
+    }
+
