@@ -1,6 +1,7 @@
 using GivingChampion.API.Handlers;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
+//using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Application.Transformers;
@@ -30,12 +31,14 @@ var jwtOptions = builder.Configuration
     .Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+
 // Add services to the container.
 
-//if (!builder.Environment.IsDevelopment())
-//{
-//    builder.Configuration.AddUserSecrets<Program>();
-//}
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
 
 if (_env.IsDevelopment())
 {
@@ -52,18 +55,18 @@ else
 }
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
+{
+    options.User.RequireUniqueEmail = true;
 
-        options.Password.RequiredLength = 8;
-        options.Password.RequireDigit = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
 
-        options.Lockout.MaxFailedAccessAttempts = 5;
-        options.SignIn.RequireConfirmedAccount = false;
-    })
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.SignIn.RequireConfirmedAccount = false;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -107,10 +110,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:5173", "https://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins(allowedOrigins) // Use the loaded array here
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -121,6 +123,9 @@ builder.Services.Configure<JwtOptions>(
             _conf.GetSection(JwtOptions.SectionName));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IUserService, UserService>();
+
+
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
 
@@ -142,6 +147,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+app.UseCors("Frontend");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
