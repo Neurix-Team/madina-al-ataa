@@ -57,6 +57,8 @@ namespace GivingChampion.Domain.Contexts
                 .HasQueryFilter(ub => !ub.IsDeleted);
             modelBuilder.Entity<UserLevel>()
                 .HasQueryFilter(ul => !ul.IsDeleted);
+            modelBuilder.Entity<Review>()
+                .HasQueryFilter(r => !r.IsDeleted);
             modelBuilder.Entity<Profile>()
                 .HasMany(p => p.UserBadges)
                 .WithOne(ub => ub.Profile)
@@ -65,6 +67,10 @@ namespace GivingChampion.Domain.Contexts
                 .HasMany(p => p.UserLevels)
                 .WithOne(ul => ul.Profile)
                 .HasForeignKey(ul => ul.ProfileId);
+           modelBuilder.Entity<Profile>()
+                .HasMany(p => p.Reviews)
+                .WithOne(r => r.Profile)
+                .HasForeignKey(r => r.ProfileId);
         }
     }
 }

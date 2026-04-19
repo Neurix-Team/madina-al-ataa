@@ -78,6 +78,8 @@ builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
 builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
 builder.Services.AddScoped<IUserLevelRepository, UserLevelRepository>();
 builder.Services.AddScoped<IUserLevelService, UserLevelService>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services
     .AddAuthentication(options =>
     {

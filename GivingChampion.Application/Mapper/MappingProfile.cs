@@ -4,9 +4,11 @@ using GivingChampion.Common.DTO.AvatarDto;
 using GivingChampion.Common.DTO.BadgeDto;
 using GivingChampion.Common.DTO.LevelDto;
 using GivingChampion.Common.DTO.ProfileDto;
+using GivingChampion.Common.DTO.ReviewDto;
 using GivingChampion.Common.DTO.UserBadgeDto;
 using GivingChampion.Common.DTO.UserLevelDto;
 using GivingChampion.Domain.Entities;
+
 
 namespace GivingChampion.Application.Mapper
 {
@@ -116,6 +118,23 @@ namespace GivingChampion.Application.Mapper
 
             CreateMap<UpdateProfileDto, Domain.Entities.Profile>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            #endregion
+
+            #region Review Mappings
+            CreateMap<Review, ReviewDto>()
+                .ReverseMap();
+
+            CreateMap<CreateReviewDto, Review>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.ReviewDate, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+
+            CreateMap<UpdateReviewDto, Review>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.ReviewDate, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
             #endregion

@@ -28,5 +28,6 @@ namespace GivingChampion.Domain.Entities
 
         public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
         public ICollection<UserLevel> UserLevels { get; set; } = new List<UserLevel>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }
