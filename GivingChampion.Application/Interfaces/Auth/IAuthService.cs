@@ -1,4 +1,4 @@
-﻿using global::GivingChampion.Common.Auth;
+﻿using GivingChampion.Common.DTO.Auth;
 using global::GivingChampion.Common.Results;
 
 namespace GivingChampion.Application.Interfaces.Auth
