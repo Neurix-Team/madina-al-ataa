@@ -351,7 +351,6 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.CreatedAt,
                            opt => opt.Ignore());
 
-            #endregion
 
             #region UpdateVolunteerOrderDto To VolunteerOrder
             #region Partner Mapping
@@ -430,19 +429,15 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(_ => 0))  // Default to 0 hours
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false)) // Set IsDeleted to false by default
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore()) // Ignore DeletedAt, will not be used on creation
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow)) // Set creation time
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId)) // Set UserId passed from Admin/Claims
-                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore()) // Ignore UpdatedAt as it's not needed on creation
                 .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability)) // Map from DTO to Entity
                 .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills)); // Map from DTO to Entity
 
             // Map UpdateVolunteerDto to Volunteer (Updating an existing Volunteer)
             CreateMap<UpdateVolunteerDto, Volunteer>()
-                .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(src => src.TotalHours)) // Update total hours
                 .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills)) // Update skills
                 .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability)) // Update availability
-                .ForMember(dest => dest.UserId, opt => opt.Ignore()) // UserId should remain the same as when initially created
-                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow)); // Set updated time
+                .ForMember(dest => dest.UserId, opt => opt.Ignore()); // UserId should remain the same as when initially created
 
             #endregion
 
