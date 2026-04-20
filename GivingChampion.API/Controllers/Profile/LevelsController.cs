@@ -1,8 +1,7 @@
-﻿using GivingChampion.Common.DTO.LevelDto;
-using GivingChampion.Domain.Contexts;
-using GivingChampion.Domain.Entities;
+﻿using GivingChampion.API.Interfaces;
+using GivingChampion.Common.DTO.LevelDto;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.API.Controllers
 {
@@ -10,103 +9,63 @@ namespace GivingChampion.API.Controllers
     [Route("api/[controller]")]
     public class LevelsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ILevelService _levelService;
 
-        public LevelsController(AppDbContext context)
+        public LevelsController(ILevelService levelService)
         {
-            _context = context;
+            _levelService = levelService;
         }
 
+        // GET api/levels
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
-            var levels = await _context.Levels
-                .AsNoTracking()
-                .Select(l => new LevelDto
-                {
-                    Id = l.Id,
-                    Number = l.Number,
-                    MaxXp = l.MaxXp
-                })
-                .ToListAsync();
-
-            return Ok(levels);
+            // Call service method to get all levels with pagination
+            var levels = await _levelService.GetAllAsync(pageParameters);
+            return Ok(levels); // Return levels as response
         }
 
+        // GET api/levels/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var level = await _context.Levels
-                .AsNoTracking()
-                .Where(l => l.Id == id)
-                .Select(l => new LevelDto
-                {
-                    Id = l.Id,
-                    Number = l.Number,
-                    MaxXp = l.MaxXp
-                })
-                .FirstOrDefaultAsync();
-
+            // Call service method to get a level by id
+            var level = await _levelService.GetByIdAsync(id);
             if (level == null)
                 return NotFound("Level not found");
 
-            return Ok(level);
+            return Ok(level); // Return the level as response
         }
 
+        // POST api/levels
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateLevelDto dto)
         {
-            var level = new Level
-            {
-                Number = dto.Number,
-                MaxXp = dto.MaxXp
-            };
-
-            await _context.Levels.AddAsync(level);
-            await _context.SaveChangesAsync();
-
-            var result = new LevelDto
-            {
-                Id = level.Id,
-                Number = level.Number,
-                MaxXp = level.MaxXp
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = level.Id }, result);
+            // Call service method to create a level
+            var created = await _levelService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Value.Id }, created); // Return created level
         }
 
+        // PUT api/levels/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateLevelDto dto)
         {
-            var level = await _context.Levels
-                .FirstOrDefaultAsync(l => l.Id == id);
+            // Call service method to update a level
+            var updated = await _levelService.UpdateAsync(id, dto);
+            if (!updated.Value) return NotFound("Level not found");
 
-            if (level == null)
-                return NotFound("Level not found");
-
-            level.Number = dto.Number;
-            level.MaxXp = dto.MaxXp;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Level updated successfully");
+            return NoContent(); // Return NoContent status if updated successfully
         }
 
+        // DELETE api/levels/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var level = await _context.Levels
-                .FirstOrDefaultAsync(l => l.Id == id);
+            // Call service method to soft delete a level
+            var deleted = await _levelService.SoftDeleteAsync(id);
+            if (!deleted.Value) return NotFound("Level not found");
 
-            if (level == null)
-                return NotFound("Level not found");
-
-            level.IsDeleted = true;
-            level.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Level deleted successfully");
+            return NoContent(); // Return NoContent status if deleted successfully
         }
     }
 }
