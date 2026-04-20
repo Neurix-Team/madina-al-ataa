@@ -6,9 +6,9 @@ namespace GivingChampion.Persistance.Interfaces
 {
     public interface ICertificateRepository
     {
+       
 
-
-        public  Task<List<Certificate>> GetCertificateByIdAsync(Guid id, CancellationToken cancellationToken = default);
+            Task<Certificate?> GetCertificateByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
             Task<bool> VolunteerExistsAsync(Guid volunteerId, CancellationToken cancellationToken = default);
 
