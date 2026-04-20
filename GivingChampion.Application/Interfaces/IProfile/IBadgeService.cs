@@ -1,13 +1,15 @@
 ﻿using GivingChampion.Common.DTO.BadgeDto;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 
 namespace GivingChampion.API.Interfaces
 {
     public interface IBadgeService
     {
-        Task<List<BadgeDto>> GetAllAsync();
-        Task<BadgeDto?> GetByIdAsync(Guid id);
-        Task<BadgeDto> CreateAsync(CreateBadgeDto dto);
-        Task<bool> UpdateAsync(Guid id, UpdateBadgeDto dto);
-        Task<bool> SoftDeleteAsync(Guid id);
+        Task<Result<PagedList<BadgeDto>>> GetAllAsync(PageParameters pageParameters);
+        Task<Result<BadgeDto?>> GetByIdAsync(Guid id);
+        Task<Result<BadgeDto>> CreateAsync(CreateBadgeDto dto);
+        Task<Result<bool>> UpdateAsync(Guid id, UpdateBadgeDto dto);
+        Task<Result<bool>> SoftDeleteAsync(Guid id);
     }
 }

@@ -1,10 +1,11 @@
-﻿using GivingChampion.Domain.Entities;
+﻿using GivingChampion.Common.Pagination;
+using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.API.Interfaces
 {
     public interface ILevelRepository
     {
-        Task<List<Level>> GetAllAsync();
+        Task<PagedList<Level>> GetAllAsync(PageParameters pageParameters);
         Task<Level?> GetByIdAsync(Guid id);
         Task AddAsync(Level level);
         void Update(Level level);

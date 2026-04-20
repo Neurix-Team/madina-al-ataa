@@ -1,10 +1,12 @@
 ﻿using GivingChampion.Common.DTO.Mission;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 
 namespace GivingChampion.Application.Interfaces
 {
     public interface IMissionService
     {
-        Task<Result<List<MissionDto>>> GetAllActiveAsync();
+        Task<Result<PagedList<MissionDto>>> GetAllActiveAsync();
         Task<Result<List<MissionDto>>> GetAvailableForUserAsync(int userLevel);
         Task<Result<MissionDto>> GetByIdAsync(Guid id);
         Task<Result<MissionDto>> CreateMissionAsync(CreateMissionDto dto);

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using GivingChampion.Domain.Entities.Base;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Activity
+    public class Activity : BaseEntity
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -15,10 +16,10 @@ namespace GivingChampion.Domain.Entities
         [StringLength(500)]
         public string Description { get; set; } 
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        //public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public bool IsDeleted { get; set; } = false;
+        //public bool IsDeleted { get; set; } = false;
 
-        public DateTime? DeletedAt { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

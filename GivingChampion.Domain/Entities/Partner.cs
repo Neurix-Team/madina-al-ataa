@@ -2,11 +2,12 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Partner : ISoftDeletable
+    public class Partner : BaseEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         /// <summary>
@@ -50,13 +51,13 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Record creation timestamp (UTC)
         /// </summary>
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        //public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// Last update timestamp (UTC)
-        /// </summary>
-        public DateTime? UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        ///// <summary>
+        ///// Last update timestamp (UTC)
+        ///// </summary>
+        //public DateTime? UpdatedAt { get; set; }
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

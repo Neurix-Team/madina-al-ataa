@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.Donor;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -28,16 +29,13 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<DonorDto>> CreateDonorAsync(CreateDonorDto dto, Guid userId)
+        public async Task<DonorDto> CreateDonorAsync(CreateDonorDto dto, Guid userId)
         {
             // Check if donor profile already exists for this user
             if (await _donorRepository.ExistsByUserIdAsync(userId))
-                return Result<DonorDto>.Failure("Donor profile already exists for this user.");
-
+                throw new InvalidOperationException("Donor profile already exists for this user.");
             var donor = _mapper.Map<Donor>(dto);
-            donor.Id = Guid.NewGuid();
             donor.UserId = userId;
-            donor.TotalDonated = 0;
             donor.CreatedAt = DateTime.UtcNow;
 
             await _donorRepository.CreateAsync(donor);
@@ -45,49 +43,45 @@ namespace GivingChampion.Application.Services
             _logger.LogInformation("Donor profile created for user {UserId}", userId);
 
             var donorDto = _mapper.Map<DonorDto>(donor);
-            return Result<DonorDto>.Success(donorDto);
+            return donorDto;
         }
 
-        public async Task<Result<DonorDto>> GetMyDonorProfileAsync(Guid userId)
+        public async Task<DonorDto> GetMyDonorProfileAsync(Guid userId)
         {
             var donor = await _donorRepository.GetByUserIdAsync(userId);
             if (donor == null)
-                return Result<DonorDto>.Failure("Donor profile not found.");
-
+                throw new InvalidOperationException("Donor profile not found.");
             var dto = _mapper.Map<DonorDto>(donor);
-            return Result<DonorDto>.Success(dto);
+            return dto;
         }
 
-        public async Task<Result<DonorDto>> GetDonorByUserIdAsync(Guid userId)
+        public async Task<DonorDto> GetDonorByUserIdAsync(Guid userId)
         {
             var donor = await _donorRepository.GetByUserIdAsync(userId);
             if (donor == null)
-                return Result<DonorDto>.Failure("Donor profile not found.");
-
+                throw new InvalidOperationException("Donor profile not found.");
             var dto = _mapper.Map<DonorDto>(donor);
-            return Result<DonorDto>.Success(dto);
+            return dto;
         }
 
-        public async Task<Result<DonorDto>> UpdateDonorAsync(UpdateDonorDto dto, Guid userId)
+        public async Task<DonorDto> UpdateDonorAsync(UpdateDonorDto dto, Guid userId)
         {
             var donor = await _donorRepository.GetByUserIdAsync(userId);
             if (donor == null)
-                return Result<DonorDto>.Failure("Donor profile not found.");
-
+                throw new InvalidOperationException("Donor profile not found.");
             _mapper.Map(dto, donor);
             donor.UpdatedAt = DateTime.UtcNow;
 
             await _donorRepository.UpdateAsync(donor);
 
             var updatedDto = _mapper.Map<DonorDto>(donor);
-            return Result<DonorDto>.Success(updatedDto);
+            return updatedDto;
         }
 
-        public async Task<Result> SoftDeleteDonorAsync(Guid userId)
+        public async Task SoftDeleteDonorAsync(Guid userId)
         {
             await _donorRepository.SoftDeleteAsync(userId);
             _logger.LogInformation("Donor profile soft deleted for user {UserId}", userId);
-            return Result.Success();
         }
     }
 }

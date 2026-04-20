@@ -1,6 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.User;
 using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
