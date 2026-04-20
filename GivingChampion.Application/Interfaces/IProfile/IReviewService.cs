@@ -4,7 +4,7 @@ namespace GivingChampion.API.Interfaces
 {
     public interface IReviewService
     {
-        Task<List<ReviewDto>> GetAllAsync();
+        Task<List<ReviewDto>> GetAllByProfileIdAsync(Guid profileId);
         Task<ReviewDto?> GetByIdAsync(Guid id);
         Task<ReviewDto> CreateAsync(CreateReviewDto dto);
         Task<bool> UpdateAsync(Guid id, UpdateReviewDto dto);

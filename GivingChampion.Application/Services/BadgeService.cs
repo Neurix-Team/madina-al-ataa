@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.BadgeDto;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.API.Services
@@ -16,50 +18,48 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        public async Task<List<BadgeDto>> GetAllAsync()
+        public async Task<Result<PagedList<BadgeDto>>> GetAllAsync(PageParameters pageParameters)
         {
-            var badges = await _badgeRepository.GetAllAsync();
-            return _mapper.Map<List<BadgeDto>>(badges); // AutoMapper
+            var badges = await _badgeRepository.GetAllAsync(pageParameters);
+            return Result<PagedList<BadgeDto>>.Success(_mapper.Map<PagedList<BadgeDto>>(badges)); 
         }
 
-        public async Task<BadgeDto?> GetByIdAsync(Guid id)
+        public async Task<Result<BadgeDto?>> GetByIdAsync(Guid id)
         {
             var badge = await _badgeRepository.GetByIdAsync(id);
-            return badge == null ? null : _mapper.Map<BadgeDto>(badge); // AutoMapper
+            return badge == null ? Result<BadgeDto?>.Failure("Badge not found") : Result<BadgeDto?>.Success(_mapper.Map<BadgeDto>(badge));
         }
 
-        public async Task<BadgeDto> CreateAsync(CreateBadgeDto dto)
+        public async Task<Result<BadgeDto>> CreateAsync(CreateBadgeDto dto)
         {
             var badge = _mapper.Map<Badge>(dto);
             await _badgeRepository.AddAsync(badge);
             await _badgeRepository.SaveChangesAsync();
 
-            return _mapper.Map<BadgeDto>(badge); // AutoMapper
+            return Result<BadgeDto>.Success(_mapper.Map<BadgeDto>(badge)); // AutoMapper
         }
 
-        public async Task<bool> UpdateAsync(Guid id, UpdateBadgeDto dto)
+        public async Task<Result<bool>> UpdateAsync(Guid id, UpdateBadgeDto dto)
         {
             var badge = await _badgeRepository.GetByIdAsync(id);
             if (badge == null)
-                return false;
-
+                return Result<bool>.Failure("Badge not found");
             _mapper.Map(dto, badge); // AutoMapper
             _badgeRepository.Update(badge);
             await _badgeRepository.SaveChangesAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
 
-        public async Task<bool> SoftDeleteAsync(Guid id)
+        public async Task<Result<bool>> SoftDeleteAsync(Guid id)
         {
             var badge = await _badgeRepository.GetByIdAsync(id);
             if (badge == null)
-                return false;
-
+                return Result<bool>.Failure("Badge not found");
             badge.IsDeleted = true;
             badge.DeletedAt = DateTime.UtcNow;
             _badgeRepository.Update(badge);
             await _badgeRepository.SaveChangesAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
     }
 }

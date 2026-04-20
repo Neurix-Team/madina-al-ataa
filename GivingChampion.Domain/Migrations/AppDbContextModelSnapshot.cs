@@ -49,7 +49,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AiAvatars");
+                    b.ToTable("AiAvatars", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.ApplicationRole", b =>
@@ -215,7 +215,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Avatars");
+                    b.ToTable("Avatars", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Badge", b =>
@@ -255,7 +255,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.ToTable("Badges");
+                    b.ToTable("Badges", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Certificate", b =>
@@ -298,7 +298,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("VolunteerId");
 
-                    b.ToTable("Certificates");
+                    b.ToTable("Certificates", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Child", b =>
@@ -348,7 +348,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Children");
+                    b.ToTable("Children", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.DonationOrder", b =>
@@ -410,7 +410,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("DonorId");
 
-                    b.ToTable("DonationOrders");
+                    b.ToTable("DonationOrders", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.DonationRequest", b =>
@@ -461,7 +461,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("PartnerId");
 
-                    b.ToTable("DonationRequests");
+                    b.ToTable("DonationRequests", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Donor", b =>
@@ -495,7 +495,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Donors");
+                    b.ToTable("Donors", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
@@ -518,7 +518,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Levels");
+                    b.ToTable("Levels", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Location", b =>
@@ -550,7 +550,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Locations");
+                    b.ToTable("Locations", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Mission", b =>
@@ -594,7 +594,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("Missions");
+                    b.ToTable("Missions", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Notification", b =>
@@ -640,7 +640,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Partner", b =>
@@ -685,7 +685,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Partners");
+                    b.ToTable("Partners", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
@@ -723,7 +723,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Profiles");
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Review", b =>
@@ -760,7 +760,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.ServiceRequest", b =>
@@ -808,7 +808,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("PartnerId");
 
-                    b.ToTable("ServiceRequests");
+                    b.ToTable("ServiceRequests", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserBadge", b =>
@@ -838,7 +838,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.ToTable("UserBadges");
+                    b.ToTable("UserBadges", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserLevel", b =>
@@ -866,7 +866,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LevelId");
 
-                    b.ToTable("UserLevels");
+                    b.ToTable("UserLevels", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserMission", b =>
@@ -905,7 +905,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserMissions");
+                    b.ToTable("UserMissions", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Volunteer", b =>
@@ -940,7 +940,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Volunteers");
+                    b.ToTable("Volunteers", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerOrder", b =>
@@ -993,7 +993,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VolunteerOrders");
+                    b.ToTable("VolunteerOrders", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

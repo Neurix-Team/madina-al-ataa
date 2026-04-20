@@ -1,5 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO.Mission;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,17 +22,17 @@ namespace GivingChampion.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<Result<List<MissionDto>>>> GetAllActive()
+        public async Task<ActionResult<Result<PagedList<MissionDto>>>> GetAllActive([FromQuery] PageParameters pageParameters)
         {
-            var result = await _missionService.GetAllActiveAsync();
+            var result = await _missionService.GetAllActiveAsync(pageParameters);
             return Ok(result);
         }
 
         [HttpGet("available")]
         [Authorize]
-        public async Task<ActionResult<Result<List<MissionDto>>>> GetAvailableForUser([FromQuery] int userLevel)
+        public async Task<ActionResult<Result<PagedList<MissionDto>>>> GetAvailableForUser([FromQuery] int userLevel, [FromQuery] PageParameters pageParameters)
         {
-            var result = await _missionService.GetAvailableForUserAsync(userLevel);
+            var result = await _missionService.GetAvailableForUserAsync(userLevel, pageParameters);
             return Ok(result);
         }
 

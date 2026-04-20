@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.Donor;
+using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -22,22 +23,22 @@ namespace GivingChampion.API.Controllers
             _donorService = donorService;
         }
 
-        /// <summary>
-        /// Creates a donor profile for the currently authenticated user
-        /// </summary>
-        [HttpPost]
-        [Authorize]
-        [ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<DonorDto>>> CreateDonor([FromBody] CreateDonorDto dto)
-        {
-            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
+        ///// <summary>
+        ///// Creates a donor profile for the currently authenticated user
+        ///// </summary>
+        //[HttpPost]
+        //[Authorize]
+        //[ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status201Created)]
+        //[ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status400BadRequest)]
+        //public async Task<ActionResult<Result<DonorDto>>> CreateDonor([FromBody] CreateDonorDto dto)
+        //{
+        //    var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            var result = await _donorService.CreateDonorAsync(dto, userId);
-            return result.Succeeded
-                ? CreatedAtAction(nameof(GetMyDonorProfile), result)
-                : BadRequest(result);
-        }
+        //    var result = await _donorService.CreateDonorAsync(dto, userId);
+        //    return result.Succeeded
+        //        ? CreatedAtAction(nameof(GetMyDonorProfile), result)
+        //        : BadRequest(result);
+        //}
 
         /// <summary>
         /// Gets the donor profile of the currently authenticated user
@@ -82,13 +83,13 @@ namespace GivingChampion.API.Controllers
         /// <summary>
         /// Soft deletes donor profile (Admin only)
         /// </summary>
-        [HttpDelete("{userId:guid}")]
-        [Authorize(Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> SoftDeleteDonor(Guid userId)
-        {
-            var result = await _donorService.SoftDeleteDonorAsync(userId);
-            return result.Succeeded ? NoContent() : BadRequest(result);
-        }
+        //[HttpDelete("{userId:guid}")]
+        //[Authorize(Roles = "Admin")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //public async Task<IActionResult> SoftDeleteDonor(Guid userId)
+        //{
+        //    var result = await _donorService.SoftDeleteDonorAsync(userId);
+        //    return result.Succeeded ? NoContent() : BadRequest(result);
+        //}
     }
 }

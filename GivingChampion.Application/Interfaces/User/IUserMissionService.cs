@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Common.DTO.Mission;
 using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 
 namespace GivingChampion.Application.Interfaces.Mission
 {

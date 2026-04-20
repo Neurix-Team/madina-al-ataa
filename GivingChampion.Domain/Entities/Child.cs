@@ -1,4 +1,5 @@
 ﻿using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,7 +11,7 @@ using System.Text;
 namespace GivingChampion.Domain.Entities
 {
     [PrimaryKey("Id")]
-    public class Child : ISoftDeletable, IHasStatus
+    public class Child : BaseEntity, IHasStatus
     {
         public Guid Id { get; set; }
         [Range(0.01, double.MaxValue)]
@@ -28,8 +29,8 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("User")]
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        //public DateTime CreatedAt { get; set; }
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using GivingChampion.API.Interfaces;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +16,15 @@ namespace GivingChampion.API.Repositories
             _context = context;
         }
 
-        public async Task<List<Level>> GetAllAsync()
+        public async Task<PagedList<Level>> GetAllAsync(PageParameters pageParameters)
         {
-            return await _context.Levels
-                .AsNoTracking()
-                .ToListAsync();
+            var query = _context.Levels.AsNoTracking();
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize)
+                .Take(pageParameters.PageSize).ToPagedListAsync(pageParameters);
+
+            return items;
         }
 
         public async Task<Level?> GetByIdAsync(Guid id)

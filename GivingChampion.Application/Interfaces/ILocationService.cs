@@ -1,4 +1,5 @@
 ﻿using GivingChampion.Common.DTO.Location;
+using GivingChampion.Common.Results;
 
 namespace GivingChampion.Application.Interfaces.Location
 {
