@@ -46,5 +46,10 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [MaxLength(2000)]
         public string QrCode { get; set; } = string.Empty;
+        // Soft Delete
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }
+
+    
