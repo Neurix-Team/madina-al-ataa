@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO.Notification;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using System;
@@ -25,7 +27,7 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<List<NotificationDto>>> GetMyNotificationsAsync(Guid userId, bool unreadOnly = false)
+        public async Task<Result<PagedList<NotificationDto>>> GetMyNotificationsAsync(Guid userId, bool unreadOnly = false, PageParameters pageParameters = null)
         {
 
             var notifications = unreadOnly
@@ -33,7 +35,8 @@ namespace GivingChampion.Application.Services
                 : await _notificationRepository.GetByUserIdAsync(userId);
 
             var dtos = _mapper.Map<List<NotificationDto>>(notifications);
-            return Result<List<NotificationDto>>.Success(dtos);
+            var pagedList = new PagedList<NotificationDto>(dtos, dtos.Count, pageParameters?.PageNumber ?? 1, pageParameters?.PageSize ?? dtos.Count);
+            return Result<PagedList<NotificationDto>>.Success(pagedList);
         }
 
         public async Task<Result> MarkAsReadAsync(Guid userId, Guid notificationId)

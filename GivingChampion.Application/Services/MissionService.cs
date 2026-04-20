@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO.Mission;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using System;
@@ -25,11 +27,11 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<List<MissionDto>>> GetAllActiveAsync()
+        public async Task<Result<PagedList<MissionDto>>> GetAllActiveAsync(PageParameters pageParameters)
         {
-            var missions = await _missionRepository.GetAllActiveAsync();
-            var dtos = _mapper.Map<List<MissionDto>>(missions);
-            return Result<List<MissionDto>>.Success(dtos);
+            var missions = await _missionRepository.GetAllActiveAsync(pageParameters);
+            var dtos = _mapper.Map<PagedList<MissionDto>>(missions);
+            return Result<PagedList<MissionDto>>.Success(dtos);
         }
 
         public async Task<Result<List<MissionDto>>> GetAvailableForUserAsync(int userLevel)

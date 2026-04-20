@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Common.DTO.User;
 using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

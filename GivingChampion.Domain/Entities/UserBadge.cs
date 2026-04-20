@@ -1,10 +1,11 @@
 ﻿using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class UserBadge : ISoftDeletable
+    public class UserBadge : BaseEntity
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -16,7 +17,7 @@ namespace GivingChampion.Domain.Entities
         public Badge Badge { get; set; }
 
         public DateTime EarnedAt { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

@@ -26,14 +26,14 @@ namespace GivingChampion.Application.Services
             _donorRepository = donorRepository;
         }
 
-        public async Task<ServiceResult<TokenResponse>> RegisterAsync(
+        public async Task<AuthServiceResult<TokenResponse>> RegisterAsync(
             RegisterRequest request,
             CancellationToken cancellationToken = default)
         {
             var existingUser = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
             if (existingUser is not null)
             {
-                return ServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("DuplicateEmail", "A user with this email already exists."));
             }
 
@@ -45,7 +45,7 @@ namespace GivingChampion.Application.Services
 
             if (!createResult.Succeeded || createResult.Data is null)
             {
-                return ServiceResult<TokenResponse>.Failure(createResult.Errors);
+                return AuthServiceResult<TokenResponse>.Failure(createResult.Errors);
             }
 
             var user = createResult.Data;
@@ -53,7 +53,7 @@ namespace GivingChampion.Application.Services
             var addRoleResult = await _identityRepository.AddToRoleAsync(user, "User", cancellationToken);
             if (!addRoleResult.Succeeded)
             {
-                return ServiceResult<TokenResponse>.Failure(addRoleResult.Errors);
+                return AuthServiceResult<TokenResponse>.Failure(addRoleResult.Errors);
             }
             else
             {
@@ -64,40 +64,40 @@ namespace GivingChampion.Application.Services
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
             var token = _jwtTokenFactory.Create(user, roles);
 
-            return ServiceResult<TokenResponse>.Success(token);
+            return AuthServiceResult<TokenResponse>.Success(token);
         }
 
-        public async Task<ServiceResult<TokenResponse>> LoginAsync(
+        public async Task<AuthServiceResult<TokenResponse>> LoginAsync(
             LoginRequest request,
             CancellationToken cancellationToken = default)
         {
             var user = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
             if (user is null)
             {
-                return ServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
             var passwordValid = await _identityRepository.CheckPasswordAsync(user, request.Password, cancellationToken);
             if (!passwordValid)
             {
-                return ServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
             var token = _jwtTokenFactory.Create(user, roles);
 
-            return ServiceResult<TokenResponse>.Success(token);
+            return AuthServiceResult<TokenResponse>.Success(token);
         }
 
-        public async Task<ServiceResult<ExternalLoginCodeResponse>> CompleteGoogleLoginAsync(
+        public async Task<AuthServiceResult<ExternalLoginCodeResponse>> CompleteGoogleLoginAsync(
             ExternalUserInfo externalUser,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(externalUser.ProviderKey))
             {
-                return ServiceResult<ExternalLoginCodeResponse>.Failure(
+                return AuthServiceResult<ExternalLoginCodeResponse>.Failure(
                     new ServiceError("InvalidExternalLogin", "Provider key is missing."));
             }
 
@@ -112,7 +112,7 @@ namespace GivingChampion.Application.Services
             {
                 if (string.IsNullOrWhiteSpace(externalUser.Email))
                 {
-                    return ServiceResult<ExternalLoginCodeResponse>.Failure(
+                    return AuthServiceResult<ExternalLoginCodeResponse>.Failure(
                         new ServiceError("EmailNotProvided", "Google did not provide an email address."));
                 }
 
@@ -127,7 +127,7 @@ namespace GivingChampion.Application.Services
 
                     if (!createUserResult.Succeeded || createUserResult.Data is null)
                     {
-                        return ServiceResult<ExternalLoginCodeResponse>.Failure(createUserResult.Errors);
+                        return AuthServiceResult<ExternalLoginCodeResponse>.Failure(createUserResult.Errors);
                     }
 
                     var donor = new Donor
@@ -162,7 +162,7 @@ namespace GivingChampion.Application.Services
 
                     if (!addLoginResult.Succeeded)
                     {
-                        return ServiceResult<ExternalLoginCodeResponse>.Failure(addLoginResult.Errors);
+                        return AuthServiceResult<ExternalLoginCodeResponse>.Failure(addLoginResult.Errors);
                     }
                 }
             }
@@ -172,7 +172,7 @@ namespace GivingChampion.Application.Services
                 var addRoleResult = await _identityRepository.AddToRoleAsync(user, "User", cancellationToken);
                 if (!addRoleResult.Succeeded)
                 {
-                    return ServiceResult<ExternalLoginCodeResponse>.Failure(addRoleResult.Errors);
+                    return AuthServiceResult<ExternalLoginCodeResponse>.Failure(addRoleResult.Errors);
                 }
                 else
                 {
@@ -187,10 +187,10 @@ namespace GivingChampion.Application.Services
 
             var hasPassword = await _identityRepository.HasPasswordAsync(user);
 
-            return ServiceResult<ExternalLoginCodeResponse>.Success(new ExternalLoginCodeResponse { Code = code, NeedsRegistration = !hasPassword });
+            return AuthServiceResult<ExternalLoginCodeResponse>.Success(new ExternalLoginCodeResponse { Code = code, NeedsRegistration = !hasPassword });
         }
 
-        public async Task<ServiceResult<TokenResponse>> CompleteSocialRegistrationAsync(
+        public async Task<AuthServiceResult<TokenResponse>> CompleteSocialRegistrationAsync(
             CompleteSocialRegistrationRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -198,13 +198,13 @@ namespace GivingChampion.Application.Services
 
             if (user is null)
             {
-                return ServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("UserNotFound", "User was not found."));
             }
 
             if (!user.IsExternal)
             {
-                return ServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("InvalidUserType", "This action is only allowed for external users."));
             }
 
@@ -212,7 +212,7 @@ namespace GivingChampion.Application.Services
 
             if (hasPassword)
             {
-                return ServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("PasswordAlreadyExists", "This user already has a local password."));
             }
 
@@ -223,7 +223,7 @@ namespace GivingChampion.Application.Services
 
             if (!addPasswordResult.Succeeded)
             {
-                return ServiceResult<TokenResponse>.Failure(addPasswordResult.Errors);
+                return AuthServiceResult<TokenResponse>.Failure(addPasswordResult.Errors);
             }
 
             // Keep IsExternal = true if you want to preserve the source of registration.
@@ -234,16 +234,16 @@ namespace GivingChampion.Application.Services
 
             if (!updateResult.Succeeded)
             {
-                return ServiceResult<TokenResponse>.Failure(updateResult.Errors);
+                return AuthServiceResult<TokenResponse>.Failure(updateResult.Errors);
             }
 
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
             var token = _jwtTokenFactory.Create(user, roles);
 
-            return ServiceResult<TokenResponse>.Success(token);
+            return AuthServiceResult<TokenResponse>.Success(token);
         }
 
-        public Task<ServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
+        public Task<AuthServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
             string code,
             CancellationToken cancellationToken = default)
         {
@@ -252,11 +252,11 @@ namespace GivingChampion.Application.Services
             if (token is null)
             {
                 return Task.FromResult(
-                    ServiceResult<TokenResponse>.Failure(
+                    AuthServiceResult<TokenResponse>.Failure(
                         new ServiceError("InvalidCode", "Invalid or expired code.")));
             }
 
-            return Task.FromResult(ServiceResult<TokenResponse>.Success(token));
+            return Task.FromResult(AuthServiceResult<TokenResponse>.Success(token));
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -22,32 +24,37 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
         }
 
-        public async Task<List<Mission>> GetAllActiveAsync()
+        public async Task<PagedList<Mission>> GetAllActiveAsync(PageParameters pageParameters)
         {
-            return await _context.Missions
+            var query = await _context.Missions
                 .Include(m => m.Location)
                 .Where(m => m.Status == MissionStatus.Open && !m.IsDeleted)
                 .OrderBy(m => m.RequiredLevel)
-                .ThenBy(m => m.Title)
-                .ToListAsync();
+                .ThenBy(m => m.Title).ToPagedListAsync(pageParameters);
+
+            return query;
         }
 
-        public async Task<List<Mission>> GetByDifficultyAsync(DifficultyLevel difficulty)
+        public async Task<PagedList<Mission>> GetByDifficultyAsync(DifficultyLevel difficulty, PageParameters pageParameters)
         {
-            return await _context.Missions
+            var query = await _context.Missions
                 .Where(m => m.Difficulty == difficulty && !m.IsDeleted)
-                .ToListAsync();
+                .ToPagedListAsync(pageParameters);
+
+            return query;
         }
 
-        public async Task<List<Mission>> GetAvailableForLevelAsync(int userLevel)
+        public async Task<PagedList<Mission>> GetAvailableForLevelAsync(int userLevel, PageParameters pageParameters)
         {
-            return await _context.Missions
+            var query = await _context.Missions
                 .Where(m => m.RequiredLevel <= userLevel &&
                            m.Status == MissionStatus.Open &&
                            !m.IsDeleted)
                 .Include(m => m.Location)
                 .OrderBy(m => m.RequiredLevel)
-                .ToListAsync();
+                .ToPagedListAsync(pageParameters);
+
+            return query;
         }
 
         public async Task CreateAsync(Mission mission)

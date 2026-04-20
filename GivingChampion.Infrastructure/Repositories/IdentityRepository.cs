@@ -1,6 +1,8 @@
 ﻿using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Common.DTO.Donor;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace GivingChampion.Persistance.Repositories
@@ -9,13 +11,16 @@ namespace GivingChampion.Persistance.Repositories
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IDonorRepository _donorRepository;
 
         public IdentityRepository(
             UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+            RoleManager<ApplicationRole> roleManager,
+            IDonorRepository donorRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _donorRepository = donorRepository;
         }
 
         public Task<ApplicationUser?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -27,7 +32,7 @@ namespace GivingChampion.Persistance.Repositories
             CancellationToken cancellationToken = default)
             => _userManager.FindByLoginAsync(provider, providerKey);
 
-        public async Task<ServiceResult<ApplicationUser>> CreateLocalUserAsync(
+        public async Task<AuthServiceResult<ApplicationUser>> CreateLocalUserAsync(
             string email,
             string password,
             string? fullName,
@@ -42,13 +47,20 @@ namespace GivingChampion.Persistance.Repositories
 
             var result = await _userManager.CreateAsync(user, password);
 
+            Donor donorDto = new()
+            {
+                UserId = user.Id,
+            };
+
+            await _donorRepository.CreateAsync(donorDto);
+
             return result.Succeeded
-                ? ServiceResult<ApplicationUser>.Success(user)
-                : ServiceResult<ApplicationUser>.Failure(
+                ? AuthServiceResult<ApplicationUser>.Success(user)
+                : AuthServiceResult<ApplicationUser>.Failure(
                     result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
         }
 
-        public async Task<ServiceResult<ApplicationUser>> CreateExternalUserAsync(
+        public async Task<AuthServiceResult<ApplicationUser>> CreateExternalUserAsync(
             string email,
             string? fullName,
             CancellationToken cancellationToken = default)
@@ -64,8 +76,8 @@ namespace GivingChampion.Persistance.Repositories
             var result = await _userManager.CreateAsync(user);
 
             return result.Succeeded
-                ? ServiceResult<ApplicationUser>.Success(user)
-                : ServiceResult<ApplicationUser>.Failure(
+                ? AuthServiceResult<ApplicationUser>.Success(user)
+                : AuthServiceResult<ApplicationUser>.Failure(
                     result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
         }
 
@@ -75,7 +87,7 @@ namespace GivingChampion.Persistance.Repositories
             CancellationToken cancellationToken = default)
             => _userManager.CheckPasswordAsync(user, password);
 
-        public async Task<ServiceResult> AddToRoleAsync(
+        public async Task<AuthServiceResult> AddToRoleAsync(
             ApplicationUser user,
             string role,
             CancellationToken cancellationToken = default)
@@ -83,8 +95,8 @@ namespace GivingChampion.Persistance.Repositories
             var result = await _userManager.AddToRoleAsync(user, role);
 
             return result.Succeeded
-                ? ServiceResult.Success()
-                : ServiceResult.Failure(
+                ? AuthServiceResult.Success()
+                : AuthServiceResult.Failure(
                     result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
         }
 
@@ -103,7 +115,7 @@ namespace GivingChampion.Persistance.Repositories
             return logins.Any(x => x.LoginProvider == provider && x.ProviderKey == providerKey);
         }
 
-        public async Task<ServiceResult> AddExternalLoginAsync(
+        public async Task<AuthServiceResult> AddExternalLoginAsync(
             ApplicationUser user,
             string provider,
             string providerKey,
@@ -114,8 +126,8 @@ namespace GivingChampion.Persistance.Repositories
             var result = await _userManager.AddLoginAsync(user, login);
 
             return result.Succeeded
-                ? ServiceResult.Success()
-                : ServiceResult.Failure(
+                ? AuthServiceResult.Success()
+                : AuthServiceResult.Failure(
                     result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
         }
 
@@ -149,7 +161,7 @@ namespace GivingChampion.Persistance.Repositories
             CancellationToken cancellationToken = default)
             => _userManager.HasPasswordAsync(user);
 
-        public async Task<ServiceResult> AddPasswordAsync(
+        public async Task<AuthServiceResult> AddPasswordAsync(
             ApplicationUser user,
             string newPassword,
             CancellationToken cancellationToken = default)
@@ -157,20 +169,20 @@ namespace GivingChampion.Persistance.Repositories
             var result = await _userManager.AddPasswordAsync(user, newPassword);
 
             return result.Succeeded
-                ? ServiceResult.Success()
-                : ServiceResult.Failure(
+                ? AuthServiceResult.Success()
+                : AuthServiceResult.Failure(
                     result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
         }
 
-        public async Task<ServiceResult> UpdateAsync(
+        public async Task<AuthServiceResult> UpdateAsync(
             ApplicationUser user,
             CancellationToken cancellationToken = default)
         {
             var result = await _userManager.UpdateAsync(user);
 
             return result.Succeeded
-                ? ServiceResult.Success()
-                : ServiceResult.Failure(
+                ? AuthServiceResult.Success()
+                : AuthServiceResult.Failure(
                     result.Errors.Select(x => new ServiceError(x.Code, x.Description)));
         }
     }

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Domain.Entities
@@ -9,7 +10,7 @@ namespace GivingChampion.Domain.Entities
     /// Represents a volunteer order where a volunteer is assigned to a service request.
     /// Tracks scheduling, status, and assignment details.
     /// </summary>
-    public class VolunteerOrder : ISoftDeletable
+    public class VolunteerOrder : BaseEntity
 	{
 		/// <summary>
 		/// Primary key (unique identifier)
@@ -71,8 +72,8 @@ namespace GivingChampion.Domain.Entities
 		/// <summary>
 		/// Record creation timestamp (UTC)
 		/// </summary>
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletedAt { get; set; }
+		//public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+  //      public bool IsDeleted { get; set; }
+  //      public DateTime? DeletedAt { get; set; }
     }
 }

@@ -16,9 +16,9 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        public async Task<List<UserBadgeDto>> GetAllAsync()
+        public async Task<List<UserBadgeDto>> GetAllByProfileIdAsync(Guid profileId)
         {
-            var userBadges = await _userBadgeRepository.GetAllAsync();
+            var userBadges = await _userBadgeRepository.GetAllByProfileIdAsync(profileId);
             return _mapper.Map<List<UserBadgeDto>>(userBadges); // AutoMapper
         }
 

@@ -16,9 +16,9 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        public async Task<List<ReviewDto>> GetAllAsync()
+        public async Task<List<ReviewDto>> GetAllByProfileIdAsync(Guid profileId)
         {
-            var reviews = await _reviewRepository.GetAllAsync();
+            var reviews = await _reviewRepository.GetAllByProfileIdAsync(profileId);
             return _mapper.Map<List<ReviewDto>>(reviews);
         }
 

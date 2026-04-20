@@ -3,6 +3,7 @@ using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.User;
 using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Persistence.Repositories;

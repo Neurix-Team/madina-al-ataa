@@ -22,11 +22,11 @@ namespace GivingChampion.API.Repositories
                 .ToListAsync();
         }
 
-        public async Task<UserLevel?> GetByIdAsync(Guid id)
+        public async Task<UserLevel?> GetByProfileIdAsync(Guid profileId)
         {
             return await _context.UserLevels
                 .Include(ul => ul.Level) // Include Level entity for level name
-                .FirstOrDefaultAsync(ul => ul.Id == id);
+                .FirstOrDefaultAsync(ul => ul.ProfileId == profileId);
         }
 
         public async Task AddAsync(UserLevel userLevel)
@@ -42,6 +42,13 @@ namespace GivingChampion.API.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<UserLevel?> GetByIdAsync(Guid id)
+        {
+            return await _context.UserLevels
+                .Include(ul => ul.Level) // Include Level entity for level name
+                .FirstOrDefaultAsync(ul => ul.Id == id);
         }
     }
 }

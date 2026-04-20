@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.Child;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;

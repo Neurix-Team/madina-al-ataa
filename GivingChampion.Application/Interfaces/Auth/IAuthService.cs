@@ -5,23 +5,23 @@ namespace GivingChampion.Application.Interfaces.Auth
 {
     public interface IAuthService
     {
-        Task<ServiceResult<TokenResponse>> RegisterAsync(
+        Task<AuthServiceResult<TokenResponse>> RegisterAsync(
             RegisterRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<ServiceResult<TokenResponse>> LoginAsync(
+        Task<AuthServiceResult<TokenResponse>> LoginAsync(
             LoginRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<ServiceResult<ExternalLoginCodeResponse>> CompleteGoogleLoginAsync(
+        Task<AuthServiceResult<ExternalLoginCodeResponse>> CompleteGoogleLoginAsync(
             ExternalUserInfo externalUser,
             CancellationToken cancellationToken = default);
 
-        Task<ServiceResult<TokenResponse>> CompleteSocialRegistrationAsync(
+        Task<AuthServiceResult<TokenResponse>> CompleteSocialRegistrationAsync(
             CompleteSocialRegistrationRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<ServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
+        Task<AuthServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
             string code,
             CancellationToken cancellationToken = default);
     }
