@@ -1,8 +1,6 @@
-﻿using GivingChampion.Common.DTO.AiAvatarDto;
-using GivingChampion.Domain.Contexts;
-using GivingChampion.Domain.Entities;
+﻿using GivingChampion.API.Interfaces;
+using GivingChampion.Common.DTO.AiAvatarDto;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.API.Controllers
 {
@@ -10,108 +8,49 @@ namespace GivingChampion.API.Controllers
     [Route("api/[controller]")]
     public class AiAvatarsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAiAvatarService _aiAvatarService;
 
-        public AiAvatarsController(AppDbContext context)
+        public AiAvatarsController(IAiAvatarService aiAvatarService)
         {
-            _context = context;
+            _aiAvatarService = aiAvatarService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var aiAvatars = await _context.AiAvatars
-                .AsNoTracking()
-                .Select(a => new AiAvatarDto
-                {
-                    Id = a.Id,
-                    FavoriteCategory = a.FavoriteCategory,
-                    SuccessRate = a.SuccessRate,
-                    LastSuggestion = a.LastSuggestion
-                })
-                .ToListAsync();
-
-            return Ok(aiAvatars);
-        }
-
+        // GET api/aiavatars/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<ActionResult<AiAvatarDto>> GetById(Guid id)
         {
-            var aiAvatar = await _context.AiAvatars
-                .AsNoTracking()
-                .Where(a => a.Id == id)
-                .Select(a => new AiAvatarDto
-                {
-                    Id = a.Id,
-                    FavoriteCategory = a.FavoriteCategory,
-                    SuccessRate = a.SuccessRate,
-                    LastSuggestion = a.LastSuggestion
-                })
-                .FirstOrDefaultAsync();
-
+            var aiAvatar = await _aiAvatarService.GetByIdAsync(id);
             if (aiAvatar == null)
-                return NotFound("AiAvatar not found");
-
+                return NotFound();
             return Ok(aiAvatar);
         }
 
+        // POST api/aiavatars
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateAiAvatarDto dto)
+        public async Task<ActionResult<AiAvatarDto>> Create([FromBody] CreateAiAvatarDto dto)
         {
-            var aiAvatar = new AiAvatar
-            {
-                FavoriteCategory = dto.FavoriteCategory,
-                SuccessRate = dto.SuccessRate,
-                LastSuggestion = dto.LastSuggestion
-            };
-
-            await _context.AiAvatars.AddAsync(aiAvatar);
-            await _context.SaveChangesAsync();
-
-            var result = new AiAvatarDto
-            {
-                Id = aiAvatar.Id,
-                FavoriteCategory = aiAvatar.FavoriteCategory,
-                SuccessRate = aiAvatar.SuccessRate,
-                LastSuggestion = aiAvatar.LastSuggestion
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = aiAvatar.Id }, result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var created = await _aiAvatarService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        // PUT api/aiavatars/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAiAvatarDto dto)
         {
-            var aiAvatar = await _context.AiAvatars
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (aiAvatar == null)
-                return NotFound("AiAvatar not found");
-
-            aiAvatar.FavoriteCategory = dto.FavoriteCategory;
-            aiAvatar.SuccessRate = dto.SuccessRate;
-            aiAvatar.LastSuggestion = dto.LastSuggestion;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("AiAvatar updated successfully");
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var updated = await _aiAvatarService.UpdateAsync(id, dto);
+            if (!updated) return NotFound();
+            return NoContent();
         }
 
+        // DELETE api/aiavatars/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var aiAvatar = await _context.AiAvatars
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (aiAvatar == null)
-                return NotFound("AiAvatar not found");
-
-            aiAvatar.IsDeleted = true;
-            aiAvatar.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("AiAvatar deleted successfully");
+            var deleted = await _aiAvatarService.SoftDeleteAsync(id);
+            if (!deleted) return NotFound();
+            return NoContent();
         }
     }
 }

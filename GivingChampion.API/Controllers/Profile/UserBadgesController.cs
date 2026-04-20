@@ -1,8 +1,6 @@
-﻿using GivingChampion.Common.DTO.UserBadgeDto;
-using GivingChampion.Domain.Contexts;
-using GivingChampion.Domain.Entities;
+﻿using GivingChampion.API.Interfaces;
+using GivingChampion.Common.DTO.UserBadgeDto;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.API.Controllers
 {
@@ -10,191 +8,66 @@ namespace GivingChampion.API.Controllers
     [Route("api/[controller]")]
     public class UserBadgesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserBadgeService _userBadgeService;
 
-        public UserBadgesController(AppDbContext context)
+        public UserBadgesController(IUserBadgeService userBadgeService)
         {
-            _context = context;
+            _userBadgeService = userBadgeService;
         }
 
+        // GET api/userbadges
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(Guid profileId)
         {
-            var userBadges = await _context.UserBadges
-                .AsNoTracking()
-                .Select(ub => new UserBadgeDto
-                {
-                    Id = ub.Id,
-                    ProfileId = ub.ProfileId,
-                    BadgeId = ub.BadgeId,
-                    BadgeName = ub.Badge.Name,
-                    BadgeCategory = ub.Badge.Category,
-                    EarnedAt = ub.EarnedAt
-                })
-                .ToListAsync();
-
+            var userBadges = await _userBadgeService.GetAllByProfileIdAsync(profileId);
             return Ok(userBadges);
         }
 
+        // GET api/userbadges/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var userBadge = await _context.UserBadges
-                .AsNoTracking()
-                .Where(ub => ub.Id == id)
-                .Select(ub => new UserBadgeDto
-                {
-                    Id = ub.Id,
-                    ProfileId = ub.ProfileId,
-                    BadgeId = ub.BadgeId,
-                    BadgeName = ub.Badge.Name,
-                    BadgeCategory = ub.Badge.Category,
-                    EarnedAt = ub.EarnedAt
-                })
-                .FirstOrDefaultAsync();
-
+            var userBadge = await _userBadgeService.GetByIdAsync(id);
             if (userBadge == null)
                 return NotFound("User badge not found");
 
             return Ok(userBadge);
         }
 
+        // GET api/userbadges/profile/{profileId}
         [HttpGet("profile/{profileId}")]
         public async Task<IActionResult> GetByProfileId(Guid profileId)
         {
-            var profileExists = await _context.Profiles
-                .AnyAsync(p => p.Id == profileId);
-
-            if (!profileExists)
-                return NotFound("Profile not found");
-
-            var userBadges = await _context.UserBadges
-                .AsNoTracking()
-                .Where(ub => ub.ProfileId == profileId)
-                .Select(ub => new UserBadgeDto
-                {
-                    Id = ub.Id,
-                    ProfileId = ub.ProfileId,
-                    BadgeId = ub.BadgeId,
-                    BadgeName = ub.Badge.Name,
-                    BadgeCategory = ub.Badge.Category,
-                    EarnedAt = ub.EarnedAt
-                })
-                .ToListAsync();
-
+            var userBadges = await _userBadgeService.GetByIdAsync(profileId);
             return Ok(userBadges);
         }
 
+        // POST api/userbadges
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserBadgeDto dto)
         {
-            var profileExists = await _context.Profiles
-                .AnyAsync(p => p.Id == dto.ProfileId);
-
-            if (!profileExists)
-                return BadRequest("Profile not found");
-
-            var badgeExists = await _context.Badges
-                .AnyAsync(b => b.Id == dto.BadgeId);
-
-            if (!badgeExists)
-                return BadRequest("Badge not found");
-
-            var existingUserBadge = await _context.UserBadges
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(ub =>
-                    ub.ProfileId == dto.ProfileId &&
-                    ub.BadgeId == dto.BadgeId);
-
-            if (existingUserBadge != null)
-            {
-                if (!existingUserBadge.IsDeleted)
-                    return BadRequest("This profile already has this badge");
-
-                existingUserBadge.IsDeleted = false;
-                existingUserBadge.DeletedAt = null;
-                existingUserBadge.EarnedAt = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-
-                var restoredResult = new UserBadgeDto
-                {
-                    Id = existingUserBadge.Id,
-                    ProfileId = existingUserBadge.ProfileId,
-                    BadgeId = existingUserBadge.BadgeId,
-                    EarnedAt = existingUserBadge.EarnedAt
-                };
-
-                return Ok(restoredResult);
-            }
-
-            var userBadge = new UserBadge
-            {
-                ProfileId = dto.ProfileId,
-                BadgeId = dto.BadgeId,
-                EarnedAt = DateTime.UtcNow
-            };
-
-            await _context.UserBadges.AddAsync(userBadge);
-            await _context.SaveChangesAsync();
-
-            var result = new UserBadgeDto
-            {
-                Id = userBadge.Id,
-                ProfileId = userBadge.ProfileId,
-                BadgeId = userBadge.BadgeId,
-                EarnedAt = userBadge.EarnedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = userBadge.Id }, result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var created = await _userBadgeService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        // PUT api/userbadges/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserBadgeDto dto)
         {
-            var userBadge = await _context.UserBadges
-                .FirstOrDefaultAsync(ub => ub.Id == id);
-
-            if (userBadge == null)
-                return NotFound("User badge not found");
-
-            var badgeExists = await _context.Badges
-                .AnyAsync(b => b.Id == dto.BadgeId);
-
-            if (!badgeExists)
-                return BadRequest("Badge not found");
-
-            var duplicateExists = await _context.UserBadges
-                .AnyAsync(ub =>
-                    ub.Id != id &&
-                    ub.ProfileId == userBadge.ProfileId &&
-                    ub.BadgeId == dto.BadgeId);
-
-            if (duplicateExists)
-                return BadRequest("This profile already has this badge");
-
-            userBadge.BadgeId = dto.BadgeId;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("User badge updated successfully");
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var updated = await _userBadgeService.UpdateAsync(id, dto);
+            if (!updated) return NotFound("User badge not found");
+            return NoContent();
         }
 
+        // DELETE api/userbadges/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var userBadge = await _context.UserBadges
-                .FirstOrDefaultAsync(ub => ub.Id == id);
-
-            if (userBadge == null)
-                return NotFound("User badge not found");
-
-            userBadge.IsDeleted = true;
-            userBadge.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("User badge deleted successfully");
+            var deleted = await _userBadgeService.SoftDeleteAsync(id);
+            if (!deleted) return NotFound("User badge not found");
+            return NoContent();
         }
     }
 }

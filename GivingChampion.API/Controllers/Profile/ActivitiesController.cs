@@ -1,9 +1,7 @@
-﻿using GivingChampion.Common.DTO.ActivityDto;
+﻿using GivingChampion.API.Interfaces;
+using GivingChampion.Common.DTO.ActivityDto;
 using GivingChampion.Common.DTO.GivingChampion.Common.DTO.ActivityDto;
-using GivingChampion.Domain.Contexts;
-using GivingChampion.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.API.Controllers
 {
@@ -11,107 +9,58 @@ namespace GivingChampion.API.Controllers
     [Route("api/[controller]")]
     public class ActivitiesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IActivityService _activityService;
 
-        public ActivitiesController(AppDbContext context)
+        public ActivitiesController(IActivityService activityService)
         {
-            _context = context;
+            _activityService = activityService;
         }
 
+        // GET api/activities
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var activities = await _context.Activities
-                .AsNoTracking()
-                .Select(a => new ActivityDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Description = a.Description,
-                    CreatedAt = a.CreatedAt
-                })
-                .ToListAsync();
-
+            var activities = await _activityService.GetAllAsync();
             return Ok(activities);
         }
 
+        // GET api/activities/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var activity = await _context.Activities
-                .AsNoTracking()
-                .Where(a => a.Id == id)
-                .Select(a => new ActivityDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Description = a.Description,
-                    CreatedAt = a.CreatedAt
-                })
-                .FirstOrDefaultAsync();
-
+            var activity = await _activityService.GetByIdAsync(id);
             if (activity == null)
                 return NotFound("Activity not found");
 
             return Ok(activity);
         }
 
+        // POST api/activities
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateActivityDto dto)
         {
-            var activity = new Activity
-            {
-                Name = dto.Name,
-                Description = dto.Description,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _context.Activities.AddAsync(activity);
-            await _context.SaveChangesAsync();
-
-            var result = new ActivityDto
-            {
-                Id = activity.Id,
-                Name = activity.Name,
-                Description = activity.Description,
-                CreatedAt = activity.CreatedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = activity.Id }, result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var created = await _activityService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        // PUT api/activities/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateActivityDto dto)
         {
-            var activity = await _context.Activities
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (activity == null)
-                return NotFound("Activity not found");
-
-            activity.Name = dto.Name;
-            activity.Description = dto.Description;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Activity updated successfully");
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var updated = await _activityService.UpdateAsync(id, dto);
+            if (!updated) return NotFound("Activity not found");
+            return NoContent();
         }
 
+        // DELETE api/activities/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var activity = await _context.Activities
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (activity == null)
-                return NotFound("Activity not found");
-
-            activity.IsDeleted = true;
-            activity.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Activity deleted successfully");
+            var deleted = await _activityService.SoftDeleteAsync(id);
+            if (!deleted) return NotFound("Activity not found");
+            return NoContent();
         }
     }
 }

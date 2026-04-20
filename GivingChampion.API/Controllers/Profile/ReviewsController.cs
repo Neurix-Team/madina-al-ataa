@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.ReviewDto;
 using Microsoft.AspNetCore.Mvc;
@@ -29,10 +26,13 @@ namespace GivingChampion.API.Controllers.Profile
         public async Task<ActionResult<ReviewDto>> GetById(Guid id)
         {
             var review = await _reviewService.GetByIdAsync(id);
-            if (review == null) return NotFound();
+            if (review == null)
+                return NotFound();
             return Ok(review);
         }
 
+        // POST api/reviews
+        
         [HttpPost]
         public async Task<ActionResult<ReviewDto>> Create([FromBody] CreateReviewDto dto)
         {
@@ -40,6 +40,8 @@ namespace GivingChampion.API.Controllers.Profile
             var created = await _reviewService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
+
+        // PUT api/review/{id}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReviewDto dto)
@@ -49,6 +51,8 @@ namespace GivingChampion.API.Controllers.Profile
             if (!updated) return NotFound();
             return NoContent();
         }
+
+        // DELETE api/review/{id}
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
