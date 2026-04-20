@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,15 +27,16 @@ namespace GivingChampion.API.Controllers.Certificate
                 _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             }
 
-            #endregion
+        #endregion
 
-            #region Query Methods
+        #region Query Methods
 
-            #region GetById
-            /// <summary>
-            /// Retrieves a certificate by its unique identifier (ID).
-            /// </summary>
-            [HttpGet("{id:guid}")]
+        #region GetById
+        /// <summary>
+        /// Retrieves a certificate by its unique identifier (ID).
+        /// </summary>
+        [Authorize]
+        [HttpGet("{id:guid}")]
             public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
             {
                 try
@@ -58,13 +60,14 @@ namespace GivingChampion.API.Controllers.Certificate
                     return StatusCode(500, "Internal server error");
                 }
             }
-            #endregion
+        #endregion
 
-            #region GetAllCertificates
-            /// <summary>
-            /// Retrieves all certificates.
-            /// </summary>
-            [HttpGet]
+        #region GetAllCertificates
+        /// <summary>
+        /// Retrieves all certificates.
+        /// </summary>
+        [Authorize]
+        [HttpGet]
             public async Task<IActionResult> GetAllCertificates(CancellationToken cancellationToken)
             {
                 try
@@ -85,28 +88,28 @@ namespace GivingChampion.API.Controllers.Certificate
             #endregion
 
 
-            #region CreateCertificate
-            /// <summary>
-            /// Creates a new certificate.
-            /// </summary>
-            [HttpPost]
-            public async Task<IActionResult> Create([FromBody] CertificateCreateDto dto, CancellationToken cancellationToken)
-            {
-                try
-                {
-                    // Call the service to create the certificate
-                    var createdCertificate = await _certificateService.CreateAsync(dto, cancellationToken);
+            //#region CreateCertificate
+            ///// <summary>
+            ///// Creates a new certificate.
+            ///// </summary>
+            //[HttpPost]
+            //public async Task<IActionResult> Create([FromBody] CertificateCreateDto dto, CancellationToken cancellationToken)
+            //{
+            //    try
+            //    {
+            //        // Call the service to create the certificate
+            //        var createdCertificate = await _certificateService.CreateAsync(dto, cancellationToken);
 
-                    // Return the created certificate with 201 status code
-                    return CreatedAtAction(nameof(GetById), new { id = createdCertificate?.Id }, createdCertificate);
-                }
-                catch (Exception ex)
-                {
-                    // Log error and return 500 Internal Server Error
-                    _logger.LogError(ex, "Error occurred while creating the certificate.");
-                    return StatusCode(500, "Internal server error");
-                }
-            }
-            #endregion
+            //        // Return the created certificate with 201 status code
+            //        return CreatedAtAction(nameof(GetById), new { id = createdCertificate?.Id }, createdCertificate);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        // Log error and return 500 Internal Server Error
+            //        _logger.LogError(ex, "Error occurred while creating the certificate.");
+            //        return StatusCode(500, "Internal server error");
+            //    }
+            //}
+            //#endregion
         }
     }
