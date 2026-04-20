@@ -1,9 +1,11 @@
 ﻿using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.UserLevelDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GivingChampion.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserLevelsController : ControllerBase

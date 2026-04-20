@@ -1,9 +1,11 @@
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.ReviewDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GivingChampion.API.Controllers.Profile
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ReviewsController : ControllerBase

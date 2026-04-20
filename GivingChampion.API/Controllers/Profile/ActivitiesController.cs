@@ -1,10 +1,12 @@
 ﻿using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.ActivityDto;
 using GivingChampion.Common.DTO.GivingChampion.Common.DTO.ActivityDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GivingChampion.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ActivitiesController : ControllerBase
