@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using GivingChampion.Common.DTO.Partner;
+using GivingChampion.Common.DTO.CertificateDto;
 using GivingChampion.Common.DTO.Partner;
 using GivingChampion.Common.DTO.PartnerDto;
 using GivingChampion.Common.DTO.ServiceRequestDto;
@@ -441,7 +441,13 @@ namespace GivingChampion.Application.Mapper
 
             #endregion
 
-            #endregion
+            // Map from Certificate entity to CertificateReadAllDto
+            CreateMap<Certificate, CertificateReadAllDto>();
+
+            // Map from CertificateCreateDto to Certificate entity
+            CreateMap<CertificateCreateDto, Certificate>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore the Id since it will be generated in the service
+                .ForMember(dest => dest.IssuedDate, opt => opt.Ignore()); // Ignore IssuedDate since it will be set in the service
 
         }
 
