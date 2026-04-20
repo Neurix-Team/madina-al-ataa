@@ -170,7 +170,7 @@ namespace GivingChampion.Application.Services
             Guid id,
             Guid currentUserId,
             bool isAdmin)
-        {
+    {
             var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
 
             if (donationRequest == null)

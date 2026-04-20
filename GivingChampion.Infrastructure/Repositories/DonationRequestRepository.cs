@@ -15,7 +15,7 @@ namespace GivingChampion.Persistance.Repositories
     public class DonationRequestRepository : IDonationRequestRepository
     {
         private readonly AppDbContext _context;
-
+   
         public DonationRequestRepository(AppDbContext context)
         {
             _context = context;
@@ -28,7 +28,7 @@ namespace GivingChampion.Persistance.Repositories
         }
 
         public Task DeleteAsync(DonationRequest donationRequest)
-        {
+    {
             _context.DonationRequests.Remove(donationRequest);
             return _context.SaveChangesAsync(); 
         }
@@ -38,7 +38,7 @@ namespace GivingChampion.Persistance.Repositories
             return await _context.DonationRequests
                 .AsNoTracking()
                 .Where(dr => !dr.IsDeleted).ToPagedListAsync(pageParameters);
-        }
+    }
 
         public async Task<PagedList<DonationRequest>> GetApprovedAsync(PageParameters pageParameters)
         {
@@ -47,8 +47,8 @@ namespace GivingChampion.Persistance.Repositories
                 .Where(dr =>
                     !dr.IsDeleted && dr.Status == RequestStatus.Approved)
                 .ToPagedListAsync(pageParameters);
-        }
-
+    }
+  
         //public async Task<IEnumerable<DonationRequest>> GetByParentIdAsync(string parentUserId)
         //{
         //    return await _context.DonationRequests

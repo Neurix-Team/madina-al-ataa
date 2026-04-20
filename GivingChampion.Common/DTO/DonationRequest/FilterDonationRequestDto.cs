@@ -9,14 +9,16 @@ namespace GivingChampion.Common.DTO.DonationRequest
     {
        
       
-        public string? SearchTerm { get; set; }
+            public string? SearchTerm { get; set; }
 
-        public bool? IsVerified { get; set; }
+            public bool? IsVerified { get; set; }
 
-        public bool? IsFulfilled { get; set; }
+            public bool? IsFulfilled { get; set; }
 
-        public UrgencyLevel? UrgencyLevel { get; set; }
+            public UrgencyLevel? UrgencyLevel { get; set; }
 
-        public Guid? PartnerId { get; set; }
+            public Guid? PartnerId { get; set; }
+
+
+        }
     }
-}

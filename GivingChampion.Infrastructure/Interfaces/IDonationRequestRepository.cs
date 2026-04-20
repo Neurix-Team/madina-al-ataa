@@ -8,8 +8,8 @@ using System.Text;
 namespace GivingChampion.Persistance.Interfaces
 {
    
-    public interface IDonationRequestRepository
-    {
+        public interface IDonationRequestRepository
+        {
         Task AddAsync(DonationRequest donationRequest);
 
         Task<PagedList<DonationRequest>> GetAllAsync(PageParameters pageParameters);
@@ -23,6 +23,6 @@ namespace GivingChampion.Persistance.Interfaces
 
         Task UpdateAsync(DonationRequest donationRequest);
         Task DeleteAsync(DonationRequest donationRequest);
-    }
+        }
 }
 
