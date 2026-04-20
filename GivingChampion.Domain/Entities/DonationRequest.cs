@@ -39,7 +39,7 @@ namespace GivingChampion.Domain.Entities
 		/// <summary>
 		/// Remaining amount needed to complete the donation
 		/// </summary>
-		[Range(0, double.MaxValue, ErrorMessage = "Amount remaining cannot be negative")]
+		[Range(10, double.MaxValue, ErrorMessage = "Amount remaining cannot be negative")]
 		public decimal AmountRemaining { get; set; }
 
 		/// <summary>
