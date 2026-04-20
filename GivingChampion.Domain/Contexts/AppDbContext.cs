@@ -16,7 +16,7 @@ namespace GivingChampion.Domain.Contexts
         {
         }
 
-        // Your existing DbSets...
+        // DbSets
         public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<ApplicationRole> Roles { get; set; }
         public DbSet<Profile> Profiles { get; set; }
@@ -41,44 +41,37 @@ namespace GivingChampion.Domain.Contexts
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Certificate> Certificates { get; set; }
         public DbSet<Activity> Activities { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Activity>()
-                .HasQueryFilter(a => !a.IsDeleted);
-            modelBuilder.Entity<AiAvatar>()
-                .HasQueryFilter(a => !a.IsDeleted);
-            modelBuilder.Entity<Avatar>()
-                .HasQueryFilter(a => !a.IsDeleted);
-            modelBuilder.Entity<Badge>()
-                .HasQueryFilter(b => !b.IsDeleted);
-            modelBuilder.Entity<Level>()
-                .HasQueryFilter(l => !l.IsDeleted);
+
+            // ====================== GLOBAL SOFT DELETE FILTER ======================
+            // This applies automatically to ALL entities that implement ISoftDeletable
+            modelBuilder.ApplySoftDeleteQueryFilter();
+
+            // ====================== Specific Configurations ======================
+            // Only add manual configurations here if needed (relationships, indexes, etc.)
+
             modelBuilder.Entity<Profile>()
-                .HasQueryFilter(p => !p.IsDeleted);
-            modelBuilder.Entity<UserBadge>()
-                .HasQueryFilter(ub => !ub.IsDeleted);
-            modelBuilder.Entity<UserLevel>()
-                .HasQueryFilter(ul => !ul.IsDeleted);
-            modelBuilder.Entity<Review>()
-                .HasQueryFilter(r => !r.IsDeleted);
-            modelBuilder.Entity<Profile>()
-                .HasMany(p => p.UserBadges)
+                .HasMany(p => p.Badges)
                 .WithOne(ub => ub.Profile)
                 .HasForeignKey(ub => ub.ProfileId);
-           modelBuilder.Entity<Profile>()
-                .HasMany(p => p.UserLevels)
-                .WithOne(ul => ul.Profile)
-                .HasForeignKey(ul => ul.ProfileId);
-           modelBuilder.Entity<Profile>()
+
+            modelBuilder.Entity<Profile>()
+                .HasOne(p => p.Level)
+                .WithMany(ul => ul.Profiles);
+
+            modelBuilder.Entity<Profile>()
                 .HasMany(p => p.Reviews)
                 .WithOne(r => r.Profile)
                 .HasForeignKey(r => r.ProfileId);
 
-            // Apply global query filter to ALL entities that implement ISoftDeletable
-            modelBuilder.ApplySoftDeleteQueryFilter();
+            // Example: If you want to disable soft delete for a specific entity
+            // modelBuilder.Entity<SomeEntity>().HasQueryFilter(null);
         }
 
+        // ====================== SOFT DELETE HANDLING ======================
         public override int SaveChanges()
         {
             HandleSoftDeletes();
@@ -102,6 +95,25 @@ namespace GivingChampion.Domain.Contexts
                 entry.Entity.IsDeleted = true;
                 entry.Entity.DeletedAt = DateTime.UtcNow;
             }
+        }
+
+        // ====================== HELPER METHODS ======================
+
+        /// <summary>
+        /// Use this when you need to query soft-deleted entities
+        /// Example: await _context.Users.IgnoreQueryFilters().Where(...).ToListAsync();
+        /// </summary>
+        public IQueryable<T> QueryWithDeleted<T>() where T : class, ISoftDeletable
+        {
+            return Set<T>().IgnoreQueryFilters();
+        }
+
+        /// <summary>
+        /// Gets only deleted entities of type T
+        /// </summary>
+        public IQueryable<T> GetDeleted<T>() where T : class, ISoftDeletable
+        {
+            return Set<T>().IgnoreQueryFilters().Where(x => x.IsDeleted);
         }
     }
 }

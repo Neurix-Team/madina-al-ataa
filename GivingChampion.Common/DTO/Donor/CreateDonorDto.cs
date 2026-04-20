@@ -7,8 +7,8 @@ namespace GivingChampion.Common.DTO.Donor
 {
     public class CreateDonorDto
     {
-        [Required]
-        public Guid UserId { get; set; }
+        //[Required]
+        //public Guid UserId { get; set; }
 
         public int PreferredCategory { get; set; } = 0; // Default category
     }

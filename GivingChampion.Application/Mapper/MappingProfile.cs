@@ -25,78 +25,45 @@ namespace GivingChampion.Application.Mapper
         public MappingProfile()
         {
             #region AiAvatar Mappings
-            CreateMap<AiAvatar, AiAvatarDto>()
-                .ReverseMap(); // Reverse mapping for AiAvatar -> AiAvatarDto and vice versa
+            CreateMap<AiAvatar, AiAvatarDto>().ReverseMap();
 
-            CreateMap<CreateAiAvatarDto, AiAvatar>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id for Create Mapping
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateAiAvatarDto, AiAvatar>().ReverseMap();
 
-            CreateMap<UpdateAiAvatarDto, AiAvatar>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateAiAvatarDto, AiAvatar>().ReverseMap();
             #endregion
 
             #region Avatar Mappings
-            CreateMap<Avatar, AvatarDto>()
-                .ReverseMap(); // Reverse mapping for Avatar -> AvatarDto and vice versa
+            CreateMap<Avatar, AvatarDto>().ReverseMap();
 
-            CreateMap<CreateAvatarDto, Avatar>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateAvatarDto, Avatar>().ReverseMap();
 
-            CreateMap<UpdateAvatarDto, Avatar>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateAvatarDto, Avatar>().ReverseMap();
             #endregion
 
             #region Level Mappings
-            CreateMap<Level, LevelDto>()
-                .ReverseMap(); // Reverse mapping for Level -> LevelDto and vice versa
+            CreateMap<Level, LevelDto>().ReverseMap(); // Reverse mapping for Level -> LevelDto and vice versa
 
-            CreateMap<CreateLevelDto, Level>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateLevelDto, Level>().ReverseMap();
 
-            CreateMap<UpdateLevelDto, Level>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateLevelDto, Level>().ReverseMap();
             #endregion
 
             #region Badge Mappings
             CreateMap<Badge, BadgeDto>()
                 .ReverseMap(); // Reverse mapping for Badge -> BadgeDto and vice versa
 
-            CreateMap<CreateBadgeDto, Badge>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateBadgeDto, Badge>().ReverseMap();
 
-            CreateMap<UpdateBadgeDto, Badge>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateBadgeDto, Badge>().ReverseMap();
             #endregion
 
             #region UserBadge Mappings
             CreateMap<UserBadge, UserBadgeDto>()
                 .ReverseMap(); // Reverse mapping for UserBadge -> UserBadgeDto and vice versa
 
-            CreateMap<CreateUserBadgeDto, UserBadge>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateUserBadgeDto, UserBadge>().ReverseMap();
 
-            CreateMap<UpdateUserBadgeDto, UserBadge>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateUserBadgeDto, UserBadge>().ReverseMap();
             #endregion
 
             #region UserLevel Mappings
@@ -104,48 +71,29 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.LevelId, opt => opt.MapFrom(src => src.Level.Id)) // Mapping level id explicitly
                 .ReverseMap(); // Reverse mapping for UserLevel -> UserLevelDto and vice versa
 
-            CreateMap<CreateUserLevelDto, UserLevel>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateUserLevelDto, UserLevel>().ReverseMap();
 
-            CreateMap<UpdateUserLevelDto, UserLevel>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateUserLevelDto, UserLevel>().ReverseMap();
             #endregion
 
             #region Profile Mappings
-            CreateMap<Domain.Entities.Profile, ProfileDto>()
-                .ReverseMap(); // Reverse mapping for Profile -> ProfileDto and vice versa
+            CreateMap<Domain.Entities.Profile, ProfileDto>().ReverseMap(); // Reverse mapping for Profile -> ProfileDto and vice versa
 
-            CreateMap<CreateProfileDto, Domain.Entities.Profile>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateProfileDto, Domain.Entities.Profile>().ReverseMap();
 
-            CreateMap<UpdateProfileDto, Domain.Entities.Profile>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateProfileDto, Domain.Entities.Profile>().ReverseMap();
             #endregion
 
             #region Review Mappings
             CreateMap<Review, ReviewDto>()
                 .ReverseMap();
 
-            CreateMap<CreateReviewDto, Review>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.ReviewDate, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<CreateReviewDto, Review>().ReverseMap();
 
-            CreateMap<UpdateReviewDto, Review>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.ReviewDate, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
+            CreateMap<UpdateReviewDto, Review>().ReverseMap();
             #endregion
+
+            #region User Mappings
             // ====================== User Mappings ======================
             CreateMap<ApplicationUser, GetUserDto>().ReverseMap();
 
@@ -155,6 +103,9 @@ namespace GivingChampion.Application.Mapper
 
             CreateMap<UpdateUser, ApplicationUser>().ReverseMap();
 
+            #endregion
+
+            #region Donor Mappings
             // ====================== Donor Mappings ======================
             CreateMap<Donor, DonorDto>().ReverseMap();
 
@@ -162,6 +113,8 @@ namespace GivingChampion.Application.Mapper
 
             CreateMap<UpdateDonorDto, Donor>().ReverseMap();
 
+            #endregion
+            #region Child Mappings
             // ====================== Child Mappings ======================
             CreateMap<Child, ChildDto>().ReverseMap();
 
@@ -170,25 +123,35 @@ namespace GivingChampion.Application.Mapper
             // For approval/rejection flows (if needed)
             CreateMap<ApproveChildDto, Child>().ReverseMap();
 
+            #endregion
+            #region Notification Mappings
             // ====================== Notification Mappings ======================
             CreateMap<Notification, NotificationDto>().ReverseMap();
 
+            #endregion
+            #region Mission Mappings
             // ====================== Mission Mappings ======================
             CreateMap<Mission, MissionDto>().ReverseMap();
             CreateMap<CreateMissionDto, Mission>().ReverseMap();
             CreateMap<UpdateMissionDto, Mission>().ReverseMap();
 
+            #endregion
+            #region Pagination Mappings
             // ====================== Pagination Mappings ======================
             // ONLY this one generic mapping for PagedList - remove any other PagedList mappings
             CreateMap(typeof(PagedList<>), typeof(PagedList<>))
                 .ConvertUsing(typeof(PagedListConverter<,>));
 
+            #endregion
+            #region Location Mappings
             // Location Mappings
             CreateMap<Location, LocationDto>().ReverseMap();
 
             CreateMap<CreateLocationDto, Location>().ReverseMap();
 
             CreateMap<UpdateLocationDto, Location>().ReverseMap();
+
+            #endregion
         }
 
         // Helper converter for generic PagedList mapping

@@ -15,12 +15,12 @@ namespace GivingChampion.API.Controllers
             _avatarService = avatarService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var avatars = await _avatarService.GetAllAsync();
-            return Ok(avatars);
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    var avatars = await _avatarService.GetAllAsync();
+        //    return Ok(avatars);
+        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)

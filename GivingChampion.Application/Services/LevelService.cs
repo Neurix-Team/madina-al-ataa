@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.LevelDto;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.API.Services
@@ -16,50 +18,48 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        public async Task<List<LevelDto>> GetAllAsync()
+        public async Task<Result<PagedList<LevelDto>>> GetAllAsync(PageParameters pageParameters)
         {
-            var levels = await _levelRepository.GetAllAsync();
-            return _mapper.Map<List<LevelDto>>(levels); // AutoMapper
+            var levels = await _levelRepository.GetAllAsync(pageParameters);
+            return Result<PagedList<LevelDto>>.Success(_mapper.Map<PagedList<LevelDto>>(levels)); // AutoMapper
         }
 
-        public async Task<LevelDto?> GetByIdAsync(Guid id)
+        public async Task<Result<LevelDto?>> GetByIdAsync(Guid id)
         {
             var level = await _levelRepository.GetByIdAsync(id);
-            return level == null ? null : _mapper.Map<LevelDto>(level); // AutoMapper
+            return level == null ? Result<LevelDto?>.Failure("Level not found") : Result<LevelDto?>.Success(_mapper.Map<LevelDto>(level)); // AutoMapper
         }
 
-        public async Task<LevelDto> CreateAsync(CreateLevelDto dto)
+        public async Task<Result<LevelDto>> CreateAsync(CreateLevelDto dto)
         {
             var level = _mapper.Map<Level>(dto);
             await _levelRepository.AddAsync(level);
             await _levelRepository.SaveChangesAsync();
 
-            return _mapper.Map<LevelDto>(level); // AutoMapper
+            return Result<LevelDto>.Success(_mapper.Map<LevelDto>(level)); // AutoMapper
         }
 
-        public async Task<bool> UpdateAsync(Guid id, UpdateLevelDto dto)
+        public async Task<Result<bool>> UpdateAsync(Guid id, UpdateLevelDto dto)
         {
             var level = await _levelRepository.GetByIdAsync(id);
             if (level == null)
-                return false;
-
+                return Result<bool>.Failure("Level not found");
             _mapper.Map(dto, level); // AutoMapper
             _levelRepository.Update(level);
             await _levelRepository.SaveChangesAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
 
-        public async Task<bool> SoftDeleteAsync(Guid id)
+        public async Task<Result<bool>> SoftDeleteAsync(Guid id)
         {
             var level = await _levelRepository.GetByIdAsync(id);
             if (level == null)
-                return false;
-
+                return Result<bool>.Failure("Level not found");
             level.IsDeleted = true;
             level.DeletedAt = DateTime.UtcNow;
             _levelRepository.Update(level);
             await _levelRepository.SaveChangesAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
     }
 }

@@ -18,12 +18,12 @@ namespace GivingChampion.API.Controllers.Profile
             _reviewService = reviewService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<ReviewDto>>> GetAll()
-        {
-            var reviews = await _reviewService.GetAllAsync();
-            return Ok(reviews);
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<List<ReviewDto>>> GetAll()
+        //{
+        //    var reviews = await _reviewService.GetAllAsync();
+        //    return Ok(reviews);
+        //}
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ReviewDto>> GetById(Guid id)

@@ -14,10 +14,11 @@ namespace GivingChampion.API.Repositories
             _context = context;
         }
 
-        public async Task<List<Review>> GetAllAsync()
+        public async Task<List<Review>> GetAllByProfileIdAsync(Guid profileId)
         {
             return await _context.Reviews
                 .AsNoTracking()
+                .Where(r => r.ProfileId == profileId)
                 .ToListAsync();
         }
 

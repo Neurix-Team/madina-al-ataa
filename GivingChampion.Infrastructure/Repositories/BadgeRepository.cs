@@ -1,4 +1,6 @@
 ﻿using GivingChampion.API.Interfaces;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +16,10 @@ namespace GivingChampion.API.Repositories
             _context = context;
         }
 
-        public async Task<List<Badge>> GetAllAsync()
+        public async Task<PagedList<Badge>> GetAllAsync(PageParameters pageParameters)
         {
             return await _context.Badges
-                .AsNoTracking()
-                .ToListAsync();
+                .AsNoTracking().ToPagedListAsync(pageParameters);
         }
 
         public async Task<Badge?> GetByIdAsync(Guid id)
