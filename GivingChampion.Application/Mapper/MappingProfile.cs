@@ -33,12 +33,11 @@ using GivingChampion.Common.DTO.ServiceRequestDto;
 using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
+
 namespace GivingChampion.Application.Mapper
 {
     public class MappingProfile : AutoMapper.Profile
     {
-        #region Constructor
-
         public MappingProfile()
         {
             // ServiceRequest -> ServiceRequestDto
@@ -287,113 +286,33 @@ namespace GivingChampion.Application.Mapper
              * Used when returning service request data to the client.
              */
             CreateMap<ServiceRequest, ServiceRequestDto>()
-               // Map FullName from Partner.FullName because ServiceRequest itself does not contain FullName directly.
-               .ForMember(dest => dest.FullName,
-    opt => opt.MapFrom(src => src.Partner != null
-        ? src.Partner.OrgName
-        : string.Empty))
-
-                // Convert RequestStatus enum to string.
-                // Example: RequestStatus.Pending => "Pending"
                 .ForMember(dest => dest.FullName,
-                           opt => opt.MapFrom(src => src.Partner != null ? src.Partner.OrgName : string.Empty))
+                    opt => opt.MapFrom(src => src.Partner != null ? src.Partner.OrgName : string.Empty))
                 .ForMember(dest => dest.Status,
                     opt => opt.MapFrom(src => src.Status.ToString()))
-
-                // Return empty string instead of null for BriefDescription.
-                           opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.BriefDescription,
-                           opt => opt.MapFrom(src => src.BriefDescription ?? string.Empty));
+                    opt => opt.MapFrom(src => src.BriefDescription ?? string.Empty));
 
-            #endregion
-
-            #region CreateServiceRequestDto To ServiceRequest
-
-            /*
-             * Maps CreateServiceRequestDto to ServiceRequest entity.
-             * Used when creating a new service request.
-             */
+            // CreateServiceRequestDto -> ServiceRequest
             CreateMap<CreateServiceRequestDto, ServiceRequest>()
-                // Generate a new Id for the new service request.
-                .ForMember(dest => dest.Id,
-                    opt => opt.MapFrom(_ => Guid.NewGuid()))
-
-                // Trim extra spaces from Title before saving.
-                           opt => opt.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(dest => dest.Title,
-                    opt => opt.MapFrom(src => src.Title.Trim()))
-
-                // Trim extra spaces from RequiredSkill before saving.
-                           opt => opt.MapFrom(src => src.Title.Trim()))
-                .ForMember(dest => dest.RequiredSkill,
-                    opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
-
-                // Handle null, empty, or whitespace BriefDescription.
-                           opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title.Trim()))
+                .ForMember(dest => dest.RequiredSkill, opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
                 .ForMember(dest => dest.BriefDescription,
-                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription)
-                        ? string.Empty
-                        : src.BriefDescription.Trim()))
+                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription) ? string.Empty : src.BriefDescription.Trim()))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => RequestStatus.Pending))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false))
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.Partner, opt => opt.Ignore());
 
-                // New service requests should start with Pending status.
-                           opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription)
-                               ? string.Empty
-                               : src.BriefDescription.Trim()))
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(_ => RequestStatus.Pending))
-
-                // New service requests should not be marked as deleted.
-                           opt => opt.MapFrom(_ => RequestStatus.Pending))
-                .ForMember(dest => dest.IsDeleted,
-                    opt => opt.MapFrom(_ => false))
-
-                // DeletedAt should stay empty when creating a new request.
-                           opt => opt.MapFrom(_ => false))
-                .ForMember(dest => dest.DeletedAt,
-                    opt => opt.Ignore())
-
-                // Set CreatedAt automatically when creating a new request.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt,
-                    opt => opt.MapFrom(_ => DateTime.UtcNow))
-
-                // Do not map Partner navigation property.
-                // The relationship is handled by PartnerId.
-                           opt => opt.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(dest => dest.Partner,
-                           opt => opt.Ignore());
-
-            #endregion
-
-            #region UpdateServiceRequestDto To ServiceRequest
-
-            /*
-             * Maps UpdateServiceRequestDto to an existing ServiceRequest entity.
-             * Used when updating an existing service request.
-             */
+            // UpdateServiceRequestDto -> ServiceRequest (normal update)
             CreateMap<UpdateServiceRequestDto, ServiceRequest>()
-                // Do not allow update DTO to change the entity Id.
-                .ForMember(dest => dest.Id,
-                    opt => opt.Ignore())
-
-                // Trim extra spaces from Title before updating.
-                .ForMember(dest => dest.Title,
-                    opt => opt.MapFrom(src => src.Title.Trim()))
-
-                // Trim extra spaces from RequiredSkill before updating.
-                           opt => opt.MapFrom(src => src.Title.Trim()))
-                .ForMember(dest => dest.RequiredSkill,
-                    opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
-
-                // Handle null, empty, or whitespace BriefDescription.
-                           opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title.Trim()))
+                .ForMember(dest => dest.RequiredSkill, opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
                 .ForMember(dest => dest.BriefDescription,
-                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription)
-                        ? string.Empty
-                        : src.BriefDescription.Trim()))
-                           opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription)
-                               ? string.Empty
-                               : src.BriefDescription.Trim()))
+                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription) ? string.Empty : src.BriefDescription.Trim()))
                 .ForMember(dest => dest.Status, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
@@ -401,308 +320,58 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.PartnerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Partner, opt => opt.Ignore());
 
-                // Status should not be changed from the normal update endpoint.
-                .ForMember(dest => dest.Status,
-                    opt => opt.Ignore())
-
-                // Soft delete fields should not be changed from the normal update endpoint.
-                .ForMember(dest => dest.IsDeleted,
-                    opt => opt.Ignore())
-
-                // DeletedAt should not be changed from the normal update endpoint.
-                .ForMember(dest => dest.DeletedAt,
-                    opt => opt.Ignore())
-
-                // CreatedAt should keep its original value.
-                .ForMember(dest => dest.CreatedAt,
-                    opt => opt.Ignore())
-
-                // PartnerId should not be changed from this update DTO.
-                .ForMember(dest => dest.PartnerId,
-                    opt => opt.Ignore())
-
-                // Do not update Partner navigation property.
-                .ForMember(dest => dest.Partner,
-                    opt => opt.Ignore());
-
-            #endregion
-
-            #endregion
-            #region Service Request Mapping
-
-            #region ServiceRequest To ServiceRequestDto
-
-            /*
-             * Maps ServiceRequest entity to ServiceRequestDto.
-             * Used when returning service request data to the client.
-             */
-            CreateMap<ServiceRequest, ServiceRequestDto>()
-               // Map FullName from Partner.FullName because ServiceRequest itself does not contain FullName directly.
-               .ForMember(dest => dest.FullName,
-    opt => opt.MapFrom(src => src.Partner != null
-        ? src.Partner.OrgName
-        : string.Empty))
-
-                // Convert RequestStatus enum to string.
-                // Example: RequestStatus.Pending => "Pending"
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => src.Status.ToString()))
-
-                // Return empty string instead of null for BriefDescription.
-                .ForMember(dest => dest.BriefDescription,
-                    opt => opt.MapFrom(src => src.BriefDescription ?? string.Empty));
-
-            #endregion
-
-            #region CreateServiceRequestDto To ServiceRequest
-
-            /*
-             * Maps CreateServiceRequestDto to ServiceRequest entity.
-             * Used when creating a new service request.
-             */
-            CreateMap<CreateServiceRequestDto, ServiceRequest>()
-                // Generate a new Id for the new service request.
-                .ForMember(dest => dest.Id,
-                    opt => opt.MapFrom(_ => Guid.NewGuid()))
-
-                // Trim extra spaces from Title before saving.
-                .ForMember(dest => dest.Title,
-                    opt => opt.MapFrom(src => src.Title.Trim()))
-
-                // Trim extra spaces from RequiredSkill before saving.
-                .ForMember(dest => dest.RequiredSkill,
-                    opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
-
-                // Handle null, empty, or whitespace BriefDescription.
-                .ForMember(dest => dest.BriefDescription,
-                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription)
-                        ? string.Empty
-                        : src.BriefDescription.Trim()))
-
-                // New service requests should start with Pending status.
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(_ => RequestStatus.Pending))
-
-                // New service requests should not be marked as deleted.
-                .ForMember(dest => dest.IsDeleted,
-                    opt => opt.MapFrom(_ => false))
-
-                // DeletedAt should stay empty when creating a new request.
-                .ForMember(dest => dest.DeletedAt,
-                    opt => opt.Ignore())
-
-                // Set CreatedAt automatically when creating a new request.
-                .ForMember(dest => dest.CreatedAt,
-                    opt => opt.MapFrom(_ => DateTime.UtcNow))
-
-                // Do not map Partner navigation property.
-                // The relationship is handled by PartnerId.
-                .ForMember(dest => dest.Partner,
-                    opt => opt.Ignore());
-
-            #endregion
-
-            #region UpdateServiceRequestDto To ServiceRequest
-
-            /*
-             * Maps UpdateServiceRequestDto to an existing ServiceRequest entity.
-             * Used when updating an existing service request.
-             */
-            CreateMap<UpdateServiceRequestDto, ServiceRequest>()
-                // Do not allow update DTO to change the entity Id.
-                .ForMember(dest => dest.Id,
-                    opt => opt.Ignore())
-
-                // Trim extra spaces from Title before updating.
-                .ForMember(dest => dest.Title,
-                    opt => opt.MapFrom(src => src.Title.Trim()))
-
-                // Trim extra spaces from RequiredSkill before updating.
-                .ForMember(dest => dest.RequiredSkill,
-                    opt => opt.MapFrom(src => src.RequiredSkill.Trim()))
-
-                // Handle null, empty, or whitespace BriefDescription.
-                .ForMember(dest => dest.BriefDescription,
-                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.BriefDescription)
-                        ? string.Empty
-                        : src.BriefDescription.Trim()))
-
-                // Status should not be changed from the normal update endpoint.
-                           opt => opt.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(dest => dest.VolunteerId,
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.Status,
-                    opt => opt.Ignore())
-
-                // Soft delete fields should not be changed from the normal update endpoint.
-                .ForMember(dest => dest.IsDeleted,
-                    opt => opt.Ignore())
-
-                // DeletedAt should not be changed from the normal update endpoint.
-                .ForMember(dest => dest.DeletedAt,
-                    opt => opt.Ignore())
-
-                // CreatedAt should keep its original value.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt,
-                    opt => opt.Ignore())
-
-                // PartnerId should not be changed from this update DTO.
-                .ForMember(dest => dest.PartnerId,
-                    opt => opt.Ignore())
-
-                // Do not update Partner navigation property.
-                .ForMember(dest => dest.Partner,
-                    opt => opt.Ignore());
-                           opt => opt.Ignore());
-
-            #endregion
-
-            #endregion
-
-            #region Volunteer Order Mapping
-
-            #region VolunteerOrder To VolunteerOrderDto
-
-            /*
-             * Maps VolunteerOrder entity to VolunteerOrderDto.
-             * Used when returning volunteer order data to the client.
-             */
+            // VolunteerOrder -> VolunteerOrderDto
             CreateMap<VolunteerOrder, VolunteerOrderDto>()
-                // Convert OrderStatus enum to string.
-                // Example: OrderStatus.Pending => "Pending"
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => src.Status.ToString()));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
-            #endregion
-
-            #region CreateVolunteerOrderDto To VolunteerOrder
-
-            /*
-             * Maps CreateVolunteerOrderDto to VolunteerOrder entity.
-             * Used when creating a new volunteer order.
-             */
+            // CreateVolunteerOrderDto -> VolunteerOrder
             CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
-                // Generate a new Id for the new volunteer order.
-                .ForMember(dest => dest.Id,
-                    opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.VolunteerId, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
-                // VolunteerId should not come from the client.
-                // It is taken from the authenticated user's JWT token in the service layer.
-                .ForMember(dest => dest.VolunteerId,
-                    opt => opt.Ignore())
-
-                // Status should not come from the client.
-                // New volunteer orders usually start with Pending status in the service layer.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.Status,
-                    opt => opt.Ignore())
-
-                // New volunteer orders should not be marked as deleted.
-                // This value is controlled in the service layer.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted,
-                    opt => opt.Ignore())
-
-                // DeletedAt should stay empty when creating a new volunteer order.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt,
-                    opt => opt.Ignore())
-
-                // CreatedAt is set automatically in the service layer.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt,
-                           opt => opt.Ignore());
-
-
-            #region UpdateVolunteerOrderDto To VolunteerOrder
-            #region Partner Mapping
-
-            // Map Partner to PartnerDto
-            CreateMap<Partner, PartnerDto>()
-                .ForMember(dest => dest.OrgTypeName,
-                           opt => opt.MapFrom(src => src.OrgType.ToString()));
-
-            /*
-             * Maps UpdateVolunteerOrderDto to an existing VolunteerOrder entity.
-             * Used when updating an existing volunteer order.
-             */
+            // UpdateVolunteerOrderDto -> VolunteerOrder
             CreateMap<UpdateVolunteerOrderDto, VolunteerOrder>()
-                // Do not allow update DTO to change the entity Id.
-                .ForMember(dest => dest.Id,
-                    opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.VolunteerId, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
 
-                // VolunteerId should not be changed from the update DTO.
-                .ForMember(dest => dest.VolunteerId,
-                    opt => opt.Ignore())
+            // Partner -> PartnerDto
+            CreateMap<Partner, PartnerDto>()
+                .ForMember(dest => dest.OrgTypeName, opt => opt.MapFrom(src => src.OrgType.ToString()));
 
-                // Status should not be changed from the normal update endpoint.
-                // If needed, it should be changed through a separate business flow.
-                .ForMember(dest => dest.Status,
-                    opt => opt.Ignore())
-                           opt => opt.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(dest => dest.CreatedAt,
-                           opt => opt.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(dest => dest.UpdatedAt,
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted,
-                           opt => opt.MapFrom(_ => false))
-                .ForMember(dest => dest.DeletedAt,
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.Verified,
-                           opt => opt.MapFrom(_ => false))
-                .ForMember(dest => dest.ProjectsCount,
-                           opt => opt.MapFrom(_ => 0));
-
-                // Soft delete fields should not be changed from the normal update endpoint.
-            // Map UpdatePartnerDto to Partner
+            // UpdatePartnerDto -> Partner
             CreateMap<UpdatePartnerDto, Partner>()
-                .ForMember(dest => dest.UpdatedAt,
-                           opt => opt.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(dest => dest.IsDeleted,
-                    opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.Verified, opt => opt.Ignore())
+                .ForMember(dest => dest.ProjectsCount, opt => opt.Ignore());
 
-                // DeletedAt should not be changed from the normal update endpoint.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt,
-                    opt => opt.Ignore())
-
-                // CreatedAt should keep its original value.
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt,
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.Verified,
-                           opt => opt.Ignore())
-                .ForMember(dest => dest.ProjectsCount,
-                           opt => opt.Ignore());
-
-            #endregion
-
-            #region Volunteer Mapping
-
-            // Map Volunteer to VolunteerDto (Returning from Database to User)
+            // Volunteer mappings
             CreateMap<Volunteer, VolunteerDto>()
                 .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(src => src.TotalHours))
                 .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
                 .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability));
 
-            // Map CreateVolunteerDto to Volunteer (Creating a new Volunteer)
             CreateMap<CreateVolunteerDto, Volunteer>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))  // Ensure Id is generated on creation
-                .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(_ => 0))  // Default to 0 hours
-                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false)) // Set IsDeleted to false by default
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore()) // Ignore DeletedAt, will not be used on creation
-                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId)) // Set UserId passed from Admin/Claims
-                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability)) // Map from DTO to Entity
-                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills)); // Map from DTO to Entity
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(_ => 0))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false))
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability))
+                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills));
 
-            // Map UpdateVolunteerDto to Volunteer (Updating an existing Volunteer)
             CreateMap<UpdateVolunteerDto, Volunteer>()
-                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills)) // Update skills
-                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability)) // Update availability
-                .ForMember(dest => dest.UserId, opt => opt.Ignore()); // UserId should remain the same as when initially created
-
-            #endregion
+                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills)).ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability)).ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             #region Volunteer Mapping
 
@@ -733,11 +402,9 @@ namespace GivingChampion.Application.Mapper
             // Map from Certificate entity to CertificateReadAllDto
             CreateMap<Certificate, CertificateReadAllDto>();
 
-            // Map from CertificateCreateDto to Certificate entity
             CreateMap<CertificateCreateDto, Certificate>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore the Id since it will be generated in the service
-                .ForMember(dest => dest.IssuedDate, opt => opt.Ignore()); // Ignore IssuedDate since it will be set in the service
-
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.IssuedDate, opt => opt.Ignore());
         }
 
         
