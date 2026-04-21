@@ -24,6 +24,7 @@ using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Application.Services.Certificate;
+using GivingChampion.Application.Interfaces.DonationRequest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,7 +146,8 @@ builder.Services.AddScoped<IVolunteerRepository, VolunteerRepository>();
 builder.Services.AddScoped<IVolunteerService, VolunteerService>();
 builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
-
+builder.Services.AddScoped<IDonationRequestService,DonationRequestService>();
+builder.Services.AddScoped<IDonationRequestRepository, DonationRequestRepository>();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 

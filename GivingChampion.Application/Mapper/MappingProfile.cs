@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Common.DTO.DonationRequest;
 using GivingChampion.Common.DTO.Partner;
 using GivingChampion.Common.DTO.PartnerDto;
 using GivingChampion.Common.DTO.ServiceRequestDto;
@@ -109,6 +110,18 @@ namespace GivingChampion.Application.Mapper
             CreateMap<CertificateCreateDto, Certificate>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.IssuedDate, opt => opt.Ignore());
+
+
+
+            CreateMap<UpdateDonationRequestDto, DonationRequest>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())  
+            .ForMember(dest => dest.Title, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Title)))  // Only map if not null or empty
+            .ForMember(dest => dest.Location, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Location)))
+            .ForMember(dest => dest.DonateAmount, opt => opt.Condition(src => src.DonateAmount.HasValue))
+            .ForMember(dest => dest.UrgencyLevel, opt => opt.Condition(src => src.UrgencyLevel.HasValue))
+            .ForMember(dest => dest.BriefDescription, opt => opt.Condition(src => !string.IsNullOrEmpty(src.BriefDescription)));
         }
     }
-}
+
+    }
+
