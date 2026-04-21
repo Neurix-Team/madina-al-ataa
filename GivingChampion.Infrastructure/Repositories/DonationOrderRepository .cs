@@ -4,6 +4,9 @@ using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GivingChampion.Persistance.Repositories
 {
@@ -16,6 +19,7 @@ namespace GivingChampion.Persistance.Repositories
             _context = context;
         }
 
+        // Implement CreateAsync method (change AddAsync to CreateAsync to match the interface)
         public async Task CreateAsync(DonationOrder donationOrder)
         {
             await _context.DonationOrders.AddAsync(donationOrder);
@@ -40,8 +44,8 @@ namespace GivingChampion.Persistance.Repositories
         {
             var query = await _context.DonationOrders
                 .AsNoTracking()
-                .Include(d => d.Donor)
-                .Include(d => d.DonationRequest)
+                                 .Include(d => d.Donor)
+                                 .Include(d => d.DonationRequest)
                 .Where(d =>
                     !d.IsDeleted &&
                     d.DonorId == donorUserId)
@@ -50,11 +54,12 @@ namespace GivingChampion.Persistance.Repositories
             return query;
         }
 
+        // Implement GetByIdAsync method
         public async Task<DonationOrder?> GetByIdAsync(Guid id)
         {
             return await _context.DonationOrders
                 .AsNoTracking()
-                .Include(d => d.Donor)
+                                 .Include(d => d.Donor)
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
                     !d.IsDeleted);
@@ -64,12 +69,13 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.DonationOrders
                 .Include(d => d.Donor)
-                .Include(d => d.DonationRequest)
+                                 .Include(d => d.DonationRequest)
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
                     !d.IsDeleted);
         }
 
+        // Implement UpdateAsync method
         public async Task UpdateAsync(DonationOrder donationOrder)
         {
             _context.DonationOrders.Update(donationOrder);

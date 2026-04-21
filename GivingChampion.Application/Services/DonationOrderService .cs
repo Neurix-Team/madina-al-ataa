@@ -9,6 +9,9 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services.DonationOrderService
 {
@@ -71,7 +74,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             var dto = _mapper.Map<DonationOrderDetailsDto>(donationOrder);
 
             return Result<DonationOrderDetailsDto?>.Success(dto);
-        }
+            }
 
         public async Task<Result<DonationOrderDetailsDto>> CreateAsync(
             CreateDonationOrderDto dto,

@@ -26,5 +26,11 @@ namespace GivingChampion.Common.DTO.DonationOrder
         /// Status of the donation order
         /// </summary>
         public string? Status { get; set; }
+
+        /// <summary>
+        /// Date when the donation order was created
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+        public object PaymentStatus { get; set; }
     }
 }
