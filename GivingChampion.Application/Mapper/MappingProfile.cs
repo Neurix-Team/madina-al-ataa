@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Common.DTO.DonationOrder;
 using GivingChampion.Common.DTO.DonationRequest;
 using GivingChampion.Common.DTO.Partner;
 using GivingChampion.Common.DTO.PartnerDto;
@@ -8,6 +9,7 @@ using GivingChampion.Common.DTO.VolunteerDto;
 using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Application.Mapper
 {
@@ -120,6 +122,24 @@ namespace GivingChampion.Application.Mapper
             .ForMember(dest => dest.DonateAmount, opt => opt.Condition(src => src.DonateAmount.HasValue))
             .ForMember(dest => dest.UrgencyLevel, opt => opt.Condition(src => src.UrgencyLevel.HasValue))
             .ForMember(dest => dest.BriefDescription, opt => opt.Condition(src => !string.IsNullOrEmpty(src.BriefDescription)));
+
+
+
+            // Mapping from DonationOrder Entity to DTOs
+            CreateMap<DonationOrder, DonationOrderReadDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus.ToString()));
+
+            CreateMap<DonationOrder, DonationOrderDetailsDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus.ToString()));
+
+            // Mapping from CreateDonationOrderDto to DonationOrder Entity
+            CreateMap<CreateDonationOrderDto, DonationOrder>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => OrderStatus.Pending)); // Default Status
+
+            // Mapping from UpdateDonationOrderDTO to DonationOrder Entity
+            CreateMap<UpdateDonationOrderDTO, DonationOrder>();
         }
     }
 
