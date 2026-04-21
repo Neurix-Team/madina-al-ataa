@@ -4,7 +4,6 @@ using GivingChampion.Common.Enums;
 using GivingChampion.Common.Interfaces;
 using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
-
 namespace GivingChampion.Domain.Entities
 {
     /// <summary>
@@ -42,7 +41,7 @@ namespace GivingChampion.Domain.Entities
 		/// <summary>
 		/// Remaining amount needed to complete the donation
 		/// </summary>
-		[Range(0, double.MaxValue, ErrorMessage = "Amount remaining cannot be negative")]
+		[Range(10, double.MaxValue, ErrorMessage = "Amount remaining cannot be negative")]
 		public decimal AmountRemaining { get; set; }
 
 		/// <summary>
@@ -59,7 +58,7 @@ namespace GivingChampion.Domain.Entities
 		/// Urgency level of the request (Low, Medium, High)
 		/// </summary>
 		[Required(ErrorMessage = "Urgency level is required")]
-		public UrgencyLevel UrgencyLevel { get; set; }
+        public UrgencyLevel UrgencyLevel { get; set; }
 
 		/// <summary>
 		/// Optional short description of the donation request
