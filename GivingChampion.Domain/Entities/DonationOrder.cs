@@ -86,7 +86,12 @@ namespace GivingChampion.Domain.Entities
 
         /// <summary>
         /// Record creation timestamp (UTC)
-        /// </summary>
+     
+
+        // Navigation Property to DonationRequest
+        [ForeignKey("DonationRequestId")]
+        public DonationRequest DonationRequest { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public object PaymentStatus { get; set; }
     }
 }
