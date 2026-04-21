@@ -12,19 +12,23 @@ namespace GivingChampion.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class DonationRequestsController : ControllerBase
     {
+        #region Feild
         private readonly IDonationRequestService _donationRequestService;
 
+        #endregion 
+
+        #region Constructor
         // Constructor to inject the DonationRequestService
         public DonationRequestsController(IDonationRequestService donationRequestService)
         {
             _donationRequestService = donationRequestService;
-        }
+        } 
+        #endregion
 
-        #region Get Methods
-        [Authorize(Roles = "Donor")] 
+        #region Get Methods By Id 
+        [Authorize(Roles = "Donor")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ReadDonationRequestDto>> GetById(Guid id)
         {
@@ -42,6 +46,9 @@ namespace GivingChampion.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");  // Return 500 for other errors
             }
         }
+        #endregion 
+
+        #region Get Methods All
         [Authorize(Roles = "Donor")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListDonationRequestDto>>> GetAll()
@@ -57,9 +64,10 @@ namespace GivingChampion.API.Controllers
             }
         }
 
+        
         #endregion
 
-        #region Post and Put Methods
+        #region Post 
         [Authorize(Roles = "Parent")]
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] CreateDonationRequestDto dto)
@@ -77,6 +85,9 @@ namespace GivingChampion.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");  // Return 500 for unexpected errors
             }
         }
+        #endregion
+
+        #region Put
         [Authorize(Roles = "Parent")]
 
         [HttpPut("{id}")]
