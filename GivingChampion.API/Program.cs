@@ -1,8 +1,12 @@
 using GivingChampion.API.Handlers;
+using GivingChampion.API.Interfaces;
+using GivingChampion.API.Repositories;
+using GivingChampion.API.Services;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
 using GivingChampion.Application.Interfaces.Location;
+using GivingChampion.Application.Interfaces.Mission;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
@@ -23,9 +27,6 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using GivingChampion.API.Interfaces;
-using GivingChampion.API.Services;
-using GivingChampion.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -157,6 +158,8 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IMissionRepository, MissionRepository>();
 builder.Services.AddScoped<IMissionService, MissionService>();
+builder.Services.AddScoped<IUserMissionService, UserMissionService>();
+builder.Services.AddScoped<IUserMissionRepository, UserMissionRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 

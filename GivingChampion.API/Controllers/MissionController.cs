@@ -20,14 +20,16 @@ namespace GivingChampion.API.Controllers
             _missionService = missionService;
         }
 
+        // Admin: Get All Active Missions
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Result<PagedList<MissionDto>>>> GetAllActive([FromQuery] PageParameters pageParameters)
         {
             var result = await _missionService.GetAllActiveAsync(pageParameters);
             return Ok(result);
         }
 
+        // User: Get Available Missions
         [HttpGet("available")]
         [Authorize]
         public async Task<ActionResult<Result<PagedList<MissionDto>>>> GetAvailableForUser([FromQuery] int userLevel, [FromQuery] PageParameters pageParameters)
@@ -36,6 +38,7 @@ namespace GivingChampion.API.Controllers
             return Ok(result);
         }
 
+        // Get Mission by ID (Admin & Volunteer)
         [HttpGet("{id:guid}")]
         [Authorize]
         public async Task<ActionResult<Result<MissionDto>>> GetById(Guid id)
@@ -44,6 +47,7 @@ namespace GivingChampion.API.Controllers
             return Ok(result);
         }
 
+        // Admin: Create Mission
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Result<MissionDto>>> CreateMission([FromBody] CreateMissionDto dto)
@@ -54,6 +58,7 @@ namespace GivingChampion.API.Controllers
                 : BadRequest(result);
         }
 
+        // Admin: Update Mission
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Result>> UpdateMission(Guid id, [FromBody] UpdateMissionDto dto)
@@ -62,6 +67,7 @@ namespace GivingChampion.API.Controllers
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
+        // Admin: Soft Delete Mission
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Result>> SoftDeleteMission(Guid id)

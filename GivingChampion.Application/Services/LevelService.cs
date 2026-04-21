@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.LevelDto;
+using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
@@ -21,7 +22,7 @@ namespace GivingChampion.API.Services
         public async Task<Result<PagedList<LevelDto>>> GetAllAsync(PageParameters pageParameters)
         {
             var levels = await _levelRepository.GetAllAsync(pageParameters);
-            return Result<PagedList<LevelDto>>.Success(_mapper.Map<PagedList<LevelDto>>(levels)); // AutoMapper
+            return Result<PagedList<LevelDto>>.Success(_mapper.MapPagedList<Level, LevelDto>(levels)); // AutoMapper
         }
 
         public async Task<Result<LevelDto?>> GetByIdAsync(Guid id)

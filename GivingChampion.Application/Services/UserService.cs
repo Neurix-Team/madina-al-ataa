@@ -2,6 +2,7 @@
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.User;
+using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
@@ -47,7 +48,7 @@ namespace GivingChampion.Application.Services
             var users = await _userRepository.GetAllAsync(pageParameters, search);
 
             // Map entities to DTOs using AutoMapper
-            return _mapper.Map<PagedList<GetUserDto>>(users);
+            return _mapper.MapPagedList<ApplicationUser, GetUserDto>(users);
         }
 
         public async Task<GetUserDto?> GetUserByIdAsync(Guid id)
