@@ -52,3 +52,5 @@ namespace GivingChampion.Domain.Entities
         //public DateTime? DeletedAt { get; set; }
     }
 }
+
+    

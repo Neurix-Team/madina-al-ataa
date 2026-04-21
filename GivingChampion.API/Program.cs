@@ -2,6 +2,8 @@ using GivingChampion.API.Handlers;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
+using GivingChampion.Application.Interfaces.ServiceRequestService;
+using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.Interfaces.Location;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
@@ -23,6 +25,13 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using GivingChampion.Application.Interfaces.Partner;
+using GivingChampion.Application.Interfaces.Volunteer;
+using GivingChampion.Application.Interfaces.Certificate;
+using GivingChampion.Application.Services.Certificate;
+using GivingChampion.Application.Interfaces.DonationRequest;
+using GivingChampion.Application.Interfaces.DonationOrderService;
+using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.API.Interfaces;
 using GivingChampion.API.Services;
 using GivingChampion.API.Repositories;
@@ -63,18 +72,18 @@ else
 }
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
+{
+    options.User.RequireUniqueEmail = true;
 
-        options.Password.RequiredLength = 8;
-        options.Password.RequireDigit = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
 
-        options.Lockout.MaxFailedAccessAttempts = 5;
-        options.SignIn.RequireConfirmedAccount = false;
-    })
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.SignIn.RequireConfirmedAccount = false;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -163,7 +172,21 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
-
+// Service Request dependencies
+builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
+builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
+builder.Services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
+builder.Services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
+builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();    
+builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<IVolunteerRepository, VolunteerRepository>();
+builder.Services.AddScoped<IVolunteerService, VolunteerService>();
+builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<IDonationRequestService,DonationRequestService>();
+builder.Services.AddScoped<IDonationRequestRepository, DonationRequestRepository>();
+builder.Services.AddScoped<IDonationOrderService, DonationOrderService>();
+builder.Services.AddScoped<IDonationOrderRepository, DonationOrderRepository>();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
