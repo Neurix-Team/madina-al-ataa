@@ -8,13 +8,13 @@ public interface IIdentityRepository
     Task<ApplicationUser?> FindByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<ApplicationUser?> FindByExternalLoginAsync(string provider, string providerKey, CancellationToken cancellationToken = default);
 
-    Task<ServiceResult<ApplicationUser>> CreateLocalUserAsync(
+    Task<AuthServiceResult<ApplicationUser>> CreateLocalUserAsync(
         string email,
         string password,
         string? fullName,
         CancellationToken cancellationToken = default);
 
-    Task<ServiceResult<ApplicationUser>> CreateExternalUserAsync(
+    Task<AuthServiceResult<ApplicationUser>> CreateExternalUserAsync(
         string email,
         string? fullName,
         CancellationToken cancellationToken = default);
@@ -24,7 +24,7 @@ public interface IIdentityRepository
         string password,
         CancellationToken cancellationToken = default);
 
-    Task<ServiceResult> AddToRoleAsync(
+    Task<AuthServiceResult> AddToRoleAsync(
         ApplicationUser user,
         string role,
         CancellationToken cancellationToken = default);
@@ -39,7 +39,7 @@ public interface IIdentityRepository
         string providerKey,
         CancellationToken cancellationToken = default);
 
-    Task<ServiceResult> AddExternalLoginAsync(
+    Task<AuthServiceResult> AddExternalLoginAsync(
         ApplicationUser user,
         string provider,
         string providerKey,
@@ -58,12 +58,12 @@ public interface IIdentityRepository
         ApplicationUser user,
         CancellationToken cancellationToken = default);
 
-    Task<ServiceResult> AddPasswordAsync(
+    Task<AuthServiceResult> AddPasswordAsync(
         ApplicationUser user,
         string newPassword,
         CancellationToken cancellationToken = default);
 
-    Task<ServiceResult> UpdateAsync(
+    Task<AuthServiceResult> UpdateAsync(
         ApplicationUser user,
         CancellationToken cancellationToken = default);
 }

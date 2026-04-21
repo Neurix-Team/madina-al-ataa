@@ -1,14 +1,16 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
 namespace GivingChampion.Domain.Entities
 {
-	/// <summary>
-	/// Represents a donation request created by a partner organization.
-	/// Used to collect and track donation progress.
-	/// </summary>
-	public class DonationRequest
+    /// <summary>
+    /// Represents a donation request created by a partner organization.
+    /// Used to collect and track donation progress.
+    /// </summary>
+    public class DonationRequest : BaseEntity
 	{
 		/// <summary>
 		/// Primary key (unique identifier)
@@ -76,8 +78,10 @@ namespace GivingChampion.Domain.Entities
 		public Partner Partner { get; set; } = null!;
 
 		/// <summary>
-		/// Timestamp when the request was created (UTC)
-		/// </summary>
-		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-	}
+		///// Timestamp when the request was created (UTC)
+		///// </summary>
+		//public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+  //      public bool IsDeleted { get; set; }
+  //      public DateTime? DeletedAt { get; set; }
+    }
 }

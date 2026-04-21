@@ -28,10 +28,16 @@ namespace GivingChampion.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FavoriteCategory")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastSuggestion")
                         .IsRequired()
@@ -43,7 +49,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AiAvatars");
+                    b.ToTable("AiAvatars", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.ApplicationRole", b =>
@@ -55,6 +61,12 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -97,6 +109,9 @@ namespace GivingChampion.Domain.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -106,6 +121,9 @@ namespace GivingChampion.Domain.Migrations
 
                     b.Property<string>("FullName")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsExternal")
                         .HasColumnType("boolean");
@@ -171,6 +189,9 @@ namespace GivingChampion.Domain.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
 
@@ -184,6 +205,9 @@ namespace GivingChampion.Domain.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("SkinColor")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -191,7 +215,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Avatars");
+                    b.ToTable("Avatars", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Badge", b =>
@@ -205,9 +229,15 @@ namespace GivingChampion.Domain.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -225,7 +255,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.ToTable("Badges");
+                    b.ToTable("Badges", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Certificate", b =>
@@ -268,7 +298,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("VolunteerId");
 
-                    b.ToTable("Certificates");
+                    b.ToTable("Certificates", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Child", b =>
@@ -280,22 +310,45 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<bool>("AllowDonations")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("DailyLimit")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("ParentId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApprovedById");
+
                     b.HasIndex("ParentId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Children");
+                    b.ToTable("Children", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.DonationOrder", b =>
@@ -320,6 +373,9 @@ namespace GivingChampion.Domain.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("DonationRequestId")
                         .HasColumnType("uuid");
 
@@ -329,6 +385,9 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<string>("ImpactReport")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -351,7 +410,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("DonorId");
 
-                    b.ToTable("DonationOrders");
+                    b.ToTable("DonationOrders", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.DonationRequest", b =>
@@ -370,8 +429,14 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("DonateAmount")
                         .HasColumnType("numeric");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("boolean");
@@ -396,7 +461,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("PartnerId");
 
-                    b.ToTable("DonationRequests");
+                    b.ToTable("DonationRequests", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Donor", b =>
@@ -410,6 +475,9 @@ namespace GivingChampion.Domain.Migrations
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("PreferedCategory")
                         .HasColumnType("integer");
@@ -427,7 +495,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Donors");
+                    b.ToTable("Donors", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
@@ -435,6 +503,12 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("MaxXp")
                         .HasColumnType("integer");
@@ -444,7 +518,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Levels");
+                    b.ToTable("Levels", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Location", b =>
@@ -452,6 +526,12 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Latitude")
                         .IsRequired()
@@ -470,7 +550,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Locations");
+                    b.ToTable("Locations", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Mission", b =>
@@ -479,11 +559,17 @@ namespace GivingChampion.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Difficulty")
                         .HasColumnType("integer");
 
                     b.Property<int>("ImpactReward")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("KPReward")
                         .HasColumnType("integer");
@@ -508,7 +594,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("Missions");
+                    b.ToTable("Missions", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Notification", b =>
@@ -516,6 +602,12 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean");
@@ -548,7 +640,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Partner", b =>
@@ -593,7 +685,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Partners");
+                    b.ToTable("Partners", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
@@ -605,8 +697,14 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<Guid>("AvatarId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Impact")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("LevelId")
                         .HasColumnType("uuid");
@@ -625,7 +723,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Profiles");
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Review", b =>
@@ -637,6 +735,12 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("uuid");
@@ -656,7 +760,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.ServiceRequest", b =>
@@ -707,7 +811,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("PartnerId");
 
-                    b.ToTable("ServiceRequests");
+                    b.ToTable("ServiceRequests", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserBadge", b =>
@@ -719,8 +823,14 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<Guid>("BadgeId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("EarnedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("uuid");
@@ -731,7 +841,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ProfileId");
 
-                    b.ToTable("UserBadges");
+                    b.ToTable("UserBadges", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserLevel", b =>
@@ -739,6 +849,12 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Kp")
                         .HasColumnType("integer");
@@ -753,7 +869,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LevelId");
 
-                    b.ToTable("UserLevels");
+                    b.ToTable("UserLevels", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserMission", b =>
@@ -764,6 +880,12 @@ namespace GivingChampion.Domain.Migrations
 
                     b.Property<DateTime>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("MissionId")
                         .HasColumnType("uuid");
@@ -786,7 +908,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserMissions");
+                    b.ToTable("UserMissions", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Volunteer", b =>
@@ -821,7 +943,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Volunteers");
+                    b.ToTable("Volunteers", (string)null);
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerOrder", b =>
@@ -874,7 +996,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VolunteerOrders");
+                    b.ToTable("VolunteerOrders", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1000,6 +1122,10 @@ namespace GivingChampion.Domain.Migrations
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Child", b =>
                 {
+                    b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Approver")
+                        .WithMany()
+                        .HasForeignKey("ApprovedById");
+
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
@@ -1011,6 +1137,8 @@ namespace GivingChampion.Domain.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Approver");
 
                     b.Navigation("Parent");
 

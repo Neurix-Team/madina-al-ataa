@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,7 +8,7 @@ using System.Text;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Review
+    public class Review : BaseEntity
     {
         public Guid Id { get; set; }
         [Range(0, 5)]
@@ -19,5 +21,7 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Profile")]
         public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

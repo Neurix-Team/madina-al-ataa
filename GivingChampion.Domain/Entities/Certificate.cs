@@ -1,10 +1,12 @@
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class Certificate
+    public class Certificate : BaseEntity
     {
         public Guid Id { get; set; }
 
@@ -46,9 +48,8 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [MaxLength(2000)]
         public string QrCode { get; set; } = string.Empty;
-        // Soft Delete
-        public bool IsDeleted { get; set; } = false;
-        public DateTime? DeletedAt { get; set; }
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }
 

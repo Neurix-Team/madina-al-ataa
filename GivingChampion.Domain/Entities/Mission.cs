@@ -1,4 +1,6 @@
 ﻿using GivingChampion.Common.Enums;
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ using System.Text;
 namespace GivingChampion.Domain.Entities
 {
     [PrimaryKey("Id")]
-    public class Mission
+    public class Mission : BaseEntity
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
@@ -22,6 +24,7 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Location")]
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
-
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

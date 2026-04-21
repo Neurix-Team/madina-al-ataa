@@ -1,14 +1,16 @@
-﻿using System;
+﻿using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace GivingChampion.Domain.Entities
 {
-    public class AiAvatar
+    public class AiAvatar : BaseEntity
     {
         [Key] 
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         [StringLength(100)]
         public string FavoriteCategory { get; set; }
@@ -18,6 +20,7 @@ namespace GivingChampion.Domain.Entities
         [StringLength(500)]
 
         public string LastSuggestion { get; set; }
-
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }
