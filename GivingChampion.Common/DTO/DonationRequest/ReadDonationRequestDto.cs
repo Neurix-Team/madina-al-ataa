@@ -7,7 +7,8 @@ using System.Text;
 namespace GivingChampion.Common.DTO.DonationRequest
 {
     public class ReadDonationRequestDto
-    { 
+    {
+        [Key]
             public Guid Id { get; set; }
 
             public string Title { get; set; } = string.Empty;
