@@ -1,16 +1,21 @@
 using GivingChampion.API.Handlers;
 using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
 using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
+using GivingChampion.Application.Interfaces.Location;
+using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Application.Transformers;
 using GivingChampion.Common.DTO.Auth;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Infrastructure.Persistence.Repositories;
 using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Persistance.Repositories;
+using GivingChampion.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +32,9 @@ using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Interfaces.DonationRequest;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
+using GivingChampion.API.Interfaces;
+using GivingChampion.API.Services;
+using GivingChampion.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +48,7 @@ var jwtOptions = builder.Configuration
     .Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new string[] { "http://localhost:5173" };
 
 // Add services to the container.
 
@@ -78,7 +86,23 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
-
+//builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
+builder.Services.AddScoped<IAvatarService, AvatarService>();
+builder.Services.AddScoped<IAiAvatarRepository, AiAvatarRepository>();
+builder.Services.AddScoped<IAiAvatarService, AiAvatarService>();
+builder.Services.AddScoped<ILevelRepository, LevelRepository>();
+builder.Services.AddScoped<ILevelService, LevelService>();
+builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
+builder.Services.AddScoped<IBadgeService, BadgeService>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
+builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
+builder.Services.AddScoped<IUserLevelRepository, UserLevelRepository>();
+builder.Services.AddScoped<IUserLevelService, UserLevelService>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services
     .AddAuthentication(options =>
     {
@@ -132,7 +156,18 @@ builder.Services.Configure<JwtOptions>(
             _conf.GetSection(JwtOptions.SectionName));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-//builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDonorRepository, DonorRepository>();
+builder.Services.AddScoped<IDonorService, DonorService>(); 
+builder.Services.AddScoped<IChildRepository, EfChildRepository>();
+builder.Services.AddScoped<IChildService, ChildService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IMissionRepository, MissionRepository>();
+builder.Services.AddScoped<IMissionService, MissionService>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();

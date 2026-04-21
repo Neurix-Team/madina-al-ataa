@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using GivingChampion.Domain.Enums;
 using Microsoft.Azure.Documents;
 
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 namespace GivingChampion.Domain.Entities
 {
-    public class Volunteer
+    public class Volunteer : BaseEntity
     {
 		/// <summary>
 		/// Primary key for Volunteer entity
@@ -42,9 +44,7 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [ForeignKey(nameof(UserId))]
         public ApplicationUser? User { get; set; }
-        public bool IsDeleted { get; set; } = false;
-        public DateTime? DeletedAt { get; set; }
-
-
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }
