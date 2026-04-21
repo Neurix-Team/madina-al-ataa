@@ -34,13 +34,12 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
                                           !um.IsDeleted);
         }
 
-        public async Task<List<UserMission>> GetByUserIdAsync(Guid userId)
+        public async Task<PagedList<UserMission>> GetByUserIdAsync(PageParameters pageParameters, Guid userId, MissionStatus status = MissionStatus.InProgress)
         {
             return await _context.UserMissions
                 .Include(um => um.Mission)
-                .Where(um => um.UserId == userId && !um.IsDeleted)
-                .OrderByDescending(um => um.StartedAt)
-                .ToListAsync();
+                .Where(um => um.UserId == userId && !um.IsDeleted && um.Status == status)
+                .OrderByDescending(um => um.StartedAt).ToPagedListAsync(pageParameters);
         }
 
         public async Task<PagedList<UserMission>> GetActiveByUserIdAsync(PageParameters pageParameters, Guid userId)
@@ -84,6 +83,14 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
         }
 
         public async Task<bool> IsMissionStartedAsync(Guid userId, Guid missionId)
+        {
+            return await _context.UserMissions
+                .AnyAsync(um => um.UserId == userId &&
+                               um.MissionId == missionId && um.Status == MissionStatus.InProgress &&
+                               !um.IsDeleted);
+        }
+
+        public async Task<bool> IsMissionCompletedAsync(Guid userId, Guid missionId)
         {
             return await _context.UserMissions
                 .AnyAsync(um => um.UserId == userId &&

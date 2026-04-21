@@ -11,6 +11,6 @@ namespace GivingChampion.Application.Interfaces.Mission
         Task<Result<PagedList<UserMissionDto>>> GetMyActiveMissionsAsync(PageParameters pageParameters, Guid userId);
         Task<Result<PagedList<UserMissionDto>>> GetMyCompletedMissionsAsync(PageParameters pageParameters, Guid userId);
         Task<Result<UserMissionDto>> GetByIdAsync(Guid userMissionId, Guid userId);
-        Task<Result<PagedList<UserMissionDto>>> GetAllUserMissionsAsync(PageParameters pageParameters, Guid userId);
+        //Task<Result<PagedList<UserMissionDto>>> GetAllUserMissionsAsync(PageParameters pageParameters, Guid userId);
     }
 }

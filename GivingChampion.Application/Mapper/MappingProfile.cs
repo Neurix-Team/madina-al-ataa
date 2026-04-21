@@ -23,8 +23,8 @@ using GivingChampion.Common.DTO.Mission;
 using GivingChampion.Common.DTO.Notification;
 using GivingChampion.Common.DTO.User;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
+using System.Collections.Generic;
 
 namespace GivingChampion.Application.Mapper
 {
@@ -233,7 +233,7 @@ namespace GivingChampion.Application.Mapper
             // ====================== User Mappings ======================
             CreateMap<ApplicationUser, GetUserDto>().ReverseMap();
 
-            CreateMap<PagedList<ApplicationUser>, PagedList<GetUserDto>>().ReverseMap();
+            //CreateMap<PagedList<ApplicationUser>, PagedList<GetUserDto>>().ReverseMap();
 
             CreateMap<CreateUserDto, ApplicationUser>().ReverseMap();
 
@@ -270,15 +270,22 @@ namespace GivingChampion.Application.Mapper
             CreateMap<Mission, MissionDto>().ReverseMap();
             CreateMap<CreateMissionDto, Mission>().ReverseMap();
             CreateMap<UpdateMissionDto, Mission>().ReverseMap();
-
             #endregion
-            #region Pagination Mappings
-            // ====================== Pagination Mappings ======================
-            // ONLY this one generic mapping for PagedList - remove any other PagedList mappings
-            CreateMap(typeof(PagedList<>), typeof(PagedList<>))
-                .ConvertUsing(typeof(PagedListConverter<,>));
 
+            #region UserMission Mappings
+            // ====================== Mission Mappings ======================
+            CreateMap<UserMission, UserMissionDto>().ReverseMap();
+            CreateMap<StartMissionDto, Mission>().ReverseMap();
+            CreateMap<UpdateProgressDto, Mission>().ReverseMap();
             #endregion
+            // NOT WORKING
+            //#region Pagination Mappings
+            //// ====================== Pagination Mappings ======================
+            //// ONLY this one generic mapping for PagedList - remove any other PagedList mappings
+            //CreateMap(typeof(PagedList<>), typeof(PagedList<>))
+            //    .ConvertUsing(typeof(PagedListConverter<,>));
+
+            //#endregion
             #region Location Mappings
             // Location Mappings
             CreateMap<Location, LocationDto>().ReverseMap();
@@ -290,19 +297,26 @@ namespace GivingChampion.Application.Mapper
             #endregion
         }
 
-        // Helper converter for generic PagedList mapping
-        public class PagedListConverter<TSource, TDestination> : ITypeConverter<PagedList<TSource>, PagedList<TDestination>>
-        {
-            public PagedList<TDestination> Convert(PagedList<TSource> source, PagedList<TDestination> destination, ResolutionContext context)
-            {
-                var items = context.Mapper.Map<List<TDestination>>(source.Items);
-                return new PagedList<TDestination>(
-                    items,
-                    source.TotalCount,
-                    source.PageNumber,
-                    source.PageSize
-                );
-            }
-        }
+        
     }
+    // NOT WORKING
+    // Helper converter for generic PagedList mapping
+    //public class PagedListConverter<TSource, TDestination> : ITypeConverter<PagedList<TSource>, PagedList<TDestination>>
+    //{
+    //    public PagedList<TDestination> Convert(PagedList<TSource> source, PagedList<TDestination> destination, ResolutionContext context)
+    //    {
+    //        if (source == null) return null;
+
+    //        // Map the internal list of items
+    //        var mappedItems = context.Mapper.Map<List<TDestination>>(source.Items);
+
+    //        // Create the new paged list with the mapped items and existing metadata
+    //        return new PagedList<TDestination>(
+    //            mappedItems,
+    //            source.TotalCount,
+    //            source.PageNumber,
+    //            source.PageSize
+    //        );
+    //    }
+    //}
 }

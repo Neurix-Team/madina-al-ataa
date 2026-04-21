@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.BadgeDto;
+using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
@@ -21,7 +22,7 @@ namespace GivingChampion.API.Services
         public async Task<Result<PagedList<BadgeDto>>> GetAllAsync(PageParameters pageParameters)
         {
             var badges = await _badgeRepository.GetAllAsync(pageParameters);
-            return Result<PagedList<BadgeDto>>.Success(_mapper.Map<PagedList<BadgeDto>>(badges)); 
+            return Result<PagedList<BadgeDto>>.Success(_mapper.MapPagedList<Badge,BadgeDto>(badges)); 
         }
 
         public async Task<Result<BadgeDto?>> GetByIdAsync(Guid id)
