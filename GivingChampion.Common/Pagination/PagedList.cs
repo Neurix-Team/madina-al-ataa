@@ -10,9 +10,9 @@ public sealed class PagedList<T>
         int pageSize,
         int totalCount)
     {
-        Items = items;
-        PageNumber = pageNumber;
-        PageSize = pageSize;
+        Items = items ?? Array.Empty<T>();
+        PageNumber = Math.Max(1, pageNumber);
+        PageSize = Math.Max(1, pageSize);
         TotalCount = totalCount;
     }
 
@@ -25,13 +25,13 @@ public sealed class PagedList<T>
     public int TotalCount { get; }
 
     public int TotalPages =>
-        TotalCount == 0
-            ? 0
-            : (int)Math.Ceiling((double)TotalCount / PageSize);
+        TotalCount == 0 ? 0 : (int)Math.Ceiling((double)TotalCount / PageSize);
 
     public bool HasPreviousPage => PageNumber > 1;
 
     public bool HasNextPage => PageNumber < TotalPages;
+
+    // ==================== Factory Methods ====================
 
     public static async Task<PagedList<T>> CreateAsync(
         IQueryable<T> query,
@@ -39,6 +39,7 @@ public sealed class PagedList<T>
         int pageSize,
         CancellationToken cancellationToken = default)
     {
+        // Normalize inputs
         pageNumber = Math.Max(1, pageNumber);
         pageSize = Math.Max(1, pageSize);
 
