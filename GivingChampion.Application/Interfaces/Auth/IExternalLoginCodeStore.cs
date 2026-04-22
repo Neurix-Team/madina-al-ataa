@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.Auth;
+﻿using GivingChampion.Common.DTO.Auth;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -1,14 +1,19 @@
+using GivingChampion.Common.Enums;
+using GivingChampion.Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
+
 
 namespace GivingChampion.Domain.Entities
 {
     /// <summary>
     /// Represents a donation order made by a donor for a specific donation request.
     /// </summary>
-    public class DonationOrder
+    public class DonationOrder : BaseEntity
     {
         /// <summary>
         /// Primary key (unique identifier)
@@ -83,7 +88,18 @@ namespace GivingChampion.Domain.Entities
 
         /// <summary>
         /// Record creation timestamp (UTC)
-        /// </summary>
+     
+
+        // Navigation Property to DonationRequest
+        [ForeignKey("DonationRequestId")]
+        public DonationRequest DonationRequest { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public object PaymentStatus { get; set; }
+        ///// <summary>
+        ///// Record creation timestamp (UTC)
+        ///// </summary>
+        //public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
     }
 }

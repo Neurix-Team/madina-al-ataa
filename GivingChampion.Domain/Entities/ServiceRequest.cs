@@ -1,11 +1,13 @@
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Interfaces;
+using GivingChampion.Domain.Entities.Base;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GivingChampion.Domain.Entities
 {
-	public class ServiceRequest
+    public class ServiceRequest : BaseEntity
 	{
 		[Key]
 		public Guid Id { get; set; } = Guid.NewGuid();
@@ -21,7 +23,7 @@ namespace GivingChampion.Domain.Entities
 
 		// Urgency level (Low, Medium, High)
 		[Required]
-		public UrgencyLevel UrgencyLevel { get; set; }
+        public UrgencyLevel UrgencyLevel { get; set; }
 
 		// Scheduled date for the service
 		[Required]
@@ -34,9 +36,12 @@ namespace GivingChampion.Domain.Entities
 		// Status of the request (Pending, Approved, Completed, etc.)
 		[Required]
 		public RequestStatus Status { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
-		// Short description
-		[MaxLength(1000)]
+        public DateTime? DeletedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // Short description
+        [MaxLength(1000)]
 		public string? BriefDescription { get; set; }
 
 		// Foreign Key
@@ -46,7 +51,9 @@ namespace GivingChampion.Domain.Entities
 		// Navigation Property
 		[ForeignKey("PartnerId")]
 		public Partner Partner { get; set; } = null!;
-	}
+        //public bool IsDeleted { get; set; }
+        //public DateTime? DeletedAt { get; set; }
+    }
 
 
 	
