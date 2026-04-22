@@ -218,8 +218,8 @@ app.MapDefaultEndpoints();
 app.UseCors("Frontend");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.MapOpenApi();
     app.MapScalarApiReference(option =>
     {
@@ -234,7 +234,7 @@ if (app.Environment.IsDevelopment())
             auth.Token = "00000000.00000.0000000";
         }).EnablePersistentAuthentication();
     });
-}
+//}
 
 app.UseHttpsRedirection();
 
