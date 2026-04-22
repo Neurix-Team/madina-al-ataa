@@ -41,6 +41,9 @@ namespace GivingChampion.Domain.Contexts
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Certificate> Certificates { get; set; }
         public DbSet<Activity> Activities { get; set; }
+        public DbSet<GeoQuest> GeoQuests { get; set; }
+        public DbSet<UserGeoQuest> UserGeoQuests { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,6 +69,15 @@ namespace GivingChampion.Domain.Contexts
                 .HasMany(p => p.Reviews)
                 .WithOne(r => r.Profile)
                 .HasForeignKey(r => r.ProfileId);
+            modelBuilder.Entity<UserGeoQuest>()
+                .HasOne(ugq => ugq.GeoQuest)
+                .WithMany()
+               .HasForeignKey(ugq => ugq.GeoQuestId);
+
+            modelBuilder.Entity<UserGeoQuest>()
+                .HasOne(ugq => ugq.User)
+                .WithMany()
+                .HasForeignKey(ugq => ugq.UserId);
 
             // Example: If you want to disable soft delete for a specific entity
             // modelBuilder.Entity<SomeEntity>().HasQueryFilter(null);

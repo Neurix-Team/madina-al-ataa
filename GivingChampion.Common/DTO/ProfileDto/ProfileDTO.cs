@@ -1,11 +1,12 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Common.DTO.ProfileDto
 {
     public class ProfileDto
     {
+        [Key]
         public Guid Id { get; set; }= Guid.NewGuid();
-
         public double Rating { get; set; }
 
         public int Impact { get; set; }

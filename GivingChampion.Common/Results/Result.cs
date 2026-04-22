@@ -21,6 +21,8 @@ namespace GivingChampion.Common.Results
     public class Result<T> : Result
     {
         public T? Value { get; }
+        public bool IsSuccess { get; set; }
+        public bool IsFailure { get; set; }
 
         public static Result<T> Success(T value) => new Result<T>(true, null, null, value);
         public static new Result<T> Failure(string error, string? errorCode = null) => new Result<T>(false, error, errorCode, default);
