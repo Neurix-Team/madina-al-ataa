@@ -94,6 +94,8 @@ builder.Services.AddScoped<IUserLevelRepository, UserLevelRepository>();
 builder.Services.AddScoped<IUserLevelService, UserLevelService>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IGeoQuestRepository, GeoQuestRepository>();
+builder.Services.AddScoped<IUserGeoQuestRepository, UserGeoQuestRepository>();
 builder.Services
     .AddAuthentication(options =>
     {
@@ -134,7 +136,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins(allowedOrigins) // Use the loaded array here
+        policy.WithOrigins(allowedOrigins) 
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -159,7 +161,8 @@ builder.Services.AddScoped<IMissionRepository, MissionRepository>();
 builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ILocationService, LocationService>();
-
+builder.Services.AddScoped<IGeoQuestService, GeoQuestService>();
+builder.Services.AddScoped<IUserGeoQuestService, UserGeoQuestService>();
 
 builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
