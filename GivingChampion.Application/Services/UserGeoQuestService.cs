@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
 using GivingChampion.Common.DTO.GeoQuestDto;
@@ -8,6 +7,7 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

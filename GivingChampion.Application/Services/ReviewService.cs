@@ -2,6 +2,7 @@ using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.ReviewDto;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
 {

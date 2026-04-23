@@ -2,6 +2,7 @@
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.ProfileDto;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
 {

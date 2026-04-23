@@ -2,6 +2,7 @@
 using GivingChampion.API.Interfaces;
 using GivingChampion.Common.DTO.AvatarDto;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
 {

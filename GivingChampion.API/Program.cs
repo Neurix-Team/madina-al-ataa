@@ -36,7 +36,6 @@ using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Interfaces.DonationRequest;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
-using GivingChampion.API.Interfaces;
 using GivingChampion.API.Services;
 using GivingChampion.API.Repositories;
 

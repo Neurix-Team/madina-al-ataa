@@ -1,6 +1,6 @@
 ﻿using GivingChampion.Domain.Entities;
 
-namespace GivingChampion.API.Interfaces
+namespace GivingChampion.Persistance.Interfaces
 {
     public interface IAiAvatarRepository
     {

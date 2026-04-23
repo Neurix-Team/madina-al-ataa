@@ -1,11 +1,7 @@
-﻿using GivingChampion.API.Interfaces;
-using GivingChampion.Application.Interfaces;
+﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
-using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace GivingChampion.API.Controllers
 {
@@ -27,7 +23,7 @@ namespace GivingChampion.API.Controllers
         //    var userGeoQuests = await _userGeoQuestService.GetAllAsync(pageParameters);
         //    return Ok(userGeoQuests);
         //}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -44,7 +40,7 @@ namespace GivingChampion.API.Controllers
         //    var created = await _userGeoQuestService.CreateAsync(dto);
         //    return CreatedAtAction(nameof(GetById), new { id = created.Value.Id }, created);
         //}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserGeoQuestDto dto)
         {
@@ -52,7 +48,7 @@ namespace GivingChampion.API.Controllers
             if (!updated.Value) return NotFound("UserGeoQuest not found");
             return NoContent();
         }
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -60,7 +56,7 @@ namespace GivingChampion.API.Controllers
             if (!deleted.Value) return NotFound("UserGeoQuest not found");
             return NoContent();
         }
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}/status")]
         public async Task<IActionResult> CheckGeoQuestStatus(Guid id)
         {

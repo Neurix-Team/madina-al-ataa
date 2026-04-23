@@ -1,10 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
 using GivingChampion.Common.DTO.GeoQuestDto;
-using GivingChampion.Common.DTO.UserGeoQuestDto;
-using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +23,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/geoquests
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {

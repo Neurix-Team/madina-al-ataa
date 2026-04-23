@@ -1,8 +1,8 @@
-﻿using GivingChampion.API.Interfaces;
-using GivingChampion.Common.Extensions.Pagination;
+﻿using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.API.Repositories
