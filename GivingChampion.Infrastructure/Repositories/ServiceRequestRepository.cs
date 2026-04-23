@@ -45,14 +45,14 @@ namespace GivingChampion.Persistance.Repositories
         }
 
         // Gets all pending service requests that are not soft deleted
-        public async Task<List<ServiceRequest>> GetPendingAsync()
-        {
-            return await _context.ServiceRequests
-                .AsNoTracking()
-                .Include(x => x.Partner)
-                .Where(x => !x.IsDeleted && x.Status == RequestStatus.Pending)
-                .ToListAsync();
-        }
+        //public async Task<List<ServiceRequest>> GetPendingAsync()
+        //{
+        //    return await _context.ServiceRequests
+        //        .AsNoTracking()
+        //        .Include(x => x.Partner)
+        //        .Where(x => !x.IsDeleted && x.Status == RequestStatus.Pending)
+        //        .ToListAsync();
+        //}
 
         // Gets all service requests related to a specific partner
         public async Task<List<ServiceRequest>> GetByPartnerIdAsync(Guid partnerId)
@@ -63,6 +63,14 @@ namespace GivingChampion.Persistance.Repositories
                 .Where(x => x.PartnerId == partnerId && !x.IsDeleted)
                 .ToListAsync();
         }
+        public async Task<List<ServiceRequest>> GetApprovedRequestsAsync()
+        {
+            return await _context.ServiceRequests
+                .AsNoTracking() .Include(x => x.Partner)
+                .Where(sr => sr.Status == RequestStatus.Approved && !sr.IsDeleted)
+                .ToListAsync();
+        }
+        
 
         #endregion
 

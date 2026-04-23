@@ -15,7 +15,9 @@ namespace GivingChampion.Persistance.Interfaces
         Task<ServiceRequest?> GetByIdAsync(Guid id);
 
         // Gets all service requests with Pending status
-        Task<List<ServiceRequest>> GetPendingAsync();
+        //Task<List<ServiceRequest>> GetPendingAsync();
+        Task<List<ServiceRequest>> GetApprovedRequestsAsync();
+
 
         // Gets all service requests created by or related to a specific partner
         Task<List<ServiceRequest>> GetByPartnerIdAsync(Guid partnerId);

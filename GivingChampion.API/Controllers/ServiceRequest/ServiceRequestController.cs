@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Common.DTO.ServiceRequestDto;
+using GivingChampion.Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace GivingChampion.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class ServiceRequestsController : ControllerBase
     {
         #region Fields
@@ -39,10 +41,16 @@ namespace GivingChampion.API.Controllers
         // GET: api/ServiceRequests
         // Returns all service requests that are not soft deleted
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] RequestStatus? status)
         {
             try
             {
+                if (status.HasValue)
+                {
+                    var filtered = await _serviceRequestService.GetByStatusAsync(status.Value);
+                    return Ok(filtered);
+                }
+
                 var serviceRequests = await _serviceRequestService.GetAllAsync();
 
                 return Ok(serviceRequests);
@@ -101,64 +109,64 @@ namespace GivingChampion.API.Controllers
                 });
             }
         }
-        // GET: api/ServiceRequests/upcoming or available
-        // GET: api/ServiceRequests/pending
-        // Returns all pending service requests
-        [HttpGet("pending")]
-        [Authorize(Roles = "Volunteer")]
-        public async Task<IActionResult> GetPending()
-        {
-            try
-            {
-                var serviceRequests = await _serviceRequestService.GetPendingAsync();
+        //// GET: api/ServiceRequests/upcoming or available
+        //// GET: api/ServiceRequests/pending
+        //// Returns all pending service requests
+        //[HttpGet("pending")]
+        //[Authorize(Roles = "Volunteer")]
+        //public async Task<IActionResult> GetPending()
+        //{
+        //    try
+        //    {
+        //        var serviceRequests = await _serviceRequestService.GetByStatusAsync(RequestStatus.Pending);
 
-                return Ok(serviceRequests);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while getting pending service requests.");
+        //        return Ok(serviceRequests);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while getting pending service requests.");
 
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred while retrieving pending service requests."
-                });
-            }
-        }
+        //        return StatusCode(500, new
+        //        {
+        //            Message = "An unexpected error occurred while retrieving pending service requests."
+        //        });
+        //    }
+        //}
 
-        // GET: api/ServiceRequests/partner/{partnerId}
-        // Returns all service requests related to a specific partner
-        [HttpGet("partner/{partnerId:guid}")]
-        [Authorize(Roles = "Volunteer")]
-        public async Task<IActionResult> GetByPartnerId(Guid partnerId)
-        {
-            try
-            {
-                if (partnerId == Guid.Empty)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Invalid partner id."
-                    });
-                }
+        //// GET: api/ServiceRequests/partner/{partnerId}
+        //// Returns all service requests related to a specific partner
+        //[HttpGet("partner/{partnerId:guid}")]
+        //[Authorize(Roles = "Volunteer")]
+        //public async Task<IActionResult> GetByPartnerId(Guid partnerId)
+        //{
+        //    try
+        //    {
+        //        if (partnerId == Guid.Empty)
+        //        {
+        //            return BadRequest(new
+        //            {
+        //                Message = "Invalid partner id."
+        //            });
+        //        }
 
-                var serviceRequests = await _serviceRequestService.GetByPartnerIdAsync(partnerId);
+        //        var serviceRequests = await _serviceRequestService.GetByPartnerIdAsync(partnerId);
 
-                return Ok(serviceRequests);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Error occurred while getting service requests for partner {PartnerId}.",
-                    partnerId
-                );
+        //        return Ok(serviceRequests);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(
+        //            ex,
+        //            "Error occurred while getting service requests for partner {PartnerId}.",
+        //            partnerId
+        //        );
 
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred while retrieving partner service requests."
-                });
-            }
-        }
+        //        return StatusCode(500, new
+        //        {
+        //            Message = "An unexpected error occurred while retrieving partner service requests."
+        //        });
+        //    }
+        //}
 
         #endregion
 
@@ -230,6 +238,28 @@ namespace GivingChampion.API.Controllers
 
         #endregion
 
+        // GET: api/ServiceRequests/filter?status=Approved
+        [HttpGet("filter")]
+        [Authorize(Roles = "Volunteer, Admin")] 
+        public async Task<IActionResult> GetByStatus([FromQuery] RequestStatus status)
+        {
+            try
+            {
+                var filteredRequests = await _serviceRequestService.GetByStatusAsync(status);
+
+                if (filteredRequests == null || !filteredRequests.Any())
+                {
+                    return NotFound(new { Message = $"No service requests found with status: {status}" });
+                }
+
+                return Ok(filteredRequests);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while filtering service requests by status {Status}.", status);
+                return StatusCode(500, new { Message = "Internal server error while filtering requests." });
+            }
+        }
         // DELETE: api/ServiceRequests/{id}
         // Soft deletes an existing service request
         // Only Admin users are allowed to delete service requests

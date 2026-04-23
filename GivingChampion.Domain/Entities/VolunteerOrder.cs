@@ -1,3 +1,4 @@
+using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -40,10 +41,11 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Record creation timestamp (UTC)
         /// </summary>
+        [Range(0, 100, ErrorMessage = "ProgressPercentage must be between 0 and 100.")]
+        public int ProgressPercentage { get; set; }
+        public DateTime? RejectedAt { get; set; } 
+        public DateTime? ApprovedAt { get; set; } 
 
-        public DateTime RejectedAt { get; set; } = DateTime.UtcNow;
-        public DateTime ApprovedAt { get; set; } = DateTime.UtcNow;
-   
         public string ?RejectionReason { get; set; }
     }
 }

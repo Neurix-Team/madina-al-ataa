@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
+using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -14,14 +15,16 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         #region Fields
 
         private readonly IVolunteerOrderService _volunteerOrderService;
+        private readonly IServiceRequestRepository _serviceRequestRepository;
 
         #endregion
 
         #region Constructor
 
-        public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService)
+        public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService, IServiceRequestRepository serviceRequestRepository)
         {
             _volunteerOrderService = volunteerOrderService;
+            _serviceRequestRepository = serviceRequestRepository;
         }
 
         #endregion
@@ -131,6 +134,15 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
                 if (string.IsNullOrWhiteSpace(volunteerIdClaim) || !Guid.TryParse(volunteerIdClaim, out var volunteerId))
                     return Unauthorized(new { message = "Invalid or missing volunteer ID in token." });
 
+                var approvedRequests = await   _serviceRequestRepository.GetApprovedRequestsAsync();
+
+                var serviceRequest = approvedRequests.FirstOrDefault(sr => sr.Id == dto.ServiceRequestId);
+
+                if (serviceRequest == null)
+                {
+                    return BadRequest(new { message = "The service request is not approved or not available." });
+                }
+
                 var createdVolunteerOrder = await _volunteerOrderService.CreateAsync(dto, volunteerId);
 
                 return CreatedAtAction(
@@ -150,8 +162,8 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #endregion
 
-   
-      
+
+
 
 
         #region Delete

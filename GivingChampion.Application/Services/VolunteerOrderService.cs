@@ -20,6 +20,7 @@ namespace GivingChampion.Application.Services
         #region Fields
 
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
+        private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly IMapper _mapper;
 
         #endregion
@@ -33,9 +34,11 @@ namespace GivingChampion.Application.Services
         /// <param name="mapper">AutoMapper instance.</param>
         public VolunteerOrderService(
             IVolunteerOrderRepository volunteerOrderRepository,
+            IServiceRequestRepository serviceRequestRepository,
             IMapper mapper)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
+            _serviceRequestRepository = serviceRequestRepository;
             _mapper = mapper;
         }
 
@@ -83,16 +86,20 @@ namespace GivingChampion.Application.Services
         /// <returns>The created volunteer order DTO.</returns>
         public async Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId)
         {
+            // Ensure the related service request exists and is in an allowed status
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(dto.ServiceRequestId);
+            if (serviceRequest == null)
+                throw new InvalidOperationException("Service request not found.");
+
+            // Only allow creating an order when the request status is Approved
+            if (!(serviceRequest.Status == RequestStatus.Approved ))
+                throw new InvalidOperationException("Volunteer cannot create an order for this request because its status is not Approved.");
+
             var volunteerOrder = _mapper.Map<VolunteerOrder>(dto);
 
-            volunteerOrder.VolunteerId = volunteerId;
-            volunteerOrder.Status = OrderStatus.Pending;
-            volunteerOrder.IsDeleted = false;
-            volunteerOrder.DeletedAt = null;
-            volunteerOrder.CreatedAt = DateTime.UtcNow;
 
-            await _volunteerOrderRepository.AddAsync(volunteerOrder);
-            await _volunteerOrderRepository.SaveChangesAsync();
+            // Use repository create which saves changes
+            await _volunteerOrderRepository.CreateAsync(volunteerOrder);
 
             return _mapper.Map<VolunteerOrderDto>(volunteerOrder);
         }

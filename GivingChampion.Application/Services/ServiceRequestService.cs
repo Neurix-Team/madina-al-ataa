@@ -4,7 +4,7 @@ using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Common.DTO.ServiceRequestDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-
+using GivingChampion.Common.Enums;
 namespace GivingChampion.Application.Services
 {
     public class ServiceRequestService : IServiceRequestService
@@ -60,12 +60,28 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<ServiceRequestDto>(serviceRequest);
         }
 
-        // Gets all service requests with Pending status.
-        public async Task<List<ServiceRequestDto>> GetPendingAsync()
-        {
-            var serviceRequests = await _serviceRequestRepository.GetPendingAsync();
+        //// Gets all service requests with Pending status.
+        //public async Task<List<ServiceRequestDto>> GetPendingAsync()
+        //{
+        //    var serviceRequests = await _serviceRequestRepository.GetPendingAsync();
 
-            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        //    return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        //}
+
+        public async Task<List<ServiceRequestDto>> GetApprovedRequestsAsync()
+        {
+            var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync();
+
+            return _mapper.Map<List<ServiceRequestDto>>(approvedRequests);
+        }
+        // Gets all service requests filtered by specific status
+        public async Task<List<ServiceRequestDto>> GetByStatusAsync(RequestStatus status)
+        {
+            // fetch all and filter in memory using repository methods if no direct repo method exists
+            var all = await _serviceRequestRepository.GetAllAsync();
+            var filtered = all.Where(sr => sr.Status == status).ToList();
+
+            return _mapper.Map<List<ServiceRequestDto>>(filtered);
         }
 
         // Gets all service requests related to a specific partner.
@@ -76,7 +92,7 @@ namespace GivingChampion.Application.Services
 
             var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
 
-            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+            return _mapper.Map<List<ServiceRequestDto>>(filtered);
         }
 
         #endregion

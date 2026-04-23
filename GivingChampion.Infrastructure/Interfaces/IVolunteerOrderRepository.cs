@@ -25,7 +25,7 @@ namespace GivingChampion.Persistance.Interfaces
 
         // Adds a new volunteer order to the DbContext
         // Note: This does not save changes to the database until SaveChangesAsync is called
-        Task AddAsync(VolunteerOrder volunteerOrder);
+        public  Task<VolunteerOrder> CreateAsync(VolunteerOrder volunteerOrder);
 
         // Marks an existing volunteer order as modified
         // Note: This does not save changes to the database until SaveChangesAsync is called

@@ -80,23 +80,21 @@ namespace GivingChampion.Persistance.Repositories
                     .AnyAsync(vo => vo.Id == id && !vo.IsDeleted);
             }
 
-            #endregion
+        #endregion
 
-            #endregion
+        #endregion
 
-            #region Command Methods
+        #region Command Methods
 
-            #region Add
+        #region Add
 
-            /// <summary>
-            /// Adds a new volunteer order to the DbContext.
-            /// Note: This does not save changes to the database until SaveChangesAsync is called.
-            /// </summary>
-            /// <param name="volunteerOrder">The volunteer order entity to add.</param>
-            public async Task AddAsync(VolunteerOrder volunteerOrder)
-            {
-                await _context.VolunteerOrders.AddAsync(volunteerOrder);
-            }
+        public async Task<VolunteerOrder> CreateAsync(VolunteerOrder volunteerOrder)
+        {
+            _context.VolunteerOrders.Add(volunteerOrder);
+            await _context.SaveChangesAsync();
+            return volunteerOrder;
+        }
+
 
             #endregion
 
