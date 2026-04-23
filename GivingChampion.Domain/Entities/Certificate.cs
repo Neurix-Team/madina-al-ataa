@@ -17,24 +17,18 @@ namespace GivingChampion.Domain.Entities
         [MaxLength(200)]
         public string Type { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Name of the person or entity the certificate was issued to
-        /// </summary>
-        [Required(ErrorMessage = "IssuedTo is required")]
-        [MaxLength(200)]
-        public string IssuedTo { get; set; } = string.Empty;
-
+      
+    
         /// <summary>
         /// Date the certificate was issued (UTC)
         /// </summary>
         [Required(ErrorMessage = "IssuedDate is required")]
         public DateTime IssuedDate { get; set; } = DateTime.UtcNow;
 
+        [Required(ErrorMessage = "IssuedTo is required")]
+        public Guid IssuedTo { get; set; }
 
-        [Required]
-        public Guid VolunteerId { get; set; }
-
-        [ForeignKey(nameof(VolunteerId))]
+        [ForeignKey(nameof(IssuedTo))]
         public Volunteer? Volunteer { get; set; }
 
         /// <summary>

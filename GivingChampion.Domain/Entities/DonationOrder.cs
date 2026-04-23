@@ -19,7 +19,7 @@ namespace GivingChampion.Domain.Entities
         /// Primary key (unique identifier)
         /// </summary>
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } 
 
         /// <summary>
         /// Donation amount paid by the donor

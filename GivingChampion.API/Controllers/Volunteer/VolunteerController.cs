@@ -11,6 +11,7 @@ namespace GivingChampion.API.Controllers.Volunteer
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class VolunteerController : ControllerBase
     {
         #region Fields
@@ -113,12 +114,12 @@ namespace GivingChampion.API.Controllers.Volunteer
 
         #region CreateVolunteer
 
-        /// <summary>
-        /// Creates a new volunteer.
-        /// Admin only.
-        /// </summary>
-        /// <param name="dto">Volunteer creation data.</param>
-        /// <returns>The created volunteer with 201 Created response.</returns>
+        ///// <summary>
+        ///// Creates a new volunteer.
+        ///// Admin only.
+        ///// </summary>
+        ///// <param name="dto">Volunteer creation data.</param>
+        ///// <returns>The created volunteer with 201 Created response.</returns>
         //[Authorize(Roles = "User")]
         //[HttpPost]
         //public async Task<IActionResult> Create([FromBody] CreateVolunteerDto dto)
@@ -148,44 +149,44 @@ namespace GivingChampion.API.Controllers.Volunteer
 
         #region UpdateVolunteer
 
-        /// <summary>
-        /// Updates an existing volunteer.
-        /// Admin only.
-        /// </summary>
-        /// <param name="id">Volunteer id.</param>
-        /// <param name="dto">Volunteer update data.</param>
-        /// <returns>Updated volunteer data if found; otherwise 404 Not Found.</returns>
-        [Authorize(Roles = "User")]
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateVolunteerDto dto)
-        {
-            try
-            {
-                // Update volunteer using service layer.
-                var updatedVolunteer = await _volunteerService.UpdateAsync(id, dto);
+        ///// <summary>
+        ///// Updates an existing volunteer.
+        ///// Admin only.
+        ///// </summary>
+        ///// <param name="id">Volunteer id.</param>
+        ///// <param name="dto">Volunteer update data.</param>
+        ///// <returns>Updated volunteer data if found; otherwise 404 Not Found.</returns>
+        //[Authorize(Roles = "User")]
+        //[HttpPut("{id:guid}")]
+        //public async Task<IActionResult> Update(Guid id, [FromBody] UpdateVolunteerDto dto)
+        //{
+        //    try
+        //    {
+        //        // Update volunteer using service layer.
+        //        var updatedVolunteer = await _volunteerService.UpdateAsync(id, dto);
 
-                // Return 404 if volunteer does not exist.
-                if (updatedVolunteer == null)
-                {
-                    _logger.LogWarning("Volunteer with ID {VolunteerId} not found for update.", id);
-                    return NotFound($"Volunteer with ID {id} not found.");
-                }
+        //        // Return 404 if volunteer does not exist.
+        //        if (updatedVolunteer == null)
+        //        {
+        //            _logger.LogWarning("Volunteer with ID {VolunteerId} not found for update.", id);
+        //            return NotFound($"Volunteer with ID {id} not found.");
+        //        }
 
-                // Return updated volunteer data.
-                return Ok(updatedVolunteer);
-            }
-            catch (Exception ex)
-            {
-                // Log unexpected errors for production tracking.
-                _logger.LogError(ex, "Error occurred while updating volunteer with ID {VolunteerId}.", id);
+        //        // Return updated volunteer data.
+        //        return Ok(updatedVolunteer);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log unexpected errors for production tracking.
+        //        _logger.LogError(ex, "Error occurred while updating volunteer with ID {VolunteerId}.", id);
 
-                // Return generic error message to avoid exposing internal details.
-                return StatusCode(500, "Internal server error");
-            }
-        }
-
-        #endregion
+        //        // Return generic error message to avoid exposing internal details.
+        //        return StatusCode(500, "Internal server error");
+        //    }
+        //}
 
         #endregion
+        #endregion
+
     }
 }

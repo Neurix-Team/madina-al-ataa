@@ -10,7 +10,7 @@ namespace GivingChampion.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]  // Ensure that only Admin can access these endpoints
+    [Authorize]  // Ensure that only Admin can access these endpoints
     public class PartnersController : ControllerBase
     {
         #region Fields
@@ -47,7 +47,6 @@ namespace GivingChampion.API.Controllers
                 // If partner is not found, return 404 Not Found
                 if (partner == null)
                 {
-                    _logger.LogWarning($"Partner with ID {id} not found.");
                     return NotFound($"Partner with ID {id} not found.");
                 }
 
@@ -94,6 +93,7 @@ namespace GivingChampion.API.Controllers
         /// <summary>
         /// Creates a new partner.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePartnerDto dto)
         {
@@ -116,6 +116,7 @@ namespace GivingChampion.API.Controllers
         /// Updates an existing partner by its ID.
         /// </summary>
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePartnerDto dto)
         {
             try
@@ -125,7 +126,6 @@ namespace GivingChampion.API.Controllers
                 // If partner not found, return 404 Not Found
                 if (updatedPartner == null)
                 {
-                    _logger.LogWarning($"Partner with ID {id} not found for update.");
                     return NotFound($"Partner with ID {id} not found.");
                 }
 

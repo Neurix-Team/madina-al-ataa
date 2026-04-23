@@ -9,7 +9,7 @@ namespace GivingChampion.Persistance.Interfaces
     {
         #region Query Methods
 
-        Task<List<Volunteer>> GetAllAsync(); // Return List<Volunteer> (Entities)
+        //Task<List<Volunteer>> GetAllAsync(); // Return List<Volunteer> (Entities)
         Task<Volunteer?> GetByIdAsync(Guid id); // Return Volunteer (Entity)
 
         #endregion

@@ -16,8 +16,15 @@ namespace GivingChampion.Domain.Entities
 		[MaxLength(200)]
 		public string Title { get; set; } = string.Empty;
 
-		// Required skill for this service
-		[Required]
+        /// <summary>
+        /// Type of service provided by the volunteer (Medical, Teaching, etc.)
+        /// </summary>
+        [Required, MaxLength(100)]
+        public string ServiceType { get; set; } = string.Empty;
+
+
+        // Required skill for this service
+        [Required]
 		[MaxLength(150)]
 		public string RequiredSkill { get; set; } = string.Empty;
 
@@ -28,24 +35,28 @@ namespace GivingChampion.Domain.Entities
 		// Scheduled date for the service
 		[Required]
 		public DateTime ScheduleDate { get; set; }
-
-		// Duration in hours
-		[Range(1, 1000)]
+        [Required]
+        public Guid LocationId { get; set; }
+        [ForeignKey(nameof(LocationId))]
+        public Location? Location { get; set; }
+        // Duration in hours
+        [Range(1, 1000)]
 		public int Duration { get; set; }
 
 		// Status of the request (Pending, Approved, Completed, etc.)
 		[Required]
 		public RequestStatus Status { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
-        public DateTime? DeletedAt { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+ 
         // Short description
         [MaxLength(1000)]
 		public string? BriefDescription { get; set; }
-
-		// Foreign Key
-		[Required]
+        /// <summary>
+        /// Impact report after donation completion
+        /// </summary>
+        [MaxLength(2000)]
+        public string? ImpactReport { get; set; }
+        // Foreign Key
+        [Required]
 		public Guid PartnerId { get; set; }
 
 		// Navigation Property

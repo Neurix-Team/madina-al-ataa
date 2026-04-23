@@ -52,8 +52,6 @@ namespace GivingChampion.Application.Mapper
             // CreateVolunteerOrderDto -> VolunteerOrder
             CreateMap<CreateVolunteerOrderDto, VolunteerOrder>().ReverseMap();
 
-            // UpdateVolunteerOrderDto -> VolunteerOrder
-            CreateMap<UpdateVolunteerOrderDto, VolunteerOrder>().ReverseMap();
 
             // Partner -> PartnerDto
             CreateMap<Partner, PartnerDto>()
@@ -72,9 +70,17 @@ namespace GivingChampion.Application.Mapper
             // Certificate mappings
             CreateMap<Certificate, CertificateReadAllDto>().ReverseMap();
 
-            CreateMap<CertificateCreateDto, Certificate>().ReverseMap();
-            // GeoQuest mappings
-            CreateMap<GeoQuest, GeoQuestDto>().ReverseMap();
+            CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
+      // Generate a unique ID for the new Order
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+
+      // Explicitly map the ServiceRequestId from the DTO
+      .ForMember(dest => dest.ServiceRequestId, opt => opt.MapFrom(src => src.ServiceRequestId))
+
+      // Set default values for a new request
+      .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => OrderStatus.Pending))
+      .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+      .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false));
 
             CreateMap<CreateGeoQuestDto, GeoQuest>().ReverseMap();
 
@@ -100,6 +106,13 @@ namespace GivingChampion.Application.Mapper
                         src.GeoQuest != null ? src.GeoQuest.LocationLongitude : 0))
                 .ReverseMap();
 
+            CreateMap<UpdateDonationRequestDto, DonationRequest>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Title, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Title)))  // Only map if not null or empty
+            .ForMember(dest => dest.Location, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Location)))
+            .ForMember(dest => dest.DonateAmount, opt => opt.Condition(src => src.DonateAmount.HasValue))
+            .ForMember(dest => dest.UrgencyLevel, opt => opt.Condition(src => src.UrgencyLevel.HasValue))
+            .ForMember(dest => dest.BriefDescription, opt => opt.Condition(src => !string.IsNullOrEmpty(src.BriefDescription)));
             CreateMap<CreateUserGeoQuestDto, UserGeoQuest>().ReverseMap();
 
             CreateMap<UpdateUserGeoQuestDto, UserGeoQuest>().ReverseMap();
@@ -107,7 +120,11 @@ namespace GivingChampion.Application.Mapper
             #endregion
 
             // Mapping from DonationOrder Entity to DTOs
-            CreateMap<DonationOrder, DonationOrderReadDto>().ReverseMap();
+            CreateMap<DonationOrder, DonationOrderReadDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<DonationOrder, DonationOrderDetailsDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
             CreateMap<DonationOrder, DonationOrderDetailsDto>().ReverseMap();
             // Mapping from CreateDonationOrderDto to DonationOrder Entity
@@ -118,6 +135,7 @@ namespace GivingChampion.Application.Mapper
             CreateMap<DonationOrder, DonationOrderDetailsDto>();
             CreateMap<CreateDonationOrderDto, DonationOrder>();
             CreateMap<UpdateDonationOrderDTO, DonationOrder>();
+  
 
             #region AiAvatar Mappings
             CreateMap<AiAvatar, AiAvatarDto>().ReverseMap();

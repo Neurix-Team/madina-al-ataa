@@ -33,19 +33,19 @@ namespace GivingChampion.Persistance.Repositories
 
         #region GetAllVolunteer
 
-        /// <summary>
-        /// Gets all volunteers from the database, excluding soft-deleted ones.
-        /// </summary>
-        /// <returns>A list of non-deleted volunteers.</returns>
-        public async Task<List<Volunteer>> GetAllAsync()
-        {
-            // Use AsNoTracking for better performance since we don't need to modify the retrieved entities
-            return await _context.Volunteers
-                .Where(v => !v.IsDeleted) // Only non-deleted volunteers
-                .AsNoTracking() // Avoid tracking entities to improve performance
-                .ToListAsync()
-                .ConfigureAwait(false); // Avoid blocking UI thread in production
-        } 
+        ///// <summary>
+        ///// Gets all volunteers from the database, excluding soft-deleted ones.
+        ///// </summary>
+        ///// <returns>A list of non-deleted volunteers.</returns>
+        //public async Task<List<Volunteer>> GetAllAsync()
+        //{
+        //    // Use AsNoTracking for better performance since we don't need to modify the retrieved entities
+        //    return await _context.Volunteers
+        //        .Where(v => !v.IsDeleted) // Only non-deleted volunteers
+        //        .AsNoTracking() // Avoid tracking entities to improve performance
+        //        .ToListAsync()
+        //        .ConfigureAwait(false); // Avoid blocking UI thread in production
+        //} 
         #endregion
 
         #region GetById
@@ -84,14 +84,14 @@ namespace GivingChampion.Persistance.Repositories
         #endregion
 
         #region UpdateVolunteer
-        /// <summary>
-        /// Updates an existing volunteer in the database.
-        /// </summary>
-        /// <param name="volunteer">The volunteer entity to be updated.</param>
-        public void Update(Volunteer volunteer)
-        {
-            _context.Volunteers.Update(volunteer); // Update the volunteer in the database
-        } 
+        ///// <summary>
+        ///// Updates an existing volunteer in the database.
+        ///// </summary>
+        ///// <param name="volunteer">The volunteer entity to be updated.</param>
+        //public void Update(Volunteer volunteer)
+        //{
+        //    _context.Volunteers.Update(volunteer); // Update the volunteer in the database
+        //} 
         #endregion
 
         #region SaveChanges

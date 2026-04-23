@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
+using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
@@ -143,7 +144,41 @@ namespace GivingChampion.Application.Services
         }
         #endregion
 
+
+        #region ProcessRequest
+
+        public async Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id)
+        {
+            var order = await _volunteerOrderRepository.GetByIdAsync(id);
+            if (order == null)
+                return null;
+
+            order.Status = OrderStatus.Approved;
+
+            // Use the existing Repository Pattern: Update + SaveChangesAsync
+            _volunteerOrderRepository.Update(order);
+            await _volunteerOrderRepository.SaveChangesAsync();
+
+            return _mapper.Map<VolunteerOrderDto>(order);
+        }
+
+        public async Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason)
+        {
+            var order = await _volunteerOrderRepository.GetByIdAsync(id);
+            if (order == null)
+                return null;
+
+            order.Status = OrderStatus.Rejected;
+            order.RejectionReason = rejectionReason;
+
+            _volunteerOrderRepository.Update(order);
+            await _volunteerOrderRepository.SaveChangesAsync();
+
+            return _mapper.Map<VolunteerOrderDto>(order);
+        }
+
+
+        #endregion
         #endregion
     }
 }
-

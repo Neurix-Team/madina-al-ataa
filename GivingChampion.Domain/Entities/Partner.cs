@@ -9,7 +9,7 @@ namespace GivingChampion.Domain.Entities
 {
     public class Partner : BaseEntity
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } 
         /// <summary>
         /// Organization official name
         /// </summary>
@@ -28,8 +28,6 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [Phone(ErrorMessage = "Invalid phone number format")]
         [MaxLength(20)]
-        //////// Updated upstream
-
         public  string? PhoneNumber { get; set; }
 
         /// <summary>
@@ -50,16 +48,5 @@ namespace GivingChampion.Domain.Entities
         [Range(0, int.MaxValue)]
         public int ProjectsCount { get; set; } = 0;
 
-        /// <summary>
-        /// Record creation timestamp (UTC)
-        /// </summary>
-        //public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        ///// <summary>
-        ///// Last update timestamp (UTC)
-        ///// </summary>
-        //public DateTime? UpdatedAt { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }

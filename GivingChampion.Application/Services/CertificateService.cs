@@ -57,12 +57,10 @@ namespace GivingChampion.Application.Services.Certificate
                 cancellationToken);
         }
 
-        public async Task<List<CertificateReadAllDto>> GetCertificateByIdAsync(
-            CancellationToken cancellationToken = default)
+        // Get all certificates for a specific user
+        public async Task<List<Certificate>> GetCertificateByIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            var certificates = await _certificateRepository.GetAllAsync(cancellationToken);
-
-            return _mapper.Map<List<CertificateReadAllDto>>(certificates);
+            return await _certificateRepository.GetCertificateByIdAsync(userId, cancellationToken);
         }
     }
-}
+    }

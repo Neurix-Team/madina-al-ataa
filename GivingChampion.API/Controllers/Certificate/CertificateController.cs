@@ -36,30 +36,23 @@ namespace GivingChampion.API.Controllers.Certificate
         /// Retrieves a certificate by its unique identifier (ID).
         /// </summary>
         [Authorize]
-        [HttpGet("{id:guid}")]
-            public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+        [HttpGet("user/{userId:guid}")]
+        public async Task<IActionResult> GetCertificatesByUserId(Guid userId, CancellationToken cancellationToken)
+        {
+            try
             {
-                try
-                {
-                    var certificate = await _certificateService.GetCertificateByIdAsync(cancellationToken);
-
-                    // If certificate is not found, return 404 Not Found
-                    if (certificate == null)
-                    {
-                        _logger.LogWarning($"Certificate with ID {id} not found.");
-                        return NotFound($"Certificate with ID {id} not found.");
-                    }
-
-                    // Return the certificate data if found
-                    return Ok(certificate);
-                }
-                catch (Exception ex)
-                {
-                    // Log error and return 500 Internal Server Error
-                    _logger.LogError(ex, $"Error occurred while fetching certificate with ID {id}.");
-                    return StatusCode(500, "Internal server error");
-                }
+                // Step 1: Call the service to get certificates for the user
+                var certificates = await _certificateService.GetCertificatesByUserIdAsync(userId, cancellationToken);
+                // Step 2: Return the certificates as an OK response
+                return Ok(certificates);
             }
+            catch (Exception ex)
+            {
+                // Log error and return 500 Internal Server Error
+                _logger.LogError(ex, "Error occurred while fetching certificates for user.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
         #endregion
 
         #region GetAllCertificates

@@ -12,12 +12,12 @@ namespace GivingChampion.Domain.Entities
     /// Used to collect and track donation progress.
     /// </summary>
     public class DonationRequest : BaseEntity
-    {
-        /// <summary>
-        /// Primary key (unique identifier)
-        /// </summary>
-        [Key]
-        public Guid Id { get; set; }
+	{
+		/// <summary>
+		/// Primary key (unique identifier)
+		/// </summary>
+		[Key]
+		public Guid Id { get; set; } 
 
         /// <summary>
         /// Title of the donation request (e.g. "Help Hospital Cases")
@@ -37,7 +37,7 @@ namespace GivingChampion.Domain.Entities
         /// Total amount required for this donation request
         /// </summary>
         [Range(1, double.MaxValue, ErrorMessage = "Donate amount must be greater than zero")]
-        public decimal DonateAmount { get; set; }
+		public decimal DonateAmount { get; set; }
 
         /// <summary>
         /// Remaining amount needed to complete the donation
@@ -45,11 +45,11 @@ namespace GivingChampion.Domain.Entities
         [Range(10, double.MaxValue, ErrorMessage = "Amount remaining cannot be negative")]
         public decimal AmountRemaining { get; set; }
 
-        /// <summary>
-        /// Indicates whether the request is verified by admin
-        /// </summary>
-        public RequestStatus Status { get; set; }
-
+		/// <summary>
+		/// Indicates whether the request is verified by admin
+		/// </summary>
+		public RequestStatus Status { get; set; } 
+        
 
         /// <summary>
         /// Urgency level of the request (Low, Medium, High)
@@ -69,9 +69,9 @@ namespace GivingChampion.Domain.Entities
         [Required]
         public Guid PartnerId { get; set; }
 
-        [ForeignKey("PartnerId")]
-        public Partner Partner { get; set; } = null!;
+		[ForeignKey("PartnerId")]
+		public Partner Partner { get; set; } = null!;
 
 
-    }
+	}
 }

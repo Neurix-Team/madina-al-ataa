@@ -15,13 +15,11 @@ namespace GivingChampion.Common.DTO.VolunteerOrder
 
             public DateTime ScheduleDate { get; set; }
 
-            public int Duration { get; set; }
 
-            public string Location { get; set; } = string.Empty;
 
             public string Status { get; set; }
 
-            public string? Notes { get; set; }
+            
 
             public Guid ServiceRequestId { get; set; }
 
