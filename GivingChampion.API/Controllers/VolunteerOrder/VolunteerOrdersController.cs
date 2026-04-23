@@ -29,7 +29,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         #region Query Endpoints
 
         #region Get All
-
+        
         /// <summary>
         /// Get all volunteer orders.
         /// </summary>
@@ -150,35 +150,9 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #endregion
 
-        #region Update
+   
+      
 
-        /// <summary>
-        /// Update an existing volunteer order.
-        /// </summary>
-        [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Volunteer")]
-        public async Task<ActionResult<VolunteerOrderDto>> Update(Guid id, [FromBody] UpdateVolunteerOrderDto dto)
-        {
-            try
-            {
-                var updatedVolunteerOrder = await _volunteerOrderService.UpdateAsync(id, dto);
-
-                if (updatedVolunteerOrder == null)
-                    return NotFound(new { message = "Volunteer order not found." });
-
-                return Ok(updatedVolunteerOrder);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "An error occurred while updating the volunteer order.",
-                    error = ex.Message
-                });
-            }
-        }
-
-        #endregion
 
         #region Delete
 

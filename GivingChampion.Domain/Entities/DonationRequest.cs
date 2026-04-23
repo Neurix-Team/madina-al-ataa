@@ -6,6 +6,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Enums;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace GivingChampion.Domain.Entities
 {
     /// <summary>

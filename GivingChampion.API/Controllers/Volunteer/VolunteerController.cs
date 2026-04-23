@@ -188,6 +188,5 @@ namespace GivingChampion.API.Controllers.Volunteer
         #endregion
         #endregion
 
-        #endregion
     }
 }

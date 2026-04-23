@@ -29,14 +29,14 @@ namespace GivingChampion.Application.Services
         #region Query Methods
 
         #region GetAllVolunteer
-        public async Task<List<VolunteerDto>> GetAllAsync()
-        {
-            // Get all volunteers from the repository (as entities)
-            var volunteers = await _volunteerRepository.GetAllAsync();
+        //public async Task<List<VolunteerDto>> GetAllAsync()
+        //{
+        //    // Get all volunteers from the repository (as entities)
+        //    var volunteers = await _volunteerRepository.GetAllAsync();
 
-            // Map to VolunteerDto to return to controller
-            return _mapper.Map<List<VolunteerDto>>(volunteers);
-        }
+        //    // Map to VolunteerDto to return to controller
+        //    return _mapper.Map<List<VolunteerDto>>(volunteers);
+        //}
 
         #endregion
 
@@ -61,43 +61,42 @@ namespace GivingChampion.Application.Services
 
         #region CreateVolunteer
 
-        public async Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto)
-        {
-            // Map the incoming CreateVolunteerDto to Volunteer entity
-            var volunteer = _mapper.Map<Volunteer>(dto);
+        //public async Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto)
+        //{
+        //    // Map the incoming CreateVolunteerDto to Volunteer entity
+        //    var volunteer = _mapper.Map<Volunteer>(dto);
 
-            // Add the volunteer to the repository
-            await _volunteerRepository.AddAsync(volunteer);
-            await _volunteerRepository.SaveChangesAsync();
+        //    // Add the volunteer to the repository
+        //    await _volunteerRepository.AddAsync(volunteer);
+        //    await _volunteerRepository.SaveChangesAsync();
 
-            // Map to VolunteerDto to return to controller
-            return _mapper.Map<VolunteerDto>(volunteer);
-        } 
+        //    // Map to VolunteerDto to return to controller
+        //    return _mapper.Map<VolunteerDto>(volunteer);
+        //} 
         #endregion
 
         #region UpdateVolunteer
-        public async Task<VolunteerDto?> UpdateAsync(Guid id, UpdateVolunteerDto dto)
-        {
-            // Get the existing volunteer by ID
-            var volunteer = await _volunteerRepository.GetByIdAsync(id);
+        //public async Task<VolunteerDto?> UpdateAsync(Guid id, UpdateVolunteerDto dto)
+        //{
+        //    // Get the existing volunteer by ID
+        //    var volunteer = await _volunteerRepository.GetByIdAsync(id);
 
-            // Return null if volunteer does not exist
-            if (volunteer == null)
-                return null;
+        //    // Return null if volunteer does not exist
+        //    if (volunteer == null)
+        //        return null;
 
-            // Map the incoming UpdateVolunteerDto to the existing volunteer entity
-            _mapper.Map(dto, volunteer);
-            volunteer.UserId = volunteer.UserId; // Ensure UserId remains unchanged
+        //    // Map the incoming UpdateVolunteerDto to the existing volunteer entity
+        //    _mapper.Map(dto, volunteer);
+        //    volunteer.UserId = volunteer.UserId; // Ensure UserId remains unchanged
 
-            // Update the volunteer in the repository
-            _volunteerRepository.Update(volunteer);
-            await _volunteerRepository.SaveChangesAsync();
+        //    // Update the volunteer in the repository
+        //    _volunteerRepository.Update(volunteer);
+        //    await _volunteerRepository.SaveChangesAsync();
 
-            // Map to VolunteerDto to return the updated volunteer
-            return _mapper.Map<VolunteerDto>(volunteer);
+        //    // Map to VolunteerDto to return the updated volunteer
+        //    return _mapper.Map<VolunteerDto>(volunteer);
         } 
         #endregion
 
         #endregion
     }
-}

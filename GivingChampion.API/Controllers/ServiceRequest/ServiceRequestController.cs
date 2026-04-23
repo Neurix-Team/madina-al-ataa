@@ -31,8 +31,11 @@ namespace GivingChampion.API.Controllers
 
         #endregion
 
-        #region Get Endpoints
 
+
+
+        #region Get Endpoints
+        [Authorize(Roles = "Volunteer")]
         // GET: api/ServiceRequests
         // Returns all service requests that are not soft deleted
         [HttpGet]
@@ -57,6 +60,8 @@ namespace GivingChampion.API.Controllers
 
         // GET: api/ServiceRequests/{id}
         // Returns a single service request by id
+        [Authorize(Roles = "Volunteer")]
+
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -96,10 +101,11 @@ namespace GivingChampion.API.Controllers
                 });
             }
         }
-
+        // GET: api/ServiceRequests/upcoming or available
         // GET: api/ServiceRequests/pending
         // Returns all pending service requests
         [HttpGet("pending")]
+        [Authorize(Roles = "Volunteer")]
         public async Task<IActionResult> GetPending()
         {
             try
@@ -122,6 +128,7 @@ namespace GivingChampion.API.Controllers
         // GET: api/ServiceRequests/partner/{partnerId}
         // Returns all service requests related to a specific partner
         [HttpGet("partner/{partnerId:guid}")]
+        [Authorize(Roles = "Volunteer")]
         public async Task<IActionResult> GetByPartnerId(Guid partnerId)
         {
             try
@@ -166,19 +173,6 @@ namespace GivingChampion.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Request body cannot be null."
-                    });
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
                 var createdServiceRequest = await _serviceRequestService.CreateAsync(dto);
 
                 return CreatedAtAction(
@@ -200,7 +194,6 @@ namespace GivingChampion.API.Controllers
 
         #endregion
 
-        #region Update Endpoint
 
         #region Update 
         // PUT: api/ServiceRequests/{id}
@@ -213,58 +206,29 @@ namespace GivingChampion.API.Controllers
         {
             try
             {
-                if (id == Guid.Empty)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Invalid service request id."
-                    });
-                }
-
-                if (dto == null)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Request body cannot be null."
-                    });
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
 
                 var isUpdated = await _serviceRequestService.UpdateAsync(id, dto);
 
                 if (!isUpdated)
                 {
-                    return NotFound(new
-                    {
-                        Message = "Service request not found."
-                    });
+                    return NotFound(new { Message = "Service request not found." });
                 }
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Error occurred while updating service request with id {ServiceRequestId}.",
-                    id
-                );
+                _logger.LogError(ex, "An error occurred while updating service request {Id}", id);
 
                 return StatusCode(500, new
                 {
-                    Message = "An unexpected error occurred while updating the service request."
+                    Message = "An unexpected error occurred. Please try again later."
                 });
             }
         }
 
 
         #endregion
-
-        #region Delete Endpoint
 
         // DELETE: api/ServiceRequests/{id}
         // Soft deletes an existing service request
@@ -275,33 +239,18 @@ namespace GivingChampion.API.Controllers
         {
             try
             {
-                if (id == Guid.Empty)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Invalid service request id."
-                    });
-                }
-
                 var isDeleted = await _serviceRequestService.DeleteAsync(id);
 
                 if (!isDeleted)
                 {
-                    return NotFound(new
-                    {
-                        Message = "Service request not found."
-                    });
+                    return NotFound(new { Message = "Service request not found." });
                 }
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Error occurred while deleting service request with id {ServiceRequestId}.",
-                    id
-                );
+                _logger.LogError(ex, "Error occurred while deleting service request with id {Id}.", id);
 
                 return StatusCode(500, new
                 {
@@ -309,7 +258,5 @@ namespace GivingChampion.API.Controllers
                 });
             }
         }
-
-        #endregion
     }
 }

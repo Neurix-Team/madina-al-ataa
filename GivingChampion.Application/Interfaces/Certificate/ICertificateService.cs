@@ -4,7 +4,7 @@ using GivingChampion.Persistance.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using GivingChampion.Domain.Entities;
 namespace GivingChampion.Application.Interfaces.Certificate
 {
     public interface ICertificateService
@@ -17,8 +17,8 @@ namespace GivingChampion.Application.Interfaces.Certificate
             // Check if a volunteer exists
             Task<bool> CheckVolunteerExists(Guid volunteerId, CancellationToken cancellationToken = default);
 
-            Task<List<CertificateReadAllDto>> GetCertificateByIdAsync(CancellationToken cancellationToken = default);
-        }
+        Task<List<Certificate>> GetCertificatesByIdAsync(Guid userId, CancellationToken cancellationToken = default);
     }
+}
 
 

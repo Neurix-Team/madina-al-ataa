@@ -50,14 +50,10 @@ namespace GivingChampion.Application.Services.Certificate
             return await _certificateRepository.VolunteerExistsAsync(volunteerId, cancellationToken);
         }
 
-        // Get all certificates (fetch all certificates)
-        public async Task<List<CertificateReadAllDto>> GetCertificateByIdAsync(CancellationToken cancellationToken = default)
+        // Get all certificates for a specific user
+        public async Task<List<Certificate>> GetCertificateByIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            // Step 1: Retrieve all certificates from the repository
-            var certificates = await _certificateRepository.GetAllAsync(cancellationToken);
-
-            // Step 2: Map certificates to DTOs and return the list
-            return _mapper.Map<List<CertificateReadAllDto>>(certificates);
+            return await _certificateRepository.GetCertificateByIdAsync(userId, cancellationToken);
         }
     }
-}
+    }

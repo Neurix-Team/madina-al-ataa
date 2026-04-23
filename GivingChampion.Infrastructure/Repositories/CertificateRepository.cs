@@ -14,14 +14,14 @@ namespace GivingChampion.Persistance.Repositories
             _context = context;
         }
 
-        // Get a certificate by its ID
-        public async Task<Certificate?> GetCertificateByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        // Get all certificates for a specific user by UserId
+        public async Task<List<Certificate>> GetCertificateByIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _context.Certificates
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+                .Where(c => c.VolunteerId == userId)  
+                .ToListAsync(cancellationToken);
         }
-
         // Check if a volunteer exists by their ID
         public async Task<bool> VolunteerExistsAsync(Guid volunteerId, CancellationToken cancellationToken = default)
         {

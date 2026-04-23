@@ -334,14 +334,6 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
-            // UpdateVolunteerOrderDto -> VolunteerOrder
-            CreateMap<UpdateVolunteerOrderDto, VolunteerOrder>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.VolunteerId, opt => opt.Ignore())
-                .ForMember(dest => dest.Status, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
 
             // Partner -> PartnerDto
             CreateMap<Partner, PartnerDto>()
@@ -362,14 +354,17 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
                 .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability));
 
-            CreateMap<CreateVolunteerDto, Volunteer>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(_ => 0))
-                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false))
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
-                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability))
-                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills));
+            CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
+      // Generate a unique ID for the new Order
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+
+      // Explicitly map the ServiceRequestId from the DTO
+      .ForMember(dest => dest.ServiceRequestId, opt => opt.MapFrom(src => src.ServiceRequestId))
+
+      // Set default values for a new request
+      .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => OrderStatus.Pending))
+      .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+      .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(_ => false));
 
             CreateMap<UpdateVolunteerDto, Volunteer>()
                 .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills)).ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability)).ForMember(dest => dest.UserId, opt => opt.Ignore());
@@ -410,7 +405,7 @@ namespace GivingChampion.Application.Mapper
 
 
             CreateMap<UpdateDonationRequestDto, DonationRequest>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())  
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Title, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Title)))  // Only map if not null or empty
             .ForMember(dest => dest.Location, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Location)))
             .ForMember(dest => dest.DonateAmount, opt => opt.Condition(src => src.DonateAmount.HasValue))
@@ -421,12 +416,10 @@ namespace GivingChampion.Application.Mapper
 
             // Mapping from DonationOrder Entity to DTOs
             CreateMap<DonationOrder, DonationOrderReadDto>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus.ToString()));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
             CreateMap<DonationOrder, DonationOrderDetailsDto>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus.ToString()));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
             // Mapping from CreateDonationOrderDto to DonationOrder Entity
             CreateMap<CreateDonationOrderDto, DonationOrder>()
