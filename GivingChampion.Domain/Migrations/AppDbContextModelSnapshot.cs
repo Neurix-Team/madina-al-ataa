@@ -471,6 +471,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DonationRequestId");
+
                     b.HasIndex("DonorId");
 
                     b.ToTable("DonationOrders");
@@ -562,6 +564,45 @@ namespace GivingChampion.Domain.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Donors");
+                });
+
+            modelBuilder.Entity("GivingChampion.Domain.Entities.GeoQuest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("LocationLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("LocationLongitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("GeoQuests");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
@@ -955,6 +996,56 @@ namespace GivingChampion.Domain.Migrations
                     b.ToTable("UserBadges");
                 });
 
+            modelBuilder.Entity("GivingChampion.Domain.Entities.UserGeoQuest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GeoQuestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsLocationVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsStarted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GeoQuestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserGeoQuests");
+                });
+
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserLevel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1288,11 +1379,19 @@ namespace GivingChampion.Domain.Migrations
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.DonationOrder", b =>
                 {
+                    b.HasOne("GivingChampion.Domain.Entities.DonationRequest", "DonationRequest")
+                        .WithMany()
+                        .HasForeignKey("DonationRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GivingChampion.Domain.Entities.Donor", "Donor")
                         .WithMany()
                         .HasForeignKey("DonorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("DonationRequest");
 
                     b.Navigation("Donor");
                 });
@@ -1317,6 +1416,17 @@ namespace GivingChampion.Domain.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GivingChampion.Domain.Entities.GeoQuest", b =>
+                {
+                    b.HasOne("GivingChampion.Domain.Entities.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Mission", b =>
@@ -1415,6 +1525,25 @@ namespace GivingChampion.Domain.Migrations
                     b.Navigation("Badge");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("GivingChampion.Domain.Entities.UserGeoQuest", b =>
+                {
+                    b.HasOne("GivingChampion.Domain.Entities.GeoQuest", "GeoQuest")
+                        .WithMany()
+                        .HasForeignKey("GeoQuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GeoQuest");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserLevel", b =>

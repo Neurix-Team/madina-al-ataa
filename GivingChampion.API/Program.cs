@@ -55,21 +55,20 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 
 // Add services to the container.
 
-if (!builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddUserSecrets<Program>();
-}
+//if (!builder.Environment.IsDevelopment())
+//{
+//    builder.Configuration.AddUserSecrets<Program>();
+//}
 
 if (_env.IsDevelopment())
 {
-    // for testing
-    builder.AddNpgsqlDbContext<AppDbContext>("givingchampion");
+    builder.AddNpgsqlDbContext<AppDbContext>("DefaultConnection");
 }
 else
 {
     var connectionstring = _conf.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    // for live
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
 }

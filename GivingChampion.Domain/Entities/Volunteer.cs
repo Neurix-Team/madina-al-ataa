@@ -1,11 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Collections.Generic;
-using GivingChampion.Domain.Enums;
-using Microsoft.Azure.Documents;
-
-using GivingChampion.Common.Interfaces;
 using GivingChampion.Domain.Entities.Base;
 namespace GivingChampion.Domain.Entities
 {

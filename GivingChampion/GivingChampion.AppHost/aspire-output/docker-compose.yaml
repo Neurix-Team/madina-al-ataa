@@ -9,38 +9,14 @@ services:
     networks:
       - "aspire"
     restart: "always"
-  postgres:
-    image: "docker.io/library/postgres:17.6"
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
-      POSTGRES_USER: "${USERNAME}"
-      POSTGRES_PASSWORD: "${PASSWORD}"
-    ports:
-      - "5432:5432"
-    expose:
-      - "5432"
-    networks:
-      - "aspire"
   migrator:
     image: "${MIGRATOR_IMAGE}"
     environment:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       ConnectionStrings__DefaultConnection: "${DEFAULTCONNECTION}"
-      ConnectionStrings__givingchampion: "Host=postgres;Port=5432;Username=${USERNAME};Password=${PASSWORD};Database=givingchampion"
-      GIVINGCHAMPION_HOST: "postgres"
-      GIVINGCHAMPION_PORT: "5432"
-      GIVINGCHAMPION_USERNAME: "${USERNAME}"
-      GIVINGCHAMPION_PASSWORD: "${PASSWORD}"
-      GIVINGCHAMPION_URI: "postgresql://${USERNAME}:${PASSWORD}@postgres:5432/givingchampion"
-      GIVINGCHAMPION_JDBCCONNECTIONSTRING: "jdbc:postgresql://postgres:5432/givingchampion"
-      GIVINGCHAMPION_DATABASENAME: "givingchampion"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://compose-dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "migrator"
-    depends_on:
-      postgres:
-        condition: "service_started"
     networks:
       - "aspire"
   seeder:
@@ -48,20 +24,10 @@ services:
     environment:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       ConnectionStrings__DefaultConnection: "${DEFAULTCONNECTION}"
-      ConnectionStrings__givingchampion: "Host=postgres;Port=5432;Username=${USERNAME};Password=${PASSWORD};Database=givingchampion"
-      GIVINGCHAMPION_HOST: "postgres"
-      GIVINGCHAMPION_PORT: "5432"
-      GIVINGCHAMPION_USERNAME: "${USERNAME}"
-      GIVINGCHAMPION_PASSWORD: "${PASSWORD}"
-      GIVINGCHAMPION_URI: "postgresql://${USERNAME}:${PASSWORD}@postgres:5432/givingchampion"
-      GIVINGCHAMPION_JDBCCONNECTIONSTRING: "jdbc:postgresql://postgres:5432/givingchampion"
-      GIVINGCHAMPION_DATABASENAME: "givingchampion"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://compose-dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "seeder"
     depends_on:
-      postgres:
-        condition: "service_started"
       migrator:
         condition: "service_completed_successfully"
     networks:
@@ -73,17 +39,10 @@ services:
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       HTTP_PORTS: "${API_PORT}"
       ConnectionStrings__DefaultConnection: "${DEFAULTCONNECTION}"
-      ConnectionStrings__givingchampion: "Host=postgres;Port=5432;Username=${USERNAME};Password=${PASSWORD};Database=givingchampion"
-      GIVINGCHAMPION_HOST: "postgres"
-      GIVINGCHAMPION_PORT: "5432"
-      GIVINGCHAMPION_USERNAME: "${USERNAME}"
-      GIVINGCHAMPION_PASSWORD: "${PASSWORD}"
-      GIVINGCHAMPION_URI: "postgresql://${USERNAME}:${PASSWORD}@postgres:5432/givingchampion"
-      GIVINGCHAMPION_JDBCCONNECTIONSTRING: "jdbc:postgresql://postgres:5432/givingchampion"
-      GIVINGCHAMPION_DATABASENAME: "givingchampion"
       Jwt__Issuer: "GivingChampion"
       Jwt__Audience: "GivingChampion.Client"
       Jwt__AccessTokenMinutes: "60"
+      Authentication__Google__ClientId: "${GOOGLE_CLIENT_ID}"
       Authentication__Google__ClientSecret: "${GOOGLE_CLIENT_SECRET}"
       Jwt__Key: "${JWT_KEY}"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://compose-dashboard:18889"
@@ -94,8 +53,6 @@ services:
     expose:
       - "${API_PORT}"
     depends_on:
-      postgres:
-        condition: "service_started"
       seeder:
         condition: "service_completed_successfully"
     networks:

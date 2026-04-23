@@ -130,12 +130,15 @@ namespace GivingChampion.Application.Services
                         return AuthServiceResult<ExternalLoginCodeResponse>.Failure(createUserResult.Errors);
                     }
 
+                    user = createUserResult.Data;
+                    isNewUser = true;
+
                     var donor = new Donor
                     {
                         Id = Guid.NewGuid(),
                         UserId = user.Id,
                         TotalDonated = 0,
-                        PreferedCategory = 0,           // or default value
+                        PreferedCategory = 0,
                         CreatedAt = DateTime.UtcNow
                     };
 
