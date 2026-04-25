@@ -42,7 +42,7 @@ namespace GivingChampion.API.Controllers.Certificate
             try
             {
                 // Step 1: Call the service to get certificates for the user
-                var certificates = await _certificateService.GetCertificatesByUserIdAsync(userId, cancellationToken);
+                var certificates = await _certificateService.GetCertificatesByIdAsync(userId, cancellationToken);
                 // Step 2: Return the certificates as an OK response
                 return Ok(certificates);
             }
@@ -76,33 +76,33 @@ namespace GivingChampion.API.Controllers.Certificate
                 }
             }
 
-            #endregion
+        #endregion
 
-            #endregion
+        #endregion
 
 
-            //#region CreateCertificate
-            ///// <summary>
-            ///// Creates a new certificate.
-            ///// </summary>
-            //[HttpPost]
-            //public async Task<IActionResult> Create([FromBody] CertificateCreateDto dto, CancellationToken cancellationToken)
-            //{
-            //    try
-            //    {
-            //        // Call the service to create the certificate
-            //        var createdCertificate = await _certificateService.CreateAsync(dto, cancellationToken);
+        //#region CreateCertificate
+        ///// <summary>
+        ///// Creates a new certificate.
+        ///// </summary>
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] CertificateCreateDto dto, CancellationToken cancellationToken)
+        //{
+        //    try
+        //    {
+        //        // Call the service to create the certificate
+        //        var createdCertificate = await _certificateService.CreateAsync(dto, cancellationToken);
 
-            //        // Return the created certificate with 201 status code
-            //        return CreatedAtAction(nameof(GetById), new { id = createdCertificate?.Id }, createdCertificate);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        // Log error and return 500 Internal Server Error
-            //        _logger.LogError(ex, "Error occurred while creating the certificate.");
-            //        return StatusCode(500, "Internal server error");
-            //    }
-            //}
-            //#endregion
-        }
+        //        // Return the created certificate with 201 status code
+        //        return CreatedAtAction(nameof(GetById), new { id = createdCertificate?.Id }, createdCertificate);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log error and return 500 Internal Server Error
+        //        _logger.LogError(ex, "Error occurred while creating the certificate.");
+        //        return StatusCode(500, "Internal server error");
+        //    }
+        //}
+        //#endregion
+    }
     }

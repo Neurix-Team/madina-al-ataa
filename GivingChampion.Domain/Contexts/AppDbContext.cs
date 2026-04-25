@@ -43,7 +43,7 @@ namespace GivingChampion.Domain.Contexts
         public DbSet<Activity> Activities { get; set; }
         public DbSet<GeoQuest> GeoQuests { get; set; }
         public DbSet<UserGeoQuest> UserGeoQuests { get; set; }
-
+        public DbSet<VolunteerHistories> VolunteerHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

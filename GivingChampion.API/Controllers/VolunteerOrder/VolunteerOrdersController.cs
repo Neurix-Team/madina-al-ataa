@@ -3,6 +3,7 @@ using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharpYaml.Serialization.Logging;
 using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers.VolunteerOrder
@@ -16,15 +17,19 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         private readonly IVolunteerOrderService _volunteerOrderService;
         private readonly IServiceRequestRepository _serviceRequestRepository;
-
+        private readonly ILogger<VolunteerOrdersController> _logger;
         #endregion
 
         #region Constructor
 
-        public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService, IServiceRequestRepository serviceRequestRepository)
+        public VolunteerOrdersController(
+        IVolunteerOrderService volunteerOrderService,
+        IServiceRequestRepository serviceRequestRepository,
+        ILogger<VolunteerOrdersController> logger)
         {
             _volunteerOrderService = volunteerOrderService;
             _serviceRequestRepository = serviceRequestRepository;
+            _logger = logger;
         }
 
         #endregion
@@ -32,7 +37,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         #region Query Endpoints
 
         #region Get All
-        
+
         /// <summary>
         /// Get all volunteer orders.
         /// </summary>
@@ -87,7 +92,6 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #endregion
 
-       
 
 
 
@@ -96,24 +100,50 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ApproveOrder(Guid id)
         {
-            var result = await _volunteerOrderService.ApproveOrderAsync(id);
-            if (result == null)
+            try
             {
-                return NotFound("Volunteer order not found.");
+                var result = await _volunteerOrderService.ApproveOrderAsync(id);
+
+                if (result == null)
+                    return NotFound("Volunteer order not found.");
+
+                return Ok(result);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while approving order {Id}", id);
+
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while approving order.",
+                    error = ex.Message
+                });
+            }
         }
         // Reject Volunteer Order
         [HttpPatch("{id}/reject")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RejectOrder(Guid id, [FromBody] string rejectionReason)
         {
-            var result = await _volunteerOrderService.RejectOrderAsync(id, rejectionReason);
-            if (result == null)
+            try
             {
-                return NotFound("Volunteer order not found.");
+                var result = await _volunteerOrderService.RejectOrderAsync(id, rejectionReason);
+
+                if (result == null)
+                    return NotFound("Volunteer order not found.");
+
+                return Ok(result);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while rejecting order {Id}", id);
+
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while rejecting order.",
+                    error = ex.Message
+                });
+            }
         }
         #region Command Endpoints
 
@@ -162,7 +192,35 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #endregion
 
+        #region Update Progress
 
+        /// <summary>
+        /// Update volunteer order progress
+        /// </summary>
+        [HttpPatch("{id}/progress")]
+        [Authorize(Roles = "Volunteer")]
+        public async Task<IActionResult> UpdateProgress(Guid id, [FromBody] int addedProgress)
+        {
+            try
+            {
+                var result = await _volunteerOrderService.UpdateProgressAsync(id, addedProgress);
+
+                if (result == null)
+                    return NotFound("Volunteer order not found.");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error while updating progress",
+                    error = ex.Message
+                });
+            }
+        }
+
+        #endregion
 
 
 

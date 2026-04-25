@@ -62,8 +62,14 @@ namespace GivingChampion.Domain.Entities
 		// Navigation Property
 		[ForeignKey("PartnerId")]
 		public Partner Partner { get; set; } = null!;
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
+        [Range(0, 100)]
+        public int Progress { get; set; }
+        public Guid? VolunteerUserId { get; set; }
+        [ForeignKey(nameof(VolunteerUserId))]
+        public ApplicationUser? Volunteer { get; set; }
+
+
+
     }
 
 

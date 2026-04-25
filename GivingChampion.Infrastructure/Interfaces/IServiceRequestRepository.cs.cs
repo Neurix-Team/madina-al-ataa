@@ -33,7 +33,7 @@ namespace GivingChampion.Persistance.Interfaces
         // Soft deletes a service request instead of physically removing it from the database
         // Usually sets IsDeleted = true and DeletedAt = current date/time
         void SoftDelete(ServiceRequest serviceRequest);
-
+        Task UpdateProgressAsync(Guid serviceRequestId, int progress);
         // Saves all pending changes to the database
         Task SaveChangesAsync();
     }

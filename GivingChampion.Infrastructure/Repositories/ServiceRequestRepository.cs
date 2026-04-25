@@ -84,7 +84,19 @@ namespace GivingChampion.Persistance.Repositories
         }
 
         #endregion
+        public async Task UpdateProgressAsync(Guid serviceRequestId, int progress)
+        {
+            var request = await _context.ServiceRequests
+                .FirstOrDefaultAsync(x => x.Id == serviceRequestId && !x.IsDeleted);
 
+            if (request == null)
+                return;
+
+            request.Progress = progress;
+
+            _context.ServiceRequests.Update(request);
+            await _context.SaveChangesAsync();
+        }
         #region Update Method
 
         // Marks an existing service request as modified

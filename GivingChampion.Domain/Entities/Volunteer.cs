@@ -31,8 +31,10 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Foreign key reference to Application User (Identity User)
         /// </summary>
-        [Required]
-        public Guid UserId { get; set; }
+
+
+            [Required]
+            public Guid UserId { get; set; }  // UserId as the foreign key
 
         /// <summary>
         /// Navigation property to the related Application User

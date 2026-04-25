@@ -20,7 +20,6 @@ namespace GivingChampion.Application.Interfaces.ServiceRequestService
         // Gets all service requests filtered by specific status.
         public Task<List<ServiceRequestDto>> GetApprovedRequestsAsync();
         Task<ServiceRequestDto> CreateAsync(CreateServiceRequestDto dto);
-
         Task<bool> UpdateAsync(Guid id, UpdateServiceRequestDto dto);
 
         Task<bool> DeleteAsync(Guid id);

@@ -24,7 +24,5 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Location")]
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }

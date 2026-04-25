@@ -35,14 +35,10 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Foreign key to Volunteer
         /// </summary>
-        public Guid VolunteerId { get; set; }
-        [ForeignKey(nameof(VolunteerId))]
-        public Volunteer? Volunteer { get; set; }
-        /// <summary>
-        /// Record creation timestamp (UTC)
-        /// </summary>
-        [Range(0, 100, ErrorMessage = "ProgressPercentage must be between 0 and 100.")]
-        public int ProgressPercentage { get; set; }
+        public Guid UserId { get; set; } // Identity User (Volunteer)
+
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser? User { get; set; }  // Navigation property to the related Application User
         public DateTime? RejectedAt { get; set; } 
         public DateTime? ApprovedAt { get; set; } 
 

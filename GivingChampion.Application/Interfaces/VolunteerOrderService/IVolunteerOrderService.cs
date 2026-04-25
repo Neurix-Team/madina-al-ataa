@@ -13,7 +13,7 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
             // Returns null if the order does not exist or is soft deleted
             Task<VolunteerOrderDto?> GetByIdAsync(Guid id);
         #endregion
-
+        Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, int addedProgress);
         Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id);
         // Added string rejectionReason to match business logic
         Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason);

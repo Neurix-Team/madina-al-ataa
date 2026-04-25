@@ -42,8 +42,8 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [MaxLength(2000)]
         public string QrCode { get; set; } = string.Empty;
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
+        public Guid VolunteerId { get; set; }
+        
     }
 }
 

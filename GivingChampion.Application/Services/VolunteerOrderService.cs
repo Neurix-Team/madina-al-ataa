@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
@@ -21,6 +22,7 @@ namespace GivingChampion.Application.Services
 
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
+        private readonly IVolunteerHistoryService _historyService;
         private readonly IMapper _mapper;
 
         #endregion
@@ -34,11 +36,12 @@ namespace GivingChampion.Application.Services
         /// <param name="mapper">AutoMapper instance.</param>
         public VolunteerOrderService(
             IVolunteerOrderRepository volunteerOrderRepository,
-            IServiceRequestRepository serviceRequestRepository,
+            IServiceRequestRepository serviceRequestRepository,IVolunteerHistoryService historyService,
             IMapper mapper)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
+            _historyService = historyService;
             _mapper = mapper;
         }
 
@@ -151,21 +154,109 @@ namespace GivingChampion.Application.Services
         }
         #endregion
 
-
-        #region ProcessRequest
-
-        public async Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id)
+        public async Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, int addedProgress)
         {
-            var order = await _volunteerOrderRepository.GetByIdAsync(id);
+            var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
             if (order == null)
                 return null;
 
-            order.Status = OrderStatus.Approved;
+            if (order.Status == OrderStatus.Rejected)
+                throw new Exception("Cannot update a rejected order.");
 
-            // Use the existing Repository Pattern: Update + SaveChangesAsync
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId);
+            if (serviceRequest == null)
+                throw new Exception("Service request not found.");
+
+            var newProgress = serviceRequest.Progress + addedProgress;
+
+            if (newProgress > 100)
+                newProgress = 100;
+
+            if (order.Status == OrderStatus.Approved && serviceRequest.Progress == 0)
+            {
+                order.Status = OrderStatus.InProgress;
+                serviceRequest.Status = RequestStatus.InProgress;
+
+                await _historyService.AddAsync(
+                    order.UserId,
+                    serviceRequest.Id,
+                    order.Id,
+                    VolunteerHistoryAction.TaskStarted
+                );
+            }
+
+            serviceRequest.Progress = newProgress;
+
+            await _historyService.AddAsync(
+                order.UserId,
+                serviceRequest.Id,
+                order.Id,
+                VolunteerHistoryAction.ProgressUpdated,
+                newProgress
+            );
+
+            if (newProgress == 100)
+            {
+                serviceRequest.Status = RequestStatus.Completed;
+
+                await _historyService.AddAsync(
+                    order.UserId,
+                    serviceRequest.Id,
+                    order.Id,
+                    VolunteerHistoryAction.TaskCompleted
+                );
+            }
+
+            _serviceRequestRepository.Update(serviceRequest);
             _volunteerOrderRepository.Update(order);
+
+            await _serviceRequestRepository.SaveChangesAsync();
             await _volunteerOrderRepository.SaveChangesAsync();
 
+            return _mapper.Map<VolunteerOrderDto>(order);
+        }
+        #region ProcessRequest
+
+        public async Task<VolunteerOrderDto?> ApproveOrderAsync(Guid orderId)
+        {
+            var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
+            if (order == null)
+                return null;
+
+            if (order.Status != OrderStatus.Pending)
+                throw new Exception("Order already processed");
+
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId);
+            if (serviceRequest == null)
+                throw new Exception("Service request not found");
+
+            serviceRequest.VolunteerUserId = order.UserId;
+            serviceRequest.Status = RequestStatus.Assigned;
+
+            await _historyService.AddAsync(
+   order.UserId,
+   serviceRequest.Id,
+   order.Id,
+   VolunteerHistoryAction.OrderApproved
+);
+            // history
+            await _historyService.AddAsync(
+                order.UserId,
+                serviceRequest.Id,
+                order.Id,
+                VolunteerHistoryAction.TaskAssigned
+            );
+            order.Status = OrderStatus.Approved;
+            order.ApprovedAt = DateTime.UtcNow;
+           
+
+            _volunteerOrderRepository.Update(order);
+            _serviceRequestRepository.Update(serviceRequest);
+
+            await _serviceRequestRepository.SaveChangesAsync();
+            await _volunteerOrderRepository.SaveChangesAsync();
+
+           
             return _mapper.Map<VolunteerOrderDto>(order);
         }
 
@@ -180,6 +271,13 @@ namespace GivingChampion.Application.Services
 
             _volunteerOrderRepository.Update(order);
             await _volunteerOrderRepository.SaveChangesAsync();
+
+            await _historyService.AddAsync(
+                order.UserId,
+                order.ServiceRequestId,
+                order.Id,
+                VolunteerHistoryAction.OrderRejected
+            );
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }

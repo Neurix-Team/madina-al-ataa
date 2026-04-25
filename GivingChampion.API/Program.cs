@@ -33,6 +33,16 @@ using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
+using GivingChampion.API.Interfaces;
+using GivingChampion.API.Services;
+using GivingChampion.API.Repositories;
+using GivingChampion.Application.Interfaces.Partner;
+using GivingChampion.Application.Interfaces.Volunteer;
+using GivingChampion.Application.Interfaces.Certificate;
+using GivingChampion.Application.Services;
+using GivingChampion.Application.Interfaces.DonationRequest;
+using GivingChampion.Application.Interfaces.DonationOrderService;
+using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.API.Handlers;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

@@ -28,6 +28,7 @@ using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using System.Collections.Generic;
 using GivingChampion.Common.DTO.UserGeoQuestDto;
+using GivingChampion.Common.Enums;
 
 using GivingChampion.Common.DTO.ServiceRequestDto;
 using GivingChampion.Common.DTO.VolunteerOrder;
@@ -56,7 +57,13 @@ namespace GivingChampion.Application.Mapper
             CreateMap<VolunteerOrder, VolunteerOrderDto>().ReverseMap();
 
             // CreateVolunteerOrderDto -> VolunteerOrder
-            CreateMap<CreateVolunteerOrderDto, VolunteerOrder>().ReverseMap();
+            CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
 
             // Partner -> PartnerDto
@@ -96,7 +103,7 @@ namespace GivingChampion.Application.Mapper
             CreateMap<CreateDonationRequestDto, DonationRequest>();
             CreateMap<UpdateDonationRequestDto, DonationRequest>();
 
-            #region UserGeoQuest Mappings
+            CreateMap<VolunteerHistories, VolunteerHistoryDto>();
 
             CreateMap<UserGeoQuest, UserGeoQuestDto>()
                 .ForMember(dest => dest.GeoQuestId,
@@ -259,7 +266,7 @@ namespace GivingChampion.Application.Mapper
             // ====================== Mission Mappings ======================
             CreateMap<UserMission, UserMissionDto>().ReverseMap();
             CreateMap<StartMissionDto, Mission>().ReverseMap();
-            CreateMap<UpdateProgressDto, Mission>().ReverseMap();
+            CreateMap<Common.DTO.Mission.UpdateProgressDto, Mission>().ReverseMap();
             #endregion
             // NOT WORKING
             //#region Pagination Mappings
@@ -269,7 +276,6 @@ namespace GivingChampion.Application.Mapper
             //    .ConvertUsing(typeof(PagedListConverter<,>));
 
             //#endregion
-            #region Location Mappings
             // Location Mappings
             CreateMap<Location, LocationDto>().ReverseMap();
 
@@ -429,18 +435,17 @@ namespace GivingChampion.Application.Mapper
             CreateMap<UpdateDonationOrderDTO, DonationOrder>();
         }
 
-        
-    }
-    // NOT WORKING
-    // Helper converter for generic PagedList mapping
-    //public class PagedListConverter<TSource, TDestination> : ITypeConverter<PagedList<TSource>, PagedList<TDestination>>
-    //{
-    //    public PagedList<TDestination> Convert(PagedList<TSource> source, PagedList<TDestination> destination, ResolutionContext context)
-    //    {
-    //        if (source == null) return null;
 
-    //        // Map the internal list of items
-    //        var mappedItems = context.Mapper.Map<List<TDestination>>(source.Items);
+            // NOT WORKING
+            // Helper converter for generic PagedList mapping
+            //public class PagedListConverter<TSource, TDestination> : ITypeConverter<PagedList<TSource>, PagedList<TDestination>>
+            //{
+            //    public PagedList<TDestination> Convert(PagedList<TSource> source, PagedList<TDestination> destination, ResolutionContext context)
+            //    {
+            //        if (source == null) return null;
+
+            //        // Map the internal list of items
+            //        var mappedItems = context.Mapper.Map<List<TDestination>>(source.Items);
 
     //        // Create the new paged list with the mapped items and existing metadata
     //        return new PagedList<TDestination>(
