@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GivingChampion.Domain.Entities.Base
+﻿namespace GivingChampion.Domain.Entities.Base
 {
     public abstract class BaseEntity
     {

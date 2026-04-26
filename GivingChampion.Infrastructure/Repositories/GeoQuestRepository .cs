@@ -1,4 +1,5 @@
-﻿using GivingChampion.Common.Pagination;
+﻿using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
@@ -16,13 +17,14 @@ namespace GivingChampion.API.Repositories
         }
 
         // Get all GeoQuests with pagination
-        public async Task<List<GeoQuest>> GetAllAsync(PageParameters pageParameters)
+        public async Task<PagedList<GeoQuest>> GetAllAsync(PageParameters pageParameters)
         {
-            return await _context.GeoQuests
+            var geoQuests = await _context.GeoQuests
                 .AsNoTracking()  // For read-only operation, improving performance
                 .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize)  // Pagination logic
                 .Take(pageParameters.PageSize)  // Pagination logic
-                .ToListAsync();
+                .ToPagedListAsync(pageParameters);
+            return geoQuests;
         }
 
         // Get a single GeoQuest by its ID

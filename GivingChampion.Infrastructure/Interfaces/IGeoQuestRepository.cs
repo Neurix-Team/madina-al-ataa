@@ -5,7 +5,7 @@ namespace GivingChampion.Persistance.Interfaces
 {
     public interface IGeoQuestRepository
     {
-        Task<List<GeoQuest>> GetAllAsync(PageParameters pageParameters);
+        Task<PagedList<GeoQuest>> GetAllAsync(PageParameters pageParameters);
         Task<GeoQuest?> GetByIdAsync(Guid id);
         Task AddAsync(GeoQuest geoQuest);
         void Update(GeoQuest geoQuest);
