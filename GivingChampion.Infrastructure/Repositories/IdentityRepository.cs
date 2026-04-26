@@ -70,7 +70,8 @@ namespace GivingChampion.Persistance.Repositories
                 UserName = email,
                 Email = email,
                 FullName = fullName,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                IsExternal = true
             };
 
             var result = await _userManager.CreateAsync(user);
