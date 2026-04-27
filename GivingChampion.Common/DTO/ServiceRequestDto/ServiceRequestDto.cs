@@ -24,8 +24,8 @@ namespace GivingChampion.Common.DTO.ServiceRequestDto
             public string BriefDescription { get; set; } = string.Empty;
 
             public Guid PartnerId { get; set; }
-
-            public string FullName { get; set; } = string.Empty;
+        public Guid LocationId { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
             public string Status { get; set; } = string.Empty;
 

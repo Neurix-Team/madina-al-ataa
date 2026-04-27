@@ -28,11 +28,11 @@ namespace GivingChampion.Persistance.Interfaces
 
         // Marks an existing service request as modified
         // Note: This does not save changes to the database until SaveChangesAsync is called
-        void Update(ServiceRequest serviceRequest);
+        Task UpdateAsync(ServiceRequest serviceRequest);
 
         // Soft deletes a service request instead of physically removing it from the database
         // Usually sets IsDeleted = true and DeletedAt = current date/time
-        void SoftDelete(ServiceRequest serviceRequest);
+        Task SoftDeleteAsync(ServiceRequest serviceRequest);
         Task UpdateProgressAsync(Guid serviceRequestId, int progress);
         // Saves all pending changes to the database
         Task SaveChangesAsync();

@@ -25,5 +25,7 @@ namespace GivingChampion.Common.DTO.ServiceRequestDto
 
         [MaxLength(1000, ErrorMessage = "Brief description cannot exceed 1000 characters")]
         public string BriefDescription { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Location id is required")]
+        public Guid LocationId { get; set; }
     }
 }

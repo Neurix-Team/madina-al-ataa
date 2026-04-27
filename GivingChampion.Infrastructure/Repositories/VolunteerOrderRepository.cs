@@ -1,7 +1,8 @@
 ﻿using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;using Microsoft.EntityFrameworkCore;
+using System;
+using Microsoft.EntityFrameworkCore;
 
 using System.Collections.Generic;
 using System.Text;
@@ -44,6 +45,7 @@ namespace GivingChampion.Persistance.Repositories
             public async Task<List<VolunteerOrder>> GetAllAsync()
             {
                 return await _context.VolunteerOrders
+                   .Include(vo => vo.ServiceRequest)
                     .Where(vo => !vo.IsDeleted)
                     .AsNoTracking()
                     .ToListAsync();
@@ -62,6 +64,7 @@ namespace GivingChampion.Persistance.Repositories
             public async Task<VolunteerOrder?> GetByIdAsync(Guid id)
             {
                 return await _context.VolunteerOrders
+
                     .FirstOrDefaultAsync(vo => vo.Id == id && !vo.IsDeleted);
             }
 
@@ -96,39 +99,26 @@ namespace GivingChampion.Persistance.Repositories
         }
 
 
-            #endregion
+        #endregion
 
-            #region Update
+        public Task UpdateAsync(VolunteerOrder volunteerOrder)
+        {
+            _context.VolunteerOrders.Update(volunteerOrder);
+            return Task.CompletedTask;
+        }
 
-            /// <summary>
-            /// Marks an existing volunteer order as modified.
-            /// Note: This does not save changes to the database until SaveChangesAsync is called.
-            /// </summary>
-            /// <param name="volunteerOrder">The volunteer order entity to update.</param>
-            public void Update(VolunteerOrder volunteerOrder)
-            {
-                _context.VolunteerOrders.Update(volunteerOrder);
-            }
+        public Task SoftDeleteAsync(VolunteerOrder volunteerOrder)
+        {
+            volunteerOrder.IsDeleted = true;
+            volunteerOrder.DeletedAt = DateTime.UtcNow;
 
-            #endregion
+            _context.VolunteerOrders.Update(volunteerOrder);
 
-            #region Soft Delete
+            return Task.CompletedTask;
+        }
 
-            /// <summary>
-            /// Soft deletes a volunteer order instead of physically removing it from the database.
-            /// Usually sets IsDeleted to true and DeletedAt to the current UTC date and time.
-            /// Note: This does not save changes to the database until SaveChangesAsync is called.
-            /// </summary>
-            /// <param name="volunteerOrder">The volunteer order entity to soft delete.</param>
-            public void SoftDelete(VolunteerOrder volunteerOrder)
-            {
-                volunteerOrder.IsDeleted = true;
-                volunteerOrder.DeletedAt = DateTime.UtcNow;
+        #endregion
 
-                _context.VolunteerOrders.Update(volunteerOrder);
-            }
-
-            #endregion
 
             #region Save Changes
 
@@ -142,7 +132,7 @@ namespace GivingChampion.Persistance.Repositories
 
             #endregion
 
-            #endregion
+            
         }
     }
 

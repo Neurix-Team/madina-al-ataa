@@ -107,7 +107,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Service request create data is required.");
 
             var serviceRequest = _mapper.Map<ServiceRequest>(dto);
-
+            serviceRequest.Status = RequestStatus.Approved;
             await _serviceRequestRepository.AddAsync(serviceRequest);
 
             await _serviceRequestRepository.SaveChangesAsync();
@@ -143,8 +143,7 @@ namespace GivingChampion.Application.Services
             // Maps the new values from the DTO into the existing entity.
             _mapper.Map(dto, serviceRequest);
 
-            _serviceRequestRepository.Update(serviceRequest);
-
+            _serviceRequestRepository.UpdateAsync(serviceRequest);
             await _serviceRequestRepository.SaveChangesAsync();
 
             return true;
@@ -166,8 +165,7 @@ namespace GivingChampion.Application.Services
             if (serviceRequest == null)
                 return false;
 
-            _serviceRequestRepository.SoftDelete(serviceRequest);
-
+            _serviceRequestRepository.SoftDeleteAsync(serviceRequest);
             await _serviceRequestRepository.SaveChangesAsync();
 
             return true;

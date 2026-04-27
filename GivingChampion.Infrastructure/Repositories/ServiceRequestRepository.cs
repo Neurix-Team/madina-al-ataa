@@ -8,25 +8,13 @@ namespace GivingChampion.Persistance.Repositories
 {
     public class ServiceRequestRepository : IServiceRequestRepository
     {
-        #region Fields
-
-        // Database context used to access ServiceRequests table
         private readonly AppDbContext _context;
-
-        #endregion
-
-        #region Constructor
 
         public ServiceRequestRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        #endregion
-
-        #region Get Methods
-
-        // Gets all service requests that are not soft deleted
         public async Task<List<ServiceRequest>> GetAllAsync()
         {
             return await _context.ServiceRequests
@@ -36,7 +24,6 @@ namespace GivingChampion.Persistance.Repositories
                 .ToListAsync();
         }
 
-        // Gets a single service request by id if it is not soft deleted
         public async Task<ServiceRequest?> GetByIdAsync(Guid id)
         {
             return await _context.ServiceRequests
@@ -44,17 +31,15 @@ namespace GivingChampion.Persistance.Repositories
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
 
-        // Gets all pending service requests that are not soft deleted
-        //public async Task<List<ServiceRequest>> GetPendingAsync()
-        //{
-        //    return await _context.ServiceRequests
-        //        .AsNoTracking()
-        //        .Include(x => x.Partner)
-        //        .Where(x => !x.IsDeleted && x.Status == RequestStatus.Pending)
-        //        .ToListAsync();
-        //}
+        public async Task<List<ServiceRequest>> GetApprovedRequestsAsync()
+        {
+            return await _context.ServiceRequests
+                .AsNoTracking()
+                .Include(x => x.Partner)
+                .Where(sr => sr.Status == RequestStatus.Approved && !sr.IsDeleted)
+                .ToListAsync();
+        }
 
-        // Gets all service requests related to a specific partner
         public async Task<List<ServiceRequest>> GetByPartnerIdAsync(Guid partnerId)
         {
             return await _context.ServiceRequests
@@ -63,73 +48,43 @@ namespace GivingChampion.Persistance.Repositories
                 .Where(x => x.PartnerId == partnerId && !x.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<List<ServiceRequest>> GetApprovedRequestsAsync()
-        {
-            return await _context.ServiceRequests
-                .AsNoTracking() .Include(x => x.Partner)
-                .Where(sr => sr.Status == RequestStatus.Approved && !sr.IsDeleted)
-                .ToListAsync();
-        }
-        
 
-        #endregion
-
-        #region Create Method
-
-        // Adds a new service request to the DbContext
-        // Note: This does not save to database until SaveChangesAsync is called
         public async Task AddAsync(ServiceRequest serviceRequest)
         {
             await _context.ServiceRequests.AddAsync(serviceRequest);
         }
 
-        #endregion
-        public async Task UpdateProgressAsync(Guid serviceRequestId, int progress)
-        {
-            var request = await _context.ServiceRequests
-                .FirstOrDefaultAsync(x => x.Id == serviceRequestId && !x.IsDeleted);
-
-            if (request == null)
-                return;
-
-            request.Progress = progress;
-
-            _context.ServiceRequests.Update(request);
-            await _context.SaveChangesAsync();
-        }
-        #region Update Method
-
-        // Marks an existing service request as modified
-        // Note: This does not save to database until SaveChangesAsync is called
-        public void Update(ServiceRequest serviceRequest)
+        public Task UpdateAsync(ServiceRequest serviceRequest)
         {
             _context.ServiceRequests.Update(serviceRequest);
+            return Task.CompletedTask;
         }
 
-        #endregion
-
-        #region Delete Method
-
-        // Soft deletes a service request instead of removing it from database
-        // This keeps the record but marks it as deleted
-        public void SoftDelete(ServiceRequest serviceRequest)
+        public Task SoftDeleteAsync(ServiceRequest serviceRequest)
         {
             serviceRequest.IsDeleted = true;
             serviceRequest.DeletedAt = DateTime.UtcNow;
 
             _context.ServiceRequests.Update(serviceRequest);
+            return Task.CompletedTask;
         }
 
-        #endregion
+        public async Task UpdateProgressAsync(Guid serviceRequestId, int progress)
+        {
+            var serviceRequest = await _context.ServiceRequests
+                .FirstOrDefaultAsync(x => x.Id == serviceRequestId && !x.IsDeleted);
 
-        #region Save Changes
+            if (serviceRequest == null)
+                return;
 
-        // Saves all tracked changes to the database
+            serviceRequest.Progress = progress;
+
+            _context.ServiceRequests.Update(serviceRequest);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
-
-        #endregion
     }
 }

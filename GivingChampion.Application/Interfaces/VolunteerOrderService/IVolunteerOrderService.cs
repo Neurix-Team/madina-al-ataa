@@ -15,7 +15,6 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
         #endregion
         Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, int addedProgress);
         Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id);
-        // Added string rejectionReason to match business logic
         Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason);
 
         #region Command Methods

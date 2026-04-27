@@ -1,6 +1,7 @@
 ﻿using GivingChampion.Common.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GivingChampion.Common.DTO.ServiceRequestDto
 {
@@ -9,7 +10,8 @@ namespace GivingChampion.Common.DTO.ServiceRequestDto
         [Required(ErrorMessage = "Title is required")]
         [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
-
+        [Required, MaxLength(100)]
+        public string ServiceType { get; set; } = string.Empty;
         [Required(ErrorMessage = "Required skill is required")]
         [MaxLength(150)]
         public string RequiredSkill { get; set; } = string.Empty;
@@ -28,5 +30,6 @@ namespace GivingChampion.Common.DTO.ServiceRequestDto
 
         [Required(ErrorMessage = "Partner id is required")]
         public Guid PartnerId { get; set; }
+        public Guid LocationId { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GivingChampion.Application.Interfaces.VolunteerHistoryService;
+﻿using GivingChampion.API.Extensions;
+using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,26 +31,27 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
 
         #endregion
 
-        #region Get User History
+        #region Get My History From Token
 
-        [HttpGet("user/{userId:guid}")]
-        public async Task<IActionResult> GetUserHistory(Guid userId)
+        [HttpGet("me")]
+        [Authorize(Roles = "Volunteer,Admin")]
+        public async Task<IActionResult> GetMyHistory()
         {
             try
             {
-                _logger.LogInformation("Fetching history for user {UserId}", userId);
+                if (!User.TryGetCurrentUserId(out var userId))
+                    return Unauthorized(new { message = "Invalid or missing user ID in token." });
 
                 var result = await _historyService.GetUserHistory(userId);
 
                 if (result == null || !result.Any())
-                {
-                    return NotFound("No history found for this user.");
-                }
+                    return NotFound(new { message = "No history found for this user." });
+
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while fetching history for user {UserId}", userId);
+                _logger.LogError(ex, "Error while fetching history for authenticated user.");
 
                 return StatusCode(500, new
                 {
@@ -64,6 +66,7 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
         #region Get Request History
 
         [HttpGet("request/{requestId:guid}")]
+        [Authorize(Roles = "Volunteer,Admin")]
         public async Task<IActionResult> GetRequestHistory(Guid requestId)
         {
             try
@@ -71,11 +74,7 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
                 var result = await _historyService.GetRequestHistory(requestId);
 
                 if (result == null || !result.Any())
-                {
-                    return NotFound("No history found for this request.");
-                }
-
-                return Ok(result);
+                    return NotFound(new { message = "No history found for this request." });
 
                 return Ok(result);
             }

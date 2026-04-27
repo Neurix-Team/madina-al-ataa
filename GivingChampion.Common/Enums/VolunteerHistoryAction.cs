@@ -10,7 +10,7 @@ namespace GivingChampion.Common.Enums
             OrderApproved = 1,
             OrderRejected = 2,
             TaskAssigned = 3,
-           TaskStarted = 4, 
+             TaskStarted = 4, 
             ProgressUpdated = 5,
             TaskCompleted = 6
 

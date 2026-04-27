@@ -36,7 +36,7 @@ namespace GivingChampion.Application.Services
         /// <param name="mapper">AutoMapper instance.</param>
         public VolunteerOrderService(
             IVolunteerOrderRepository volunteerOrderRepository,
-            IServiceRequestRepository serviceRequestRepository,IVolunteerHistoryService historyService,
+            IServiceRequestRepository serviceRequestRepository, IVolunteerHistoryService historyService,
             IMapper mapper)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
@@ -89,19 +89,19 @@ namespace GivingChampion.Application.Services
         /// <returns>The created volunteer order DTO.</returns>
         public async Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId)
         {
-            // Ensure the related service request exists and is in an allowed status
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(dto.ServiceRequestId);
-            if (serviceRequest == null)
-                throw new InvalidOperationException("Service request not found.");
 
-            // Only allow creating an order when the request status is Approved
-            if (!(serviceRequest.Status == RequestStatus.Approved ))
-                throw new InvalidOperationException("Volunteer cannot create an order for this request because its status is not Approved.");
+            if (serviceRequest == null)
+                throw new ApplicationException("Service request not found.");
+
+            if (serviceRequest.Status != RequestStatus.Approved)
+                throw new ApplicationException("Volunteer cannot create an order for this request because its status is not Approved.");
 
             var volunteerOrder = _mapper.Map<VolunteerOrder>(dto);
 
+            volunteerOrder.UserId = volunteerId;
+            volunteerOrder.Status = OrderStatus.Pending;
 
-            // Use repository create which saves changes
             await _volunteerOrderRepository.CreateAsync(volunteerOrder);
 
             return _mapper.Map<VolunteerOrderDto>(volunteerOrder);
@@ -125,7 +125,7 @@ namespace GivingChampion.Application.Services
 
             _mapper.Map(dto, existingVolunteerOrder);
 
-            _volunteerOrderRepository.Update(existingVolunteerOrder);
+            await _volunteerOrderRepository.UpdateAsync(existingVolunteerOrder);
             await _volunteerOrderRepository.SaveChangesAsync();
 
             return _mapper.Map<VolunteerOrderDto>(existingVolunteerOrder);
@@ -140,39 +140,51 @@ namespace GivingChampion.Application.Services
         /// </summary>
         /// <param name="id">Volunteer order id.</param>
         /// <returns>True if deleted successfully; otherwise false.</returns>
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id, Guid volunteerId)
         {
             var existingVolunteerOrder = await _volunteerOrderRepository.GetByIdAsync(id);
 
             if (existingVolunteerOrder == null)
                 return false;
 
-            _volunteerOrderRepository.SoftDelete(existingVolunteerOrder);
+            if (existingVolunteerOrder.UserId != volunteerId)
+                throw new ApplicationException("You are not allowed to delete this order.");
+
+            await _volunteerOrderRepository.SoftDeleteAsync(existingVolunteerOrder);
             await _volunteerOrderRepository.SaveChangesAsync();
 
             return true;
         }
         #endregion
-
-        public async Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, int addedProgress)
+        public async Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, Guid volunteerId, int progress)
         {
             var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
+
+            if (order.UserId != volunteerId)
+                throw new ApplicationException("You are not allowed to update progress for this order.");
+
             if (order == null)
                 return null;
 
-            if (order.Status == OrderStatus.Rejected)
-                throw new Exception("Cannot update a rejected order.");
+            if (progress <= 0)
+                throw new ApplicationException("Progress value must be a positive integer.");
+
+            if (order.Status != OrderStatus.Approved && order.Status != OrderStatus.InProgress)
+                throw new ApplicationException($"Only approved or in-progress orders can update progress. Current status is {order.Status}.");
 
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId);
+
             if (serviceRequest == null)
-                throw new Exception("Service request not found.");
+                throw new ApplicationException("Service request not found.");
 
-            var newProgress = serviceRequest.Progress + addedProgress;
+            if (serviceRequest.Status == RequestStatus.Completed)
+                throw new ApplicationException("Cannot update progress for a completed service request.");
 
-            if (newProgress > 100)
-                newProgress = 100;
 
-            if (order.Status == OrderStatus.Approved && serviceRequest.Progress == 0)
+            if (progress < serviceRequest.Progress)
+                throw new ApplicationException("Progress cannot be decreased.");
+
+            if (order.Status == OrderStatus.Approved)
             {
                 order.Status = OrderStatus.InProgress;
                 serviceRequest.Status = RequestStatus.InProgress;
@@ -185,18 +197,19 @@ namespace GivingChampion.Application.Services
                 );
             }
 
-            serviceRequest.Progress = newProgress;
+            serviceRequest.Progress = progress;
 
             await _historyService.AddAsync(
                 order.UserId,
                 serviceRequest.Id,
                 order.Id,
                 VolunteerHistoryAction.ProgressUpdated,
-                newProgress
+                progress
             );
 
-            if (newProgress == 100)
+            if (progress == 100)
             {
+                order.Status = OrderStatus.Completed;
                 serviceRequest.Status = RequestStatus.Completed;
 
                 await _historyService.AddAsync(
@@ -207,16 +220,14 @@ namespace GivingChampion.Application.Services
                 );
             }
 
-            _serviceRequestRepository.Update(serviceRequest);
-            _volunteerOrderRepository.Update(order);
+            await _serviceRequestRepository.UpdateAsync(serviceRequest);
+            await _volunteerOrderRepository.UpdateAsync(order);
 
             await _serviceRequestRepository.SaveChangesAsync();
             await _volunteerOrderRepository.SaveChangesAsync();
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }
-        #region ProcessRequest
-
         public async Task<VolunteerOrderDto?> ApproveOrderAsync(Guid orderId)
         {
             var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
@@ -224,21 +235,23 @@ namespace GivingChampion.Application.Services
                 return null;
 
             if (order.Status != OrderStatus.Pending)
-                throw new Exception("Order already processed");
+                throw new ApplicationException($"Only pending orders can be approved. Current status is {order.Status}.");
 
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId);
             if (serviceRequest == null)
-                throw new Exception("Service request not found");
+                throw new ApplicationException("Service request not found");
+
+
 
             serviceRequest.VolunteerUserId = order.UserId;
             serviceRequest.Status = RequestStatus.Assigned;
 
             await _historyService.AddAsync(
-   order.UserId,
-   serviceRequest.Id,
-   order.Id,
-   VolunteerHistoryAction.OrderApproved
-);
+            order.UserId,
+           serviceRequest.Id,
+           order.Id,
+           VolunteerHistoryAction.OrderApproved
+              );
             // history
             await _historyService.AddAsync(
                 order.UserId,
@@ -248,28 +261,32 @@ namespace GivingChampion.Application.Services
             );
             order.Status = OrderStatus.Approved;
             order.ApprovedAt = DateTime.UtcNow;
-           
 
-            _volunteerOrderRepository.Update(order);
-            _serviceRequestRepository.Update(serviceRequest);
+
+            await _volunteerOrderRepository.UpdateAsync(order);
+            await _serviceRequestRepository.UpdateAsync(serviceRequest);
 
             await _serviceRequestRepository.SaveChangesAsync();
             await _volunteerOrderRepository.SaveChangesAsync();
 
-           
+
             return _mapper.Map<VolunteerOrderDto>(order);
         }
 
         public async Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason)
         {
             var order = await _volunteerOrderRepository.GetByIdAsync(id);
+
             if (order == null)
                 return null;
+
+            if (order.Status == OrderStatus.Approved || order.Status == OrderStatus.Completed)
+                throw new ApplicationException("Approved or completed orders cannot be rejected.");
 
             order.Status = OrderStatus.Rejected;
             order.RejectionReason = rejectionReason;
 
-            _volunteerOrderRepository.Update(order);
+            await _volunteerOrderRepository.UpdateAsync(order);
             await _volunteerOrderRepository.SaveChangesAsync();
 
             await _historyService.AddAsync(
@@ -283,7 +300,6 @@ namespace GivingChampion.Application.Services
         }
 
 
-        #endregion
         #endregion
     }
 }

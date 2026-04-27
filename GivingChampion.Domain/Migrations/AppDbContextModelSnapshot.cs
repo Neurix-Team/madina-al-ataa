@@ -336,10 +336,8 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<DateTime>("IssuedDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("IssuedTo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<Guid>("IssuedTo")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("QrCode")
                         .IsRequired()
@@ -362,7 +360,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VolunteerId");
+                    b.HasIndex("IssuedTo");
 
                     b.ToTable("Certificates");
                 });
@@ -926,11 +924,21 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ImpactReport")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("PartnerId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Progress")
+                        .HasColumnType("integer");
 
                     b.Property<string>("RequiredSkill")
                         .IsRequired()
@@ -939,6 +947,11 @@ namespace GivingChampion.Domain.Migrations
 
                     b.Property<DateTime>("ScheduleDate")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -954,9 +967,16 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<int>("UrgencyLevel")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("VolunteerUserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("LocationId");
+
                     b.HasIndex("PartnerId");
+
+                    b.HasIndex("VolunteerUserId");
 
                     b.ToTable("ServiceRequests");
                 });
@@ -1172,11 +1192,14 @@ namespace GivingChampion.Domain.Migrations
                     b.ToTable("Volunteers");
                 });
 
-            modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerOrder", b =>
+            modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerHistories", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -1187,12 +1210,43 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                    b.Property<int>("Duration")
+                    b.Property<int?>("ProgressValue")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("ServiceRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VolunteerOrderId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VolunteerHistories");
+                });
+
+            modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -1209,13 +1263,11 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<DateTime>("ScheduleDate")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("ServiceRequestId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("ServiceType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -1223,10 +1275,14 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<Guid>("VolunteerId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ServiceRequestId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("VolunteerOrders");
                 });
@@ -1360,7 +1416,7 @@ namespace GivingChampion.Domain.Migrations
                 {
                     b.HasOne("GivingChampion.Domain.Entities.Volunteer", "Volunteer")
                         .WithMany()
-                        .HasForeignKey("VolunteerId")
+                        .HasForeignKey("IssuedTo")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1541,13 +1597,27 @@ namespace GivingChampion.Domain.Migrations
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.ServiceRequest", b =>
                 {
+                    b.HasOne("GivingChampion.Domain.Entities.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GivingChampion.Domain.Entities.Partner", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Volunteer")
+                        .WithMany()
+                        .HasForeignKey("VolunteerUserId");
+
+                    b.Navigation("Location");
+
                     b.Navigation("Partner");
+
+                    b.Navigation("Volunteer");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserBadge", b =>
@@ -1633,6 +1703,25 @@ namespace GivingChampion.Domain.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerOrder", b =>
+                {
+                    b.HasOne("GivingChampion.Domain.Entities.ServiceRequest", "ServiceRequest")
+                        .WithMany()
+                        .HasForeignKey("ServiceRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ServiceRequest");
 
                     b.Navigation("User");
                 });

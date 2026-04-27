@@ -44,6 +44,7 @@ using GivingChampion.Application.Interfaces.DonationRequest;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.API.Handlers;
+using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -122,6 +123,11 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IGeoQuestRepository, GeoQuestRepository>();
 builder.Services.AddScoped<IUserGeoQuestRepository, UserGeoQuestRepository>();
+builder.Services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
+builder.Services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
+builder.Services.AddScoped<IVolunteerHistoryService, VolunteerHistoryService  >();
+builder.Services.AddScoped<IVolunteerHistoryRepository, VolunteerHistoryRepository>();
+
 builder.Services
     .AddAuthentication(options =>
     {

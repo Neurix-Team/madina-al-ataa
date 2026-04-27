@@ -1,10 +1,9 @@
-﻿using GivingChampion.Application.Interfaces.VolunteerOrderService;
+﻿using GivingChampion.API.Extensions;
+using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SharpYaml.Serialization.Logging;
-using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers.VolunteerOrder
 {
@@ -18,14 +17,15 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         private readonly IVolunteerOrderService _volunteerOrderService;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly ILogger<VolunteerOrdersController> _logger;
+
         #endregion
 
         #region Constructor
 
         public VolunteerOrdersController(
-        IVolunteerOrderService volunteerOrderService,
-        IServiceRequestRepository serviceRequestRepository,
-        ILogger<VolunteerOrdersController> logger)
+            IVolunteerOrderService volunteerOrderService,
+            IServiceRequestRepository serviceRequestRepository,
+            ILogger<VolunteerOrdersController> logger)
         {
             _volunteerOrderService = volunteerOrderService;
             _serviceRequestRepository = serviceRequestRepository;
@@ -38,9 +38,6 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #region Get All
 
-        /// <summary>
-        /// Get all volunteer orders.
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<VolunteerOrderDto>>> GetAll()
         {
@@ -51,6 +48,8 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error while retrieving volunteer orders.");
+
                 return StatusCode(500, new
                 {
                     message = "An error occurred while retrieving volunteer orders.",
@@ -63,9 +62,6 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #region Get By Id
 
-        /// <summary>
-        /// Get volunteer order by id.
-        /// </summary>
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<VolunteerOrderDto>> GetById(Guid id)
         {
@@ -80,6 +76,8 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error while retrieving volunteer order {Id}", id);
+
                 return StatusCode(500, new
                 {
                     message = "An error occurred while retrieving the volunteer order.",
@@ -92,11 +90,9 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #endregion
 
+        #region Approve Volunteer Order
 
-
-
-        // Approve Volunteer Order
-        [HttpPatch("{id}/approve")]
+        [HttpPatch("{id:guid}/approve")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ApproveOrder(Guid id)
         {
@@ -105,7 +101,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
                 var result = await _volunteerOrderService.ApproveOrderAsync(id);
 
                 if (result == null)
-                    return NotFound("Volunteer order not found.");
+                    return NotFound(new { message = "Volunteer order not found." });
 
                 return Ok(result);
             }
@@ -120,8 +116,12 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
                 });
             }
         }
-        // Reject Volunteer Order
-        [HttpPatch("{id}/reject")]
+
+        #endregion
+
+        #region Reject Volunteer Order
+
+        [HttpPatch("{id:guid}/reject")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RejectOrder(Guid id, [FromBody] string rejectionReason)
         {
@@ -130,7 +130,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
                 var result = await _volunteerOrderService.RejectOrderAsync(id, rejectionReason);
 
                 if (result == null)
-                    return NotFound("Volunteer order not found.");
+                    return NotFound(new { message = "Volunteer order not found." });
 
                 return Ok(result);
             }
@@ -145,33 +145,28 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
                 });
             }
         }
+
+        #endregion
+
         #region Command Endpoints
 
         #region Create
 
-        /// <summary>
-        /// Create a new volunteer order.
-        /// VolunteerId is taken from the authenticated user's token.
-        /// </summary>
         [HttpPost]
         [Authorize(Roles = "Volunteer")]
         public async Task<ActionResult<VolunteerOrderDto>> Create([FromBody] CreateVolunteerOrderDto dto)
         {
             try
             {
-                var volunteerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrWhiteSpace(volunteerIdClaim) || !Guid.TryParse(volunteerIdClaim, out var volunteerId))
+                if (!User.TryGetCurrentUserId(out var volunteerId))
                     return Unauthorized(new { message = "Invalid or missing volunteer ID in token." });
 
-                var approvedRequests = await   _serviceRequestRepository.GetApprovedRequestsAsync();
+                var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync();
 
                 var serviceRequest = approvedRequests.FirstOrDefault(sr => sr.Id == dto.ServiceRequestId);
 
                 if (serviceRequest == null)
-                {
                     return BadRequest(new { message = "The service request is not approved or not available." });
-                }
 
                 var createdVolunteerOrder = await _volunteerOrderService.CreateAsync(dto, volunteerId);
 
@@ -182,6 +177,8 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error while creating volunteer order.");
+
                 return StatusCode(500, new
                 {
                     message = "An error occurred while creating the volunteer order.",
@@ -194,24 +191,26 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #region Update Progress
 
-        /// <summary>
-        /// Update volunteer order progress
-        /// </summary>
-        [HttpPatch("{id}/progress")]
+        [HttpPatch("{id:guid}/progress")]
         [Authorize(Roles = "Volunteer")]
-        public async Task<IActionResult> UpdateProgress(Guid id, [FromBody] int addedProgress)
+        public async Task<IActionResult> UpdateProgress(Guid id, [FromBody] int progress)
         {
             try
             {
-                var result = await _volunteerOrderService.UpdateProgressAsync(id, addedProgress);
+                if (!User.TryGetCurrentUserId(out var volunteerId))
+                    return Unauthorized(new { message = "Invalid or missing volunteer ID in token." });
+
+                var result = await _volunteerOrderService.UpdateProgressAsync(id, volunteerId, progress);
 
                 if (result == null)
-                    return NotFound("Volunteer order not found.");
+                    return NotFound(new { message = "Volunteer order not found." });
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error while updating progress for order {Id}", id);
+
                 return StatusCode(500, new
                 {
                     message = "Error while updating progress",
@@ -222,20 +221,18 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #endregion
 
-
-
         #region Delete
 
-        /// <summary>
-        /// Soft delete a volunteer order.
-        /// </summary>
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Volunteer")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var deleted = await _volunteerOrderService.DeleteAsync(id);
+                if (!User.TryGetCurrentUserId(out var volunteerId))
+                    return Unauthorized(new { message = "Invalid or missing volunteer ID in token." });
+
+                var deleted = await _volunteerOrderService.DeleteAsync(id, volunteerId);
 
                 if (!deleted)
                     return NotFound(new { message = "Volunteer order not found." });
@@ -244,6 +241,8 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error while deleting volunteer order {Id}", id);
+
                 return StatusCode(500, new
                 {
                     message = "An error occurred while deleting the volunteer order.",
