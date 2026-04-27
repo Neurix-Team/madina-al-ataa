@@ -28,7 +28,6 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Interfaces.Certificate;
@@ -36,8 +35,6 @@ using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Interfaces.DonationRequest;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
-using GivingChampion.API.Services;
-using GivingChampion.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

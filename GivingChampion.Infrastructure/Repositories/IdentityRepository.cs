@@ -47,12 +47,16 @@ namespace GivingChampion.Persistance.Repositories
 
             var result = await _userManager.CreateAsync(user, password);
 
-            Donor donorDto = new()
+            if (result.Succeeded)
             {
-                UserId = user.Id,
-            };
+                Donor donorDto = new()
+                {
+                    UserId = user.Id,
+                };
 
-            await _donorRepository.CreateAsync(donorDto);
+                await _donorRepository.CreateAsync(donorDto);
+            }
+            
 
             return result.Succeeded
                 ? AuthServiceResult<ApplicationUser>.Success(user)

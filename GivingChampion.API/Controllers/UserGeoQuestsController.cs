@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,19 +17,20 @@ namespace GivingChampion.API.Controllers
         {
             _userGeoQuestService = userGeoQuestService;
         }
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetAllAsync([FromQuery] Guid userId, [FromQuery] PageParameters pageParameters)
+        {
+            var userGeoQuests = await _userGeoQuestService.GetAllAsync(userId, pageParameters);
+            return Ok(userGeoQuests);
+        }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
-        //{
-        //    var userGeoQuests = await _userGeoQuestService.GetAllAsync(pageParameters);
-        //    return Ok(userGeoQuests);
-        //}
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var userGeoQuest = await _userGeoQuestService.GetByIdAsync(id);
-            if (userGeoQuest == null)
+            if (userGeoQuest == null || !userGeoQuest.IsSuccess)
                 return NotFound("UserGeoQuest not found");
 
             return Ok(userGeoQuest);

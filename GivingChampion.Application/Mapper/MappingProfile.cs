@@ -1,30 +1,33 @@
 ﻿using AutoMapper;
-using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Common.DTO.DonationOrder;
-using GivingChampion.Common.DTO.DonationRequest;
-using GivingChampion.Common.DTO.Partner;
-using GivingChampion.Common.DTO.PartnerDto;
-using GivingChampion.Common.DTO.ServiceRequestDto;
-using GivingChampion.Common.DTO.VolunteerDto;
-using GivingChampion.Common.DTO.VolunteerOrder;
+using GivingChampion.Common.DTO;
 using GivingChampion.Common.DTO.AiAvatarDto;
 using GivingChampion.Common.DTO.AvatarDto;
 using GivingChampion.Common.DTO.BadgeDto;
-using GivingChampion.Common.DTO.LevelDto;
-using GivingChampion.Common.DTO.ProfileDto;
-using GivingChampion.Common.DTO.ReviewDto;
-using GivingChampion.Common.DTO.UserBadgeDto;
-using GivingChampion.Common.DTO.UserLevelDto;
-using GivingChampion.Domain.Entities;
+using GivingChampion.Common.DTO.CertificateDto;
 using GivingChampion.Common.DTO.Child;
+using GivingChampion.Common.DTO.DonationOrder;
+using GivingChampion.Common.DTO.DonationRequest;
 using GivingChampion.Common.DTO.Donor;
+using GivingChampion.Common.DTO.GeoQuestDto;
+using GivingChampion.Common.DTO.LevelDto;
 using GivingChampion.Common.DTO.Location;
 using GivingChampion.Common.DTO.Mission;
 using GivingChampion.Common.DTO.Notification;
+using GivingChampion.Common.DTO.Partner;
+using GivingChampion.Common.DTO.PartnerDto;
+using GivingChampion.Common.DTO.ProfileDto;
+using GivingChampion.Common.DTO.ReviewDto;
+using GivingChampion.Common.DTO.ServiceRequestDto;
 using GivingChampion.Common.DTO.User;
+using GivingChampion.Common.DTO.UserBadgeDto;
+using GivingChampion.Common.DTO.UserLevelDto;
+using GivingChampion.Common.DTO.VolunteerDto;
+using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Pagination;
+using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using System.Collections.Generic;
+using GivingChampion.Common.DTO.UserGeoQuestDto;
 
 namespace GivingChampion.Application.Mapper
 {
@@ -69,12 +72,36 @@ namespace GivingChampion.Application.Mapper
             CreateMap<Certificate, CertificateReadAllDto>().ReverseMap();
 
             CreateMap<CertificateCreateDto, Certificate>().ReverseMap();
+            // GeoQuest mappings
+            CreateMap<GeoQuest, GeoQuestDto>().ReverseMap();
 
+            CreateMap<CreateGeoQuestDto, GeoQuest>().ReverseMap();
 
+            CreateMap<UpdateGeoQuestDto, GeoQuest>().ReverseMap();
 
             CreateMap<UpdateDonationRequestDto, DonationRequest>().ReverseMap();
 
+            #region UserGeoQuest Mappings
 
+            CreateMap<UserGeoQuest, UserGeoQuestDto>()
+                .ForMember(dest => dest.GeoQuestId,
+                    opt => opt.MapFrom(src => src.GeoQuestId))
+                .ForMember(dest => dest.Title,
+                    opt => opt.MapFrom(src =>
+                        src.GeoQuest != null ? src.GeoQuest.Title : src.Title))
+                .ForMember(dest => dest.LocationLatitude,
+                    opt => opt.MapFrom(src =>
+                        src.GeoQuest != null ? src.GeoQuest.LocationLatitude : 0))
+                .ForMember(dest => dest.LocationLongitude,
+                    opt => opt.MapFrom(src =>
+                        src.GeoQuest != null ? src.GeoQuest.LocationLongitude : 0))
+                .ReverseMap();
+
+            CreateMap<CreateUserGeoQuestDto, UserGeoQuest>().ReverseMap();
+
+            CreateMap<UpdateUserGeoQuestDto, UserGeoQuest>().ReverseMap();
+
+            #endregion
 
             // Mapping from DonationOrder Entity to DTOs
             CreateMap<DonationOrder, DonationOrderReadDto>().ReverseMap();

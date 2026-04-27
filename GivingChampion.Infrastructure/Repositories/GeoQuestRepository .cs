@@ -4,7 +4,6 @@ using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
 namespace GivingChampion.API.Repositories
 {
     public class GeoQuestRepository : IGeoQuestRepository
@@ -31,8 +30,10 @@ namespace GivingChampion.API.Repositories
         public async Task<GeoQuest?> GetByIdAsync(Guid id)
         {
             return await _context.GeoQuests
-                .AsNoTracking()
-                .FirstOrDefaultAsync(gq => gq.Id == id);
+                .Include(gq => gq.Location)
+                .FirstOrDefaultAsync(gq =>
+                    gq.Id == id &&
+                    !gq.IsDeleted);
         }
 
         // Add a new GeoQuest to the database

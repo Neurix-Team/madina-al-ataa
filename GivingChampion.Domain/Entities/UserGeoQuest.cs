@@ -11,9 +11,8 @@ namespace GivingChampion.Domain.Entities
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Required]
-        [StringLength(200)]
-        public string Title { get; set; }
+        
+
         [Required]
         [ForeignKey(nameof(GeoQuest))]
         public Guid GeoQuestId { get; set; }
@@ -27,5 +26,6 @@ namespace GivingChampion.Domain.Entities
         public bool IsStarted { get; set; } // Add this flag to indicate if the GeoQuest has started
         public bool IsLocationVerified { get; set; }
         public bool IsCompleted { get; set; }
+        public string? Title { get; set; }
     }
 }
