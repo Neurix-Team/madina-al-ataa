@@ -1,4 +1,6 @@
 ﻿using GivingChampion.Common.DTO.DonationOrder;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,17 +10,17 @@ namespace GivingChampion.Application.Interfaces.DonationOrderService
     public interface IDonationOrderService
     {
 
-        Task<IEnumerable<DonationOrderReadDto>> GetAllAsync();
+        Task<Result<PagedList<DonationOrderReadDto>>> GetAllAsync(PageParameters pageParameters);
 
-        Task<IEnumerable<DonationOrderReadDto>> GetMyOrdersAsync(Guid donorUserId);
+        Task<Result<PagedList<DonationOrderReadDto>>> GetMyOrdersAsync(Guid donorUserId, PageParameters pageParameters);
 
-        Task<DonationOrderDetailsDto?> GetByIdAsync(Guid id, Guid currentUserId, bool isAdmin = false);
+        Task<Result<DonationOrderDetailsDto?>> GetByIdAsync(Guid id, Guid currentUserId, bool isAdmin = false);
 
-        Task<DonationOrderDetailsDto> CreateAsync(CreateDonationOrderDto dto, Guid donorUserId);
-        Task<UpdateDonationOrderDTO> UpdateAsync(Guid id, UpdateDonationOrderDTO dto, Guid donorUserId);
-        Task ConfirmAsync(Guid id, Guid donorUserId);
+        Task<Result<DonationOrderDetailsDto>> CreateAsync(CreateDonationOrderDto dto, Guid donorUserId);
+        Task<Result<UpdateDonationOrderDTO>> UpdateAsync(Guid id, UpdateDonationOrderDTO dto);
+        Task<Result<DonationOrderDetailsDto>> ApproveAsync(Guid id);
 
-        Task CancelAsync(Guid id, Guid currentUserId, bool isAdmin);
+        Task<Result<DonationOrderDetailsDto>> RejectAsync(Guid id);
     }
 }
 

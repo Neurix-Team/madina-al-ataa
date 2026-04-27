@@ -15,6 +15,7 @@ var jwtIssuer = builder.AddParameter("jwt-issuer", secret: true);
 var jwtAudience = builder.AddParameter("jwt-audience", secret: true);
 var jwtAccessTokenMinutes = builder.AddParameter("jwt-access-token-minutes", secret: true);
 var corsOrigins = builder.AddParameter("cors-origins", secret: true);
+var authCallbackUrl = builder.AddParameter("auth-callback-url", secret: true);
 
 // FIX 1: Change to IResourceBuilder<IResourceWithConnectionString>
 // This allows the variable to be properly passed into .WithReference() calls.
@@ -76,6 +77,7 @@ builder.AddProject<Projects.GivingChampion_API>("api")
     .WithEnvironment("Authentication__Google__ClientSecret", googleClientSecret)
     .WithEnvironment("Jwt__Key", jwtKey)
     .WithEnvironment("Cors__AllowedOrigin", corsOrigins)
+    .WithEnvironment("Frontend__AuthCallbackUrl", authCallbackUrl)
     .WaitFor(db)
     .WaitForCompletion(seeder)
     .PublishAsDockerComposeService((resource, service) =>

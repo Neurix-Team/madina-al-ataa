@@ -6,12 +6,12 @@ namespace GivingChampion.Common.DTO.Mission
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
-        public DifficultyLevel Difficulty { get; set; }
+        public string Difficulty { get; set; }
         public int RequiredLevel { get; set; }
         public int KPReward { get; set; }
         public int XPReward { get; set; }
         public int ImpactReward { get; set; }
-        public MissionStatus Status { get; set; }
+        public string Status { get; set; }
         public Guid LocationId { get; set; }
     }
 }

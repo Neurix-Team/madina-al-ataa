@@ -14,8 +14,8 @@ namespace GivingChampion.Common.DTO.DonationRequest
         public Guid LocationId { get; set; }
         public decimal DonateAmount { get; set; }
         public decimal AmountRemaining { get; set; }
-        public RequestStatus Status { get; set; }
-        public UrgencyLevel UrgencyLevel { get; set; }
+        public string Status { get; set; }
+        public string UrgencyLevel { get; set; }
         public string? BriefDescription { get; set; }
         public Guid PartnerId { get; set; }
     }
