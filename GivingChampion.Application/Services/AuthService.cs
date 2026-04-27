@@ -31,8 +31,16 @@ namespace GivingChampion.Application.Services
             CancellationToken cancellationToken = default)
         {
             var existingUser = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
+
             if (existingUser is not null)
             {
+                // 2. Check if the user is soft-deleted
+                if (existingUser.IsDeleted)
+                {
+                    return AuthServiceResult<TokenResponse>.Failure(
+                        new ServiceError("AccountDisabled", "This account has been deactivated. Please contact support to reactivate your account."));
+                }
+
                 return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("DuplicateEmail", "A user with this email already exists."));
             }
@@ -68,16 +76,26 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<AuthServiceResult<TokenResponse>> LoginAsync(
-            LoginRequest request,
-            CancellationToken cancellationToken = default)
+    LoginRequest request,
+    CancellationToken cancellationToken = default)
         {
             var user = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
+
+            // 1. Check if user exists
             if (user is null)
             {
                 return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
+            // 2. Check if the account is soft-deleted/disabled
+            if (user.IsDeleted) // or user.IsDisabled, depending on your property name
+            {
+                return AuthServiceResult<TokenResponse>.Failure(
+                    new ServiceError("AccountDisabled", "Your account has been deactivated. Please contact support."));
+            }
+
+            // 3. Validate password
             var passwordValid = await _identityRepository.CheckPasswordAsync(user, request.Password, cancellationToken);
             if (!passwordValid)
             {
@@ -85,6 +103,7 @@ namespace GivingChampion.Application.Services
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
+            // 4. Generate Token
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
             var token = _jwtTokenFactory.Create(user, roles);
 

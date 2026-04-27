@@ -25,7 +25,7 @@ namespace GivingChampion.API.Controllers
 
         // Parent creates a child request
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<Result<ChildDto>>> CreateChild([FromBody] CreateChildDto dto)
         {
             var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
@@ -38,7 +38,7 @@ namespace GivingChampion.API.Controllers
 
         // Parent views their children
         [HttpGet("my-children")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<Result<List<ChildDto>>>> GetMyChildren()
         {
             var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");

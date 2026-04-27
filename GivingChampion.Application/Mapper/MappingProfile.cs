@@ -55,6 +55,7 @@ namespace GivingChampion.Application.Mapper
             // Partner -> PartnerDto
             CreateMap<Partner, PartnerDto>()
                 .ForMember(dest => dest.OrgTypeName, opt => opt.MapFrom(src => src.OrgType.ToString()));
+            CreateMap<Partner, CreatePartnerDto>().ReverseMap();
 
             // UpdatePartnerDto -> Partner
             CreateMap<UpdatePartnerDto, Partner>().ReverseMap();
@@ -72,18 +73,14 @@ namespace GivingChampion.Application.Mapper
 
 
 
-            CreateMap<UpdateDonationRequestDto, DonationRequest>().ReverseMap();
+            CreateMap<DonationRequest, DonationRequestDto>();
+            CreateMap<CreateDonationRequestDto, DonationRequest>();
+            CreateMap<UpdateDonationRequestDto, DonationRequest>();
 
-
-
-            // Mapping from DonationOrder Entity to DTOs
-            CreateMap<DonationOrder, DonationOrderReadDto>().ReverseMap();
-
-            CreateMap<DonationOrder, DonationOrderDetailsDto>().ReverseMap();
-            // Mapping from CreateDonationOrderDto to DonationOrder Entity
-            CreateMap<CreateDonationOrderDto, DonationOrder>().ReverseMap();
-            // Mapping from UpdateDonationOrderDTO to DonationOrder Entity
-            CreateMap<UpdateDonationOrderDTO, DonationOrder>().ReverseMap();
+            CreateMap<DonationOrder, DonationOrderReadDto>();
+            CreateMap<DonationOrder, DonationOrderDetailsDto>();
+            CreateMap<CreateDonationOrderDto, DonationOrder>();
+            CreateMap<UpdateDonationOrderDTO, DonationOrder>();
 
             #region AiAvatar Mappings
             CreateMap<AiAvatar, AiAvatarDto>().ReverseMap();

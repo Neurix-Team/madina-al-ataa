@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GivingChampion.API.Controllers
@@ -21,14 +22,16 @@ namespace GivingChampion.API.Controllers
         }
 
         #region Query Methods
-        [Authorize(Roles = "Donor")]
+        [Authorize(Roles = "Donor, Admin")]
         // GET: api/DonationOrders/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<DonationOrderDetailsDto>> GetDonationOrderById(Guid id)
         {
             try
             {
-                var donationOrder = await _donationOrderService.GetByIdAsync(id);
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                var isAdmin = User.Claims.Any(c => c.Type == "Role" && c.Value == "Admin");
+                var donationOrder = await _donationOrderService.GetByIdAsync(id, Guid.Parse(userId), isAdmin);
 
                 if (donationOrder == null)
                 {
@@ -72,7 +75,8 @@ namespace GivingChampion.API.Controllers
         {
             try
             {
-                await _donationOrderService.CreateAsync(donationOrderDto);
+                var userId = new Guid(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!);
+                await _donationOrderService.CreateAsync(donationOrderDto, userId);
                 return CreatedAtAction(nameof(GetDonationOrderById), new { id = donationOrderDto.DonationRequestId }, donationOrderDto);
             }
             catch (Exception ex)
@@ -90,13 +94,12 @@ namespace GivingChampion.API.Controllers
         {
             try
             {
-                await _donationOrderService.UpdateAsync(donationOrderDto, id);
+                var userId = new Guid(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!);
+                await _donationOrderService.UpdateAsync(id, donationOrderDto, userId);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                // Log.Error(ex, "Error updating donation order: {Id}", id);
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
             }
         }

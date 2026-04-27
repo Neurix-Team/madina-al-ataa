@@ -79,7 +79,7 @@ namespace GivingChampion.API.Controllers
             // Get the UserGeoQuest by ID
             var userGeoQuestResult = await _userGeoQuestService.GetByIdAsync(dto.UserGeoQuestId);
 
-            if (userGeoQuestResult.IsSuccess)
+            if (userGeoQuestResult.Succeeded)
             {
                 var userGeoQuest = userGeoQuestResult.Value;
 
@@ -90,7 +90,7 @@ namespace GivingChampion.API.Controllers
                 // Update the UserGeoQuest record
                 var updateResult = await _userGeoQuestService.StartAsync(userGeoQuest.Id, dto);
 
-                if (updateResult.IsSuccess)
+                if (updateResult.Succeeded)
                 {
                     return Ok("GeoQuest started successfully");
                 }
@@ -109,7 +109,7 @@ namespace GivingChampion.API.Controllers
             var userGeoQuestResult = await _userGeoQuestService.GetByIdAsync(dto.UserGeoQuestId);
 
             // Check if the userGeoQuest was successfully retrieved
-            if (userGeoQuestResult.IsFailure)
+            if (!userGeoQuestResult.Succeeded)
             {
                 return NotFound("UserGeoQuest not found");
             }

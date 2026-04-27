@@ -85,18 +85,43 @@ namespace GivingChampion.Application.Services
             if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
                 return Result<GetUserDto>.Failure("Email and Password are required.");
 
-            if (await _userRepository.ExistsByEmailAsync(dto.Email))
-                return Result<GetUserDto>.Failure("User with this email already exists.");
+            // 1. Find user including soft-deleted ones
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
 
-            // Use AutoMapper to create ApplicationUser from DTO
+            if (existingUser != null)
+            {
+                // If the user is NOT soft-deleted, it's a true duplicate
+                if (!existingUser.IsDeleted)
+                    return Result<GetUserDto>.Failure("User with this email already exists.");
+
+                // 2. RESTORE LOGIC: User exists but was soft-deleted
+                existingUser.IsDeleted = false;
+                existingUser.EmailConfirmed = true;
+
+                // Update the password for the returning user
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
+                var updateResult = await _userManager.ResetPasswordAsync(existingUser, resetToken, dto.Password);
+
+                if (!updateResult.Succeeded)
+                    return Result<GetUserDto>.Failure("Failed to restore user account.");
+
+                await _userManager.UpdateAsync(existingUser);
+
+                return await GetUserByIdAsync(existingUser.Id) is var restored
+                    ? Result<GetUserDto>.Success(restored)
+                    : Result<GetUserDto>.Failure("Failed to retrieve restored user");
+            }
+
+            // 3. NEW USER LOGIC: Standard creation
             var user = _mapper.Map<ApplicationUser>(dto);
             user.EmailConfirmed = true;
+            user.UserName = dto.Email;
+            user.IsDeleted = false; // Ensure explicit set
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
                 return Result<GetUserDto>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-            // Assign default role
             await _userManager.AddToRolesAsync(user, new[] { "User", "Volunteer", "Donor" });
 
             var donor = new Donor
@@ -104,12 +129,11 @@ namespace GivingChampion.Application.Services
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 TotalDonated = 0,
-                PreferedCategory = 0,           // or default value
-                CreatedAt = DateTime.UtcNow
+                PreferedCategory = 0,
+                CreatedAt = DateTime.UtcNow // Ensure UTC for Postgres
             };
 
             await _donorRepository.CreateAsync(donor);
-
             _logger.LogInformation("New user created: {Email}", dto.Email);
 
             return await GetUserByIdAsync(user.Id) is var created
@@ -133,6 +157,7 @@ namespace GivingChampion.Application.Services
 
             var user = _mapper.Map<ApplicationUser>(dto);
             user.EmailConfirmed = true;
+            user.UserName = dto.Email; // Ensure UserName is set to email for Identity
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)

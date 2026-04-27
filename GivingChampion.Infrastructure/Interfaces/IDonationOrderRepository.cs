@@ -6,14 +6,21 @@ using System.Text;
 namespace GivingChampion.Persistance.Interfaces
 {
 
-        public interface IDonationOrderRepository
-        {
-            Task<DonationOrder> GetByIdAsync(Guid id);  // For getting a single donation order by id
-            Task<IEnumerable<DonationOrder>> GetAllAsync();  // Now matches the return type of IEnumerable
-            Task CreateAsync(DonationOrder donationOrder);  // Now matches method name in repository
-            Task UpdateAsync(DonationOrder donationOrder);  // For updating a donation order
-        }
+    public interface IDonationOrderRepository
+    {
+        Task CreateAsync(DonationOrder donationOrder);
+
+        Task<IEnumerable<DonationOrder>> GetAllAsync();
+
+        Task<IEnumerable<DonationOrder>> GetByDonorIdAsync(Guid donorUserId);
+
+        Task<DonationOrder?> GetByIdAsync(Guid id);
+
+        Task<DonationOrder?> GetByIdForUpdateAsync(Guid id);
+
+        Task UpdateAsync(DonationOrder donationOrder);
     }
+}
 
 
 

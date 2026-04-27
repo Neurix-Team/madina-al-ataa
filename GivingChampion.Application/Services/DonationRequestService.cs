@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
-using GivingChampion.Application.Interfaces.DonationRequest;
+using GivingChampion.Application.Exceptions;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO.DonationRequest;
+using GivingChampion.Common.Enums;
+using GivingChampion.Common.Extensions.Mapper;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
@@ -15,62 +18,171 @@ namespace GivingChampion.Application.Services
         private readonly IDonationRequestRepository _donationRequestRepository;
         private readonly IMapper _mapper;
 
-        // Constructor to inject dependencies (Repository and AutoMapper)
-        public DonationRequestService(IDonationRequestRepository donationRequestRepository, IMapper mapper)
+        public DonationRequestService(
+            IDonationRequestRepository donationRequestRepository,
+            IMapper mapper)
         {
             _donationRequestRepository = donationRequestRepository;
             _mapper = mapper;
         }
 
-        #region Query Methods
+        public async Task<PagedList<DonationRequestDto>> GetAllAsync(PageParameters pageParameters)
+        {
+            var donationRequests = await _donationRequestRepository.GetAllAsync(pageParameters);
 
-        // Get a DonationRequest by its ID
-        public async Task<ReadDonationRequestDto> GetByIdAsync(Guid id)
+            var donationRequestDtos = _mapper.MapPagedList<DonationRequest, DonationRequestDto>(donationRequests);
+
+            return donationRequestDtos;
+        }
+
+        public async Task<PagedList<DonationRequestDto>> GetApprovedAsync(PageParameters pageParameters )
+        {
+            var donationRequests = await _donationRequestRepository.GetApprovedAsync(pageParameters);
+
+            return _mapper.MapPagedList<DonationRequest, DonationRequestDto>(donationRequests);
+        }
+
+        public async Task<PagedList<DonationRequestDto>> GetMyRequestsAsync(Guid parentUserId, PageParameters pageParameters)
+        {
+            var donationRequests = await _donationRequestRepository.GetRequestsByUserAsync(parentUserId, pageParameters);
+
+            return _mapper.MapPagedList<DonationRequest, DonationRequestDto>(donationRequests);
+        }
+
+        public async Task<DonationRequestDto?> GetByIdAsync(
+            Guid id,
+            Guid currentUserId,
+            bool isAdmin)
         {
             var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
+
             if (donationRequest == null)
+                throw new NotFoundException($"Donation request with ID {id} not found.");
+
+            // Admin can view any request.
+            if (isAdmin)
+                return _mapper.Map<DonationRequestDto>(donationRequest);
+
+            // Donor can view only approved requests.
+            if (donationRequest.Status == RequestStatus.Approved)
+                return _mapper.Map<DonationRequestDto>(donationRequest);
+
+            throw new ForbiddenException("You are not allowed to view this donation request.");
+        }
+
+        public async Task<DonationRequestDto> AddAsync(
+            CreateDonationRequestDto dto,
+            Guid currentUserId,
+            bool isAdmin)
+        {
+            var donationRequest = _mapper.Map<DonationRequest>(dto);
+
+
+            // If Admin creates it, it is approved directly.
+            // If Parent creates it, it waits for approval.
+            donationRequest.Status = isAdmin ? RequestStatus.Approved : RequestStatus.Pending;
+
+            if (donationRequest.DonateAmount <= 0)
+                throw new BadRequestException("Donation amount must be greater than zero.");
+
+            if (donationRequest.DonateAmount <= 0)
+                throw new BadRequestException("Donation amount must be greater than zero.");
+
+            // Usually AmountRemaining should start equal to the target donation amount.
+            if (donationRequest.AmountRemaining <= 0)
             {
-                throw new KeyNotFoundException($"DonationRequest with ID {id} not found.");
+                donationRequest.AmountRemaining = donationRequest.DonateAmount;
             }
 
-            return _mapper.Map<ReadDonationRequestDto>(donationRequest);
+            await _donationRequestRepository.AddAsync(donationRequest);
+
+            return _mapper.Map<DonationRequestDto>(donationRequest);
         }
 
-        // Get all DonationRequests
-        public async Task<IEnumerable<ListDonationRequestDto>> GetAllAsync()
-        {
-            var donationRequests = await _donationRequestRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<ListDonationRequestDto>>(donationRequests);
-        }
-
-        #endregion
-
-        #region Command Methods
-
-        // Add a new DonationRequest
-        public async Task<ReadDonationRequestDto> AddAsync(CreateDonationRequestDto donationRequestDTO)
-        {
-            var donationRequest = _mapper.Map<DonationRequest>(donationRequestDTO);
-
-            await _donationRequestRepository.AddAsync(donationRequest);  
-
-            return _mapper.Map<ReadDonationRequestDto>(donationRequest);
-        }
-
-        public async Task UpdateAsync(Guid id, UpdateDonationRequestDto donationRequestDTO)
+        public async Task UpdateAsync(
+            Guid id,
+            UpdateDonationRequestDto dto,
+            Guid currentUserId,
+            bool isAdmin)
         {
             var existingRequest = await _donationRequestRepository.GetByIdAsync(id);
-            if (existingRequest == null)
-            {
-                throw new KeyNotFoundException($"DonationRequest with ID {id} not found.");
-            }
 
-            // Map the values from DTO to the existing DonationRequest
-            _mapper.Map(donationRequestDTO, existingRequest);
+            if (existingRequest == null)
+                throw new NotFoundException($"Donation request with ID {id} not found.");
+
+            if (existingRequest.Status == RequestStatus.Approved)
+                throw new BadRequestException("You cannot update an approved donation request.");
+
+            if (existingRequest.Status == RequestStatus.Completed)
+                throw new BadRequestException("You cannot update a completed donation request.");
+
+            _mapper.Map(dto, existingRequest);
+
+            if (existingRequest.DonateAmount <= 0)
+                throw new BadRequestException("Donation amount must be greater than zero.");
+
+            if (existingRequest.AmountRemaining < 0)
+                throw new BadRequestException("Amount remaining cannot be negative.");
 
             await _donationRequestRepository.UpdateAsync(existingRequest);
         }
 
-        #endregion
+        public async Task ApproveAsync(Guid id)
+        {
+            var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
+
+            if (donationRequest == null)
+                throw new NotFoundException($"Donation request with ID {id} not found.");
+
+            if (donationRequest.Status == RequestStatus.Approved ||
+                donationRequest.Status == RequestStatus.Completed)
+            {
+                throw new BadRequestException("Donation request is already approved or completed.");
+            }
+
+            donationRequest.Status = RequestStatus.Approved;
+
+            await _donationRequestRepository.UpdateAsync(donationRequest);
+        }
+
+        public async Task RejectAsync(Guid id)
+        {
+            var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
+
+            if (donationRequest == null)
+                throw new NotFoundException($"Donation request with ID {id} not found.");
+
+            if (donationRequest.Status == RequestStatus.Completed)
+                throw new BadRequestException("Cannot reject a completed donation request.");
+
+            if (donationRequest.Status == RequestStatus.Cancelled)
+                throw new BadRequestException("Donation request is already cancelled.");
+
+            if (donationRequest.Status == RequestStatus.Approved)
+                throw new BadRequestException("Cannot reject an approved donation request.");
+
+            donationRequest.Status = RequestStatus.Cancelled;
+
+            await _donationRequestRepository.UpdateAsync(donationRequest);
+        }
+
+        public async Task SoftDeleteAsync(
+            Guid id,
+            Guid currentUserId,
+            bool isAdmin)
+        {
+            var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
+
+            if (donationRequest == null)
+                throw new NotFoundException($"Donation request with ID {id} not found.");
+
+            if (donationRequest.Status == RequestStatus.Approved)
+                throw new BadRequestException("You cannot delete an approved donation request.");
+
+            if (donationRequest.Status == RequestStatus.Completed)
+                throw new BadRequestException("You cannot delete a completed donation request.");
+
+            await _donationRequestRepository.DeleteAsync(donationRequest);
+        }
     }
 }

@@ -28,8 +28,6 @@ namespace GivingChampion.Application.Services
 
         #endregion
 
-        #region Query Methods
-
         #region GetAllPartner
 
         /// <summary>
@@ -63,10 +61,6 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<PartnerDto>(partner);
         }
         #endregion
-
-        #endregion
-
-        #region Command Methods
 
         #region CreatePartner
         /// <summary>
@@ -134,8 +128,6 @@ namespace GivingChampion.Application.Services
             // Returning true to indicate successful deletion
             return true;
         }
-        #endregion
-
         #endregion
     }
 }
