@@ -9,7 +9,7 @@ namespace GivingChampion.Domain.Entities
 {
     public class Partner : BaseEntity
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         /// <summary>
         /// Organization official name
         /// </summary>

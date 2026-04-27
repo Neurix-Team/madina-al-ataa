@@ -62,7 +62,7 @@ namespace GivingChampion.API.Controllers
         {
             var result = await _userGeoQuestService.CheckGeoQuestStatus(id);
 
-            if (!result.IsSuccess)
+            if (!result.Succeeded)
             {
                 return BadRequest("An error occurred while checking the GeoQuest status.");
             }

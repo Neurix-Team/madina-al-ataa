@@ -19,7 +19,7 @@ namespace GivingChampion.Domain.Entities
         /// Primary key (unique identifier)
         /// </summary>
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         /// <summary>
         /// Donation amount paid by the donor
@@ -46,12 +46,6 @@ namespace GivingChampion.Domain.Entities
         public string Category { get; set; } = string.Empty;
 
         /// <summary>
-        /// Target location of the donation impact
-        /// </summary>
-        [Required, MaxLength(250)]
-        public string TargetLocation { get; set; } = string.Empty;
-
-        /// <summary>
         /// Status of the donation order lifecycle
         /// (Pending, Approved, Rejected)
         /// </summary>
@@ -64,11 +58,11 @@ namespace GivingChampion.Domain.Entities
         [MaxLength(500)]
         public string? Receipt { get; set; }
 
-        /// <summary>
-        /// Impact report after donation completion
-        /// </summary>
-        [MaxLength(2000)]
-        public string? ImpactReport { get; set; }
+        ///// <summary>
+        ///// Impact report after donation completion
+        ///// </summary>
+        //[MaxLength(2000)]
+        //public string? ImpactReport { get; set; }
 
         /// <summary>
         /// Foreign key to Donor
@@ -79,26 +73,15 @@ namespace GivingChampion.Domain.Entities
         /// Donor Reference
         /// </summary>
         [ForeignKey("DonorId")]
-        public Donor Donor { get; set; }
+        public ApplicationUser Donor { get; set; }
 
         /// <summary>
         /// Foreign key to Donation Request
         /// </summary>
         public Guid DonationRequestId { get; set; }
 
-        /// <summary>
-        /// Record creation timestamp (UTC)
-     
-
         // Navigation Property to DonationRequest
         [ForeignKey("DonationRequestId")]
         public DonationRequest DonationRequest { get; set; }
-
-        ///// <summary>
-        ///// Record creation timestamp (UTC)
-        ///// </summary>
-        //public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }

@@ -11,6 +11,11 @@ var compose = builder.AddDockerComposeEnvironment("compose")
 var googleClientId = builder.AddParameter("google-client-id", secret: true);
 var googleClientSecret = builder.AddParameter("google-client-secret", secret: true);
 var jwtKey = builder.AddParameter("jwt-key", secret: true);
+var jwtIssuer = builder.AddParameter("jwt-issuer", secret: true);
+var jwtAudience = builder.AddParameter("jwt-audience", secret: true);
+var jwtAccessTokenMinutes = builder.AddParameter("jwt-access-token-minutes", secret: true);
+var corsOrigins = builder.AddParameter("cors-origins", secret: true);
+var authCallbackUrl = builder.AddParameter("auth-callback-url", secret: true);
 
 // FIX 1: Change to IResourceBuilder<IResourceWithConnectionString>
 // This allows the variable to be properly passed into .WithReference() calls.
@@ -65,12 +70,14 @@ var seeder = builder.AddProject<Projects.GivingChampion_Seeder>("seeder")
 builder.AddProject<Projects.GivingChampion_API>("api")
     .WithReference(db, "DefaultConnection")
     .WithReference(seeder)
-    .WithEnvironment("Jwt__Issuer", "GivingChampion")
-    .WithEnvironment("Jwt__Audience", "GivingChampion.Client")
-    .WithEnvironment("Jwt__AccessTokenMinutes", "60")
+    .WithEnvironment("Jwt__Issuer", jwtIssuer)
+    .WithEnvironment("Jwt__Audience", jwtAudience)
+    .WithEnvironment("Jwt__AccessTokenMinutes", jwtAccessTokenMinutes)
     .WithEnvironment("Authentication__Google__ClientId", googleClientId)
     .WithEnvironment("Authentication__Google__ClientSecret", googleClientSecret)
     .WithEnvironment("Jwt__Key", jwtKey)
+    .WithEnvironment("Cors__AllowedOrigin", corsOrigins)
+    .WithEnvironment("Frontend__AuthCallbackUrl", authCallbackUrl)
     .WaitFor(db)
     .WaitForCompletion(seeder)
     .PublishAsDockerComposeService((resource, service) =>

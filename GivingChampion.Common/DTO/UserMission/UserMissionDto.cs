@@ -8,7 +8,7 @@ namespace GivingChampion.Common.DTO.Mission
         public Guid UserId { get; set; }
         public Guid MissionId { get; set; }
         public int Progress { get; set; }
-        public MissionStatus Status { get; set; }
+        public string Status { get; set; }
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string MissionTitle { get; set; } = string.Empty;   // For display

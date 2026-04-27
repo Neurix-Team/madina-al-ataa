@@ -1,21 +1,16 @@
-﻿using GivingChampion.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GivingChampion.Common.Pagination;
+using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.Persistance.Interfaces
 {
-
-        public interface IDonationOrderRepository
-        {
-            Task<DonationOrder> GetByIdAsync(Guid id);  // For getting a single donation order by id
-            Task<IEnumerable<DonationOrder>> GetAllAsync();  // Now matches the return type of IEnumerable
-            Task CreateAsync(DonationOrder donationOrder);  // Now matches method name in repository
-            Task UpdateAsync(DonationOrder donationOrder);  // For updating a donation order
-        }
+    public interface IDonationOrderRepository
+    {
+        Task CreateAsync(DonationOrder donationOrder);
+        Task<PagedList<DonationOrder>> GetAllAsync(PageParameters pageParameters);
+        Task<PagedList<DonationOrder>> GetByDonorIdAsync(
+            Guid donorUserId,
+            PageParameters pageParameters);
+        Task<DonationOrder?> GetByIdAsync(Guid id);
+        Task UpdateAsync(DonationOrder donationOrder);
     }
-
-
-
-   
-
+}
