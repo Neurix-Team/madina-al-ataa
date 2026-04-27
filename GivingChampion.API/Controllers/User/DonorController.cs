@@ -67,7 +67,7 @@ namespace GivingChampion.API.Controllers
         }
 
         /// <summary>
-        /// Updates donor profile (parent or admin)
+        /// Updates donor profile (admin)
         /// </summary>
         [HttpPut("me")]
         [Authorize]
