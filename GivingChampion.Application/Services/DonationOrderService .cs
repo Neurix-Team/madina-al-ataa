@@ -16,15 +16,18 @@ namespace GivingChampion.Application.Services.DonationOrderService
     {
         private readonly IDonationOrderRepository _donationOrderRepository;
         private readonly IDonationRequestRepository _donationRequestRepository;
+        private readonly IDonorRepository _donorRepository;
         private readonly IMapper _mapper;
 
         public DonationOrderService(
             IDonationOrderRepository donationOrderRepository,
             IDonationRequestRepository donationRequestRepository,
+            IDonorRepository donorRepository,
             IMapper mapper)
         {
             _donationOrderRepository = donationOrderRepository;
             _donationRequestRepository = donationRequestRepository;
+            _donorRepository = donorRepository;
             _mapper = mapper;
         }
 
@@ -175,6 +178,11 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             donationOrder.Status = OrderStatus.Approved;
 
+            var donor = await _donorRepository.GetByIdAsync(donationOrder.DonorId);
+            if (donor == null)
+                throw new NotFoundException("Donor was not found.");
+            donor.TotalDonated += donationOrder.Amount;
+
             donationRequest.AmountRemaining -= donationOrder.Amount;
 
             if (donationRequest.AmountRemaining <= 0)
@@ -183,6 +191,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 donationRequest.Status = RequestStatus.Completed;
             }
 
+            await _donorRepository.UpdateAsync(donor);
             await _donationOrderRepository.UpdateAsync(donationOrder);
             await _donationRequestRepository.UpdateAsync(donationRequest);
 
