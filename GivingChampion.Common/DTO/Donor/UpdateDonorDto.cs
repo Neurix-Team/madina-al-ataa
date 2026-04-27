@@ -7,6 +7,6 @@ namespace GivingChampion.Common.DTO.Donor
     public class UpdateDonorDto
     {
         public int PreferredCategory { get; set; }
-        public decimal? TotalDonated { get; set; } // Optional - usually updated via donations
+        //public decimal? TotalDonated { get; set; } // Optional - usually updated via donations
     }
 }
