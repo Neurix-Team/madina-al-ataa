@@ -24,9 +24,6 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Level")]
         public Guid LevelId { get; set; }
         public Level Level { get; set; }
-        //public bool IsDeleted { get; set; } = false;
-        //public DateTime? DeletedAt { get; set; }
-
         public ICollection<Badge> Badges { get; set; }
         public ICollection<Review> Reviews { get; set; }
     }

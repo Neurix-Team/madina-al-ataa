@@ -1,5 +1,6 @@
 ﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,30 +17,26 @@ namespace GivingChampion.API.Controllers
         {
             _userGeoQuestService = userGeoQuestService;
         }
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetAllAsync([FromQuery] Guid userId, [FromQuery] PageParameters pageParameters)
+        {
+            var userGeoQuests = await _userGeoQuestService.GetAllAsync(userId, pageParameters);
+            return Ok(userGeoQuests);
+        }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
-        //{
-        //    var userGeoQuests = await _userGeoQuestService.GetAllAsync(pageParameters);
-        //    return Ok(userGeoQuests);
-        //}
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var userGeoQuest = await _userGeoQuestService.GetByIdAsync(id);
-            if (userGeoQuest == null)
+            if (userGeoQuest == null || !userGeoQuest.IsSuccess)
                 return NotFound("UserGeoQuest not found");
 
             return Ok(userGeoQuest);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromBody] CreateUserGeoQuestDto dto)
-        //{
-        //    var created = await _userGeoQuestService.CreateAsync(dto);
-        //    return CreatedAtAction(nameof(GetById), new { id = created.Value.Id }, created);
-        //}
+
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserGeoQuestDto dto)

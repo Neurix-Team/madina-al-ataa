@@ -19,6 +19,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/activities
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -38,6 +39,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/activities
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateActivityDto dto)
         {
@@ -47,6 +49,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/activities/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateActivityDto dto)
         {
@@ -57,6 +60,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/activities/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

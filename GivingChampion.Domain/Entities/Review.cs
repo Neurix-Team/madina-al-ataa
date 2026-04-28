@@ -21,7 +21,5 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Profile")]
         public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }

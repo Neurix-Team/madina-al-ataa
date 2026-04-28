@@ -9,9 +9,9 @@ namespace GivingChampion.Common.DTO.UserGeoQuestDto
     {
         [Key]
         public Guid Id { get; set; }
-        [Required]
+    
         [StringLength(200)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public Guid GeoQuestId { get; set; }
         public DateTime? StartedAt { get; set; } = DateTime.Now;
         public double LocationLatitude { get; set; }

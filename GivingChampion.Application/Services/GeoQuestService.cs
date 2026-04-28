@@ -2,6 +2,7 @@
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
 using GivingChampion.Common.DTO.GeoQuestDto;
+using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
@@ -23,14 +24,15 @@ namespace GivingChampion.Application.Services
         public async Task<Result<PagedList<GeoQuestDto>>> GetAllAsync(PageParameters pageParameters)
         {
             var geoQuests = await _geoQuestRepository.GetAllAsync(pageParameters);
-            var geoQuestDtos = _mapper.Map<PagedList<GeoQuestDto>>(geoQuests); // AutoMapper
+            var geoQuestDtos = _mapper.MapPagedList<GeoQuest, GeoQuestDto>(geoQuests); // AutoMapper
             return Result<PagedList<GeoQuestDto>>.Success(geoQuestDtos);
         }
 
         public async Task<Result<GeoQuestDto?>> GetByIdAsync(Guid id)
         {
             var geoQuest = await _geoQuestRepository.GetByIdAsync(id);
-            return geoQuest == null ? Result<GeoQuestDto?>.Failure("GeoQuest not found") : Result<GeoQuestDto?>.Success(_mapper.Map<GeoQuestDto>(geoQuest)); // AutoMapper
+            return geoQuest == null ? Result<GeoQuestDto?>.Failure("GeoQuest not found") :
+                Result<GeoQuestDto?>.Success(_mapper.Map<GeoQuestDto>(geoQuest)); // AutoMapper
         }
 
         public async Task<Result<GeoQuestDto>> CreateAsync(CreateGeoQuestDto dto)

@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Common.Enums;
 ﻿using GivingChampion.Common.Interfaces;
-using System.ComponentModel.DataAnnotations;
 using GivingChampion.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 

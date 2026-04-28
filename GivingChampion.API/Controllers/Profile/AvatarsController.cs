@@ -17,15 +17,8 @@ namespace GivingChampion.API.Controllers
             _avatarService = avatarService;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    var avatars = await _avatarService.GetAllAsync();
-        //    return Ok(avatars);
-        //}
-
         // GET api/avatars/{id}
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -36,6 +29,7 @@ namespace GivingChampion.API.Controllers
 
             return Ok(avatar);
         }
+
         // POST api/avatars
         //[HttpPost]
         //public async Task<IActionResult> Create([FromBody] CreateAvatarDto dto)
@@ -44,6 +38,7 @@ namespace GivingChampion.API.Controllers
         //    return CreatedAtAction(nameof(GetById), new { id = createdAvatar.Id }, createdAvatar);
         //}
         // PUT api/avatars/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAvatarDto dto)
         {
@@ -55,6 +50,7 @@ namespace GivingChampion.API.Controllers
             return Ok(new { message = "Avatar updated successfully" });
         }
         // DELETE api/avatars/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

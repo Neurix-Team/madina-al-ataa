@@ -27,5 +27,6 @@ namespace GivingChampion.Domain.Entities
         public bool IsStarted { get; set; } // Add this flag to indicate if the GeoQuest has started
         public bool IsLocationVerified { get; set; }
         public bool IsCompleted { get; set; }
+        public string? Title { get; set; }
     }
 }

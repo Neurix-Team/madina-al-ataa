@@ -4,7 +4,6 @@ namespace GivingChampion.API.Interfaces
 {
     public interface IProfileService
     {
-        //Task<List<ProfileDto>> GetAllAsync();
         Task<ProfileDto?> GetByIdAsync(Guid id);
         //Task<ProfileDto> CreateAsync(CreateProfileDto dto);
         Task<bool> UpdateAsync(Guid id, UpdateProfileDto dto);

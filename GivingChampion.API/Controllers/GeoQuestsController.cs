@@ -4,6 +4,7 @@ using GivingChampion.Common.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers
 {
@@ -23,7 +24,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/geoquests
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
@@ -71,41 +72,44 @@ namespace GivingChampion.API.Controllers
             if (!deleted.Value) return NotFound("GeoQuest not found");
             return NoContent();
         }
-        // POST api/geoquests/{geoQuestId}/start
 
+        [Authorize]
         [HttpPost("{geoQuestId}/start")]
-        public async Task<IActionResult> StartGeoQuest(Guid geoQuestId, [FromBody] StartGeoQuestDto dto)
+        public async Task<IActionResult> StartGeoQuest(Guid geoQuestId)
         {
-            // Get the UserGeoQuest by ID
-            var userGeoQuestResult = await _userGeoQuestService.GetByIdAsync(dto.UserGeoQuestId);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userGeoQuestResult.Succeeded)
             {
                 var userGeoQuest = userGeoQuestResult.Value;
 
-                // Start the GeoQuest (Mark as in progress)
-                userGeoQuest.GeoQuestId = geoQuestId; // Associate the GeoQuest with the UserGeoQuest
-                userGeoQuest.StartedAt = DateTime.UtcNow; // Set the start time
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Unauthorized("Invalid user id in token.");
 
-                // Update the UserGeoQuest record
-                var updateResult = await _userGeoQuestService.StartAsync(userGeoQuest.Id, dto);
+            var result = await _userGeoQuestService.StartAsync(geoQuestId, userId);
 
                 if (updateResult.Succeeded)
                 {
-                    return Ok("GeoQuest started successfully");
-                }
+                    message = result.Error
+                });
 
-                return BadRequest("Failed to update UserGeoQuest");
-            }
-
-            return NotFound("UserGeoQuest not found");
+            return Ok(new
+            {
+                message = "GeoQuest started successfully.",
+                data = result.Value
+            });
         }
 
-
+        [Authorize]
         [HttpPost("{geoQuestId}/verify-location")]
         public async Task<IActionResult> VerifyLocation(Guid geoQuestId, [FromBody] VerifyLocationDto dto)
         {
-            // Get the UserGeoQuest DTO by UserGeoQuestId
+            if (dto == null)
+                return BadRequest("Request body is required.");
+
+            if (dto.UserGeoQuestId == Guid.Empty)
+                return BadRequest("UserGeoQuestId is required.");
+
             var userGeoQuestResult = await _userGeoQuestService.GetByIdAsync(dto.UserGeoQuestId);
 
             // Check if the userGeoQuest was successfully retrieved
@@ -114,25 +118,22 @@ namespace GivingChampion.API.Controllers
                 return NotFound("UserGeoQuest not found");
             }
 
-            // Extract the actual DTO value
             var userGeoQuest = userGeoQuestResult.Value;
 
-            // Verify if the user's location matches the required location for this GeoQuest
-            if (dto.Latitude == userGeoQuest.LocationLatitude &&
-                dto.Longitude == userGeoQuest.LocationLongitude)
-            {
-                userGeoQuest.IsLocationVerified = true;
+            if (userGeoQuest.GeoQuestId != geoQuestId)
+                return BadRequest("This UserGeoQuest does not belong to the provided GeoQuest.");
 
-                // Update the UserGeoQuest record with the new location verification status
-                await _userGeoQuestService.UpdateAsyncVerification(userGeoQuest.Id, dto, isSuccess: true); 
+            var result = await _userGeoQuestService.UpdateAsyncVerification(
+                dto.UserGeoQuestId,
+                dto,
+                isSuccess: true);
 
-                return Ok("Location verified successfully");
-            }
+            if (!result.Succeeded)
+                return BadRequest(result);
 
-            return BadRequest("Location is incorrect");
+            return Ok(result);
         }
     }
 
 
-
-    }
+}

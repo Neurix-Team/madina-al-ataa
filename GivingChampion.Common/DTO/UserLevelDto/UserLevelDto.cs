@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Common.DTO.UserLevelDto
 {
     public class UserLevelDto
     {
+        [Key]
         public Guid Id { get; set; }
 
         public int Xp { get; set; }

@@ -20,7 +20,5 @@ namespace GivingChampion.Domain.Entities
         [StringLength(500)]
 
         public string LastSuggestion { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }

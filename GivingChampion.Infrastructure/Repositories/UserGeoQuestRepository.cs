@@ -19,26 +19,50 @@ namespace GivingChampion.API.Repositories
             _context = context;
         }
 
-        // Get all UserGeoQuests with pagination
-        public async Task<List<UserGeoQuest>> GetAllAsync(PageParameters pageParameters)
+        // Get all UserGeoQuests with paginationTask<PagedList<UserGeoQuest>>
+        public async Task<PagedList<UserGeoQuest>> GetAllByUserIdAsync(Guid userId,PageParameters pageParameters)
         {
-            return await _context.UserGeoQuests
-                .AsNoTracking() // For read-only operation, improving performance
-                .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize) // Pagination logic
-                .Take(pageParameters.PageSize) // Pagination logic
-                .Include(ugq => ugq.GeoQuest) // Include the GeoQuest related data
-                .Include(ugq => ugq.User) // Include User related data
+            var query = _context.UserGeoQuests
+                .Include(ugq => ugq.GeoQuest)
+                .Include(ugq => ugq.User)
+                .Where(ugq =>
+                    ugq.UserId == userId &&
+                    !ugq.IsDeleted);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(ugq => ugq.CreatedAt)
+                .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize)
+                .Take(pageParameters.PageSize)
                 .ToListAsync();
+
+            return new PagedList<UserGeoQuest>(
+                items,
+                totalCount,
+                pageParameters.PageNumber,
+                pageParameters.PageSize
+            );
         }
 
         // Get a single UserGeoQuest by its ID
         public async Task<UserGeoQuest?> GetByIdAsync(Guid id)
         {
             return await _context.UserGeoQuests
-                .AsNoTracking()
                 .Include(ugq => ugq.GeoQuest)
                 .Include(ugq => ugq.User)
-                .FirstOrDefaultAsync(ugq => ugq.Id == id);
+                .FirstOrDefaultAsync(ugq =>
+                    ugq.Id == id &&
+                    !ugq.IsDeleted);
+        }
+
+        public async Task<UserGeoQuest?> GetByUserIdAndGeoQuestIdAsync(Guid userId, Guid geoQuestId)
+        {
+            return await _context.UserGeoQuests
+                .FirstOrDefaultAsync(x =>
+                    x.UserId == userId &&
+                    x.GeoQuestId == geoQuestId &&
+                    !x.IsDeleted);
         }
 
         // Add a new UserGeoQuest to the database
@@ -56,7 +80,7 @@ namespace GivingChampion.API.Repositories
         // Save changes to the database
         public async Task SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+           await _context.SaveChangesAsync();
         }
     }
 }

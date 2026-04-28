@@ -17,7 +17,5 @@ namespace GivingChampion.Domain.Entities
         public Badge Badge { get; set; }
 
         public DateTime EarnedAt { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }
