@@ -20,12 +20,9 @@ namespace GivingChampion.API.Repositories
         }
 
         // Get all UserGeoQuests with paginationTask<PagedList<UserGeoQuest>>
-        public async Task<PagedList<UserGeoQuest>> GetAllByUserIdAsync(
-          Guid userId,
-          PageParameters pageParameters)
+        public async Task<PagedList<UserGeoQuest>> GetAllByUserIdAsync(Guid userId,PageParameters pageParameters)
         {
             var query = _context.UserGeoQuests
-                //.AsNoTracking()
                 .Include(ugq => ugq.GeoQuest)
                 .Include(ugq => ugq.User)
                 .Where(ugq =>

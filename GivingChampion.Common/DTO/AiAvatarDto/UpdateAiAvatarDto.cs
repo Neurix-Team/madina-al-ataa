@@ -4,9 +4,8 @@ namespace GivingChampion.Common.DTO.AiAvatarDto
 {
     public class UpdateAiAvatarDto
     {
-        [Required]
         [StringLength(100)]
-        public string FavoriteCategory { get; set; }
+        public string? FavoriteCategory { get; set; }
 
         [Range(0, 10, ErrorMessage = "Success rate must be between 0 and 10")]
         public int SuccessRate { get; set; }

@@ -36,12 +36,7 @@ namespace GivingChampion.API.Controllers
             return Ok(userGeoQuest);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromBody] CreateUserGeoQuestDto dto)
-        //{
-        //    var created = await _userGeoQuestService.CreateAsync(dto);
-        //    return CreatedAtAction(nameof(GetById), new { id = created.Value.Id }, created);
-        //}
+
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserGeoQuestDto dto)

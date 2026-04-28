@@ -17,15 +17,8 @@ namespace GivingChampion.API.Controllers
             _profileService = profileService;
         }
 
-        // GET api/profiles
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    var profiles = await _profileService.GetAllAsync();
-        //    return Ok(profiles);
-        //}
-
         // GET api/profiles/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -37,6 +30,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/profiles
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProfileDto dto)
         {
@@ -52,6 +46,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/profiles/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProfileDto dto)
         {
@@ -62,6 +57,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/profiles/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

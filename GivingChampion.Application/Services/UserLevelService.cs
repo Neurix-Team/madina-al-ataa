@@ -17,12 +17,6 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        //public async Task<List<UserLevelDto>> GetAllAsync()
-        //{
-        //    var userLevels = await _userLevelRepository.GetAllAsync();
-        //    return _mapper.Map<List<UserLevelDto>>(userLevels); // AutoMapper
-        //}
-
         public async Task<UserLevelDto?> GetByProfileIdAsync(Guid profileId)
         {
             var userLevel = await _userLevelRepository.GetByProfileIdAsync(profileId);

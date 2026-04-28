@@ -17,7 +17,5 @@ namespace GivingChampion.Domain.Entities
         public int MaxXp { get; set; }
 
         public ICollection<Profile> Profiles { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
     }
 }

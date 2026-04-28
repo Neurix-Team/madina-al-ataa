@@ -17,12 +17,6 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        //public async Task<List<ProfileDto>> GetAllAsync()
-        //{
-        //    var profiles = await _profileRepository.GetAllAsync();
-        //    return _mapper.Map<List<ProfileDto>>(profiles);
-        //}
-
         public async Task<ProfileDto?> GetByIdAsync(Guid id)
         {
             var profile = await _profileRepository.GetByIdAsync(id);

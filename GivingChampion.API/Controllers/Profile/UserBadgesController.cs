@@ -18,6 +18,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/userbadges
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll(Guid profileId)
         {
@@ -26,6 +27,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/userbadges/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -37,6 +39,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/userbadges/profile/{profileId}
+        [Authorize]
         [HttpGet("profile/{profileId}")]
         public async Task<IActionResult> GetByProfileId(Guid profileId)
         {
@@ -45,6 +48,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/userbadges
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserBadgeDto dto)
         {
@@ -54,6 +58,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/userbadges/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserBadgeDto dto)
         {
@@ -64,6 +69,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/userbadges/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

@@ -23,7 +23,8 @@ namespace GivingChampion.Application.Services
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
 
-        public UserGeoQuestService(IUserGeoQuestRepository userGeoQuestRepository, IGeoQuestRepository geoQuestRepository, ILocationRepository locationRepository, IMapper mapper)
+        public UserGeoQuestService(IUserGeoQuestRepository userGeoQuestRepository, IGeoQuestRepository geoQuestRepository, 
+            ILocationRepository locationRepository, IMapper mapper)
         {
             _userGeoQuestRepository = userGeoQuestRepository;
             _geoQuestRepository = geoQuestRepository;

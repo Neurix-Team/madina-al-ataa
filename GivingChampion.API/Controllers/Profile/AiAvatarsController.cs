@@ -18,6 +18,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/aiavatars/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<AiAvatarDto>> GetById(Guid id)
         {
@@ -28,6 +29,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/aiavatars
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<AiAvatarDto>> Create([FromBody] CreateAiAvatarDto dto)
         {
@@ -37,6 +39,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/aiavatars/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAiAvatarDto dto)
         {
@@ -47,6 +50,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/aiavatars/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

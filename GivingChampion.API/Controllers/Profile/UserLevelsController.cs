@@ -18,12 +18,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/userlevels
-        //[HttpGet]
-        //public async Task<IActionResult> GetByProfileIdAsync([FromQuery] Guid profileId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        //{
-        //    var userLevels = await _userLevelService.GetByProfileIdAsync(profileId, pageNumber, pageSize);
-        //    return Ok(userLevels);
-            
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -35,6 +30,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/userlevels
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserLevelDto dto)
         {
@@ -44,6 +40,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/userlevels/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserLevelDto dto)
         {
@@ -54,6 +51,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/userlevels/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

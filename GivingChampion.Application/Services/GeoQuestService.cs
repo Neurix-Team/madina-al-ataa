@@ -31,7 +31,8 @@ namespace GivingChampion.Application.Services
         public async Task<Result<GeoQuestDto?>> GetByIdAsync(Guid id)
         {
             var geoQuest = await _geoQuestRepository.GetByIdAsync(id);
-            return geoQuest == null ? Result<GeoQuestDto?>.Failure("GeoQuest not found") : Result<GeoQuestDto?>.Success(_mapper.Map<GeoQuestDto>(geoQuest)); // AutoMapper
+            return geoQuest == null ? Result<GeoQuestDto?>.Failure("GeoQuest not found") :
+                Result<GeoQuestDto?>.Success(_mapper.Map<GeoQuestDto>(geoQuest)); // AutoMapper
         }
 
         public async Task<Result<GeoQuestDto>> CreateAsync(CreateGeoQuestDto dto)

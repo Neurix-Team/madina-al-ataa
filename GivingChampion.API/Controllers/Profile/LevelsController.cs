@@ -19,6 +19,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/levels
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
@@ -28,6 +29,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/levels/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -40,6 +42,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/levels
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateLevelDto dto)
         {
@@ -49,6 +52,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/levels/{id}
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateLevelDto dto)
         {
@@ -60,6 +64,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/levels/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

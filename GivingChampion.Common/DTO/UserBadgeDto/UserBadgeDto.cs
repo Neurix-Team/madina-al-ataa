@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Common.DTO.UserBadgeDto
 {
     public class UserBadgeDto
     {
+        [Key]
         public Guid Id { get; set; }= Guid.NewGuid();
 
         public Guid ProfileId { get; set; }

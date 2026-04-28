@@ -17,13 +17,8 @@ namespace GivingChampion.API.Controllers.Profile
             _reviewService = reviewService;
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<List<ReviewDto>>> GetAll()
-        //{
-        //    var reviews = await _reviewService.GetAllAsync();
-        //    return Ok(reviews);
-        //}
-
+        // GET api/reviews
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<ReviewDto>> GetById(Guid id)
         {
@@ -34,7 +29,7 @@ namespace GivingChampion.API.Controllers.Profile
         }
 
         // POST api/reviews
-        
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<ReviewDto>> Create([FromBody] CreateReviewDto dto)
         {
@@ -44,7 +39,7 @@ namespace GivingChampion.API.Controllers.Profile
         }
 
         // PUT api/review/{id}
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateReviewDto dto)
         {
@@ -55,7 +50,7 @@ namespace GivingChampion.API.Controllers.Profile
         }
 
         // DELETE api/review/{id}
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

@@ -4,6 +4,7 @@ namespace GivingChampion.Common.DTO
 {
     public class UpdateGeoQuestDto
     {
+        [Key]
         public Guid Id { get; set; }
      
         [StringLength(200)]

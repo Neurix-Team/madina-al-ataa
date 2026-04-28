@@ -17,12 +17,6 @@ namespace GivingChampion.API.Services
             _mapper = mapper;
         }
 
-        //public async Task<List<AvatarDto>> GetAllAsync()
-        //{
-        //    var avatars = await _avatarRepository.GetAllAsync();
-        //    return _mapper.Map<List<AvatarDto>>(avatars); // AutoMapper
-        //}
-
         public async Task<AvatarDto?> GetByIdAsync(Guid id)
         {
             var avatar = await _avatarRepository.GetByIdAsync(id);
