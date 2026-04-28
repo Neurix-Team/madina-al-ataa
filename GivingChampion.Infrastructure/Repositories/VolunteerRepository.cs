@@ -73,8 +73,12 @@ namespace GivingChampion.Persistance.Repositories
         /// Adds a new volunteer to the database asynchronously.
         /// </summary>
         /// <param name="volunteer">The volunteer to be added.</param>
-        public async Task AddAsync(Volunteer volunteer)
+        public async Task AddAsync(Guid UserId)
         {
+            var volunteer = new Volunteer()
+            {
+                UserId = UserId,
+            };
             await _context.Volunteers.AddAsync(volunteer).ConfigureAwait(false); // Add the volunteer to the database
         } 
         #endregion

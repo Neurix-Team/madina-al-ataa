@@ -10,7 +10,7 @@ namespace GivingChampion.Domain.Entities
     public class AiAvatar : BaseEntity
     {
         [Key] 
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         [Required]
         [StringLength(100)]
         public string FavoriteCategory { get; set; }

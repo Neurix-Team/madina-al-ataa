@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.DTO.ProfileDto;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
@@ -11,40 +11,50 @@ namespace GivingChampion.API.Services
         private readonly IProfileRepository _profileRepository;
         private readonly IMapper _mapper;
 
-        public ProfileService(IProfileRepository profileRepository, IMapper mapper)
+        public ProfileService(
+            IProfileRepository profileRepository,
+            IMapper mapper)
         {
             _profileRepository = profileRepository;
             _mapper = mapper;
         }
 
-        //public async Task<List<ProfileDto>> GetAllAsync()
-        //{
-        //    var profiles = await _profileRepository.GetAllAsync();
-        //    return _mapper.Map<List<ProfileDto>>(profiles);
-        //}
-
         public async Task<ProfileDto?> GetByIdAsync(Guid id)
         {
-            var profile = await _profileRepository.GetByIdAsync(id);
-            return profile == null ? null : _mapper.Map<ProfileDto>(profile);
-        }
+            if (id == Guid.Empty)
+                throw new BadRequestException("Profile ID is required.");
 
-        public async Task<ProfileDto> CreateAsync(CreateProfileDto dto)
-        {
-            var profile = _mapper.Map<Domain.Entities.Profile>(dto);
-            await _profileRepository.AddAsync(profile);
-            await _profileRepository.SaveChangesAsync();
+            var profile = await _profileRepository.GetByIdAsync(id);
+
+            if (profile == null)
+                throw new NotFoundException($"Profile with ID {id} was not found.");
+
+            if (profile.IsDeleted)
+                throw new NotFoundException($"Profile with ID {id} was not found.");
+
             return _mapper.Map<ProfileDto>(profile);
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateProfileDto dto)
         {
-            var profile = await _profileRepository.GetByIdAsync(id);
-            if (profile == null)
-                return false;
+            if (id == Guid.Empty)
+                throw new BadRequestException("Profile ID is required.");
 
-            _mapper.Map(dto, profile);  // Map updated properties
+            if (dto == null)
+                throw new BadRequestException("Profile update data is required.");
+
+            var profile = await _profileRepository.GetByIdAsync(id);
+
+            if (profile == null)
+                throw new NotFoundException($"Profile with ID {id} was not found.");
+
+            if (profile.IsDeleted)
+                throw new BadRequestException("Cannot update a deleted profile.");
+
+            _mapper.Map(dto, profile);
+
             _profileRepository.Update(profile);
+
             await _profileRepository.SaveChangesAsync();
 
             return true;
@@ -52,14 +62,22 @@ namespace GivingChampion.API.Services
 
         public async Task<bool> SoftDeleteAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Profile ID is required.");
+
             var profile = await _profileRepository.GetByIdAsync(id);
+
             if (profile == null)
-                return false;
+                throw new NotFoundException($"Profile with ID {id} was not found.");
+
+            if (profile.IsDeleted)
+                throw new BadRequestException("Profile is already deleted.");
 
             profile.IsDeleted = true;
             profile.DeletedAt = DateTime.UtcNow;
 
             _profileRepository.Update(profile);
+
             await _profileRepository.SaveChangesAsync();
 
             return true;

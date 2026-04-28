@@ -30,9 +30,8 @@ namespace GivingChampion.API.Controllers
         {
             var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            // You should pass parentId to service if needed, or use ICurrentUserService
 
-            var result = await _childService.CreateChildAsync(dto);
+            var result = await _childService.CreateChildAsync(dto, parentId);
             return result.Succeeded ? CreatedAtAction(nameof(GetMyChildren), result) : BadRequest(result);
         }
 

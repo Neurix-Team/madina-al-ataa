@@ -10,7 +10,7 @@ namespace GivingChampion.Domain.Entities
     public class Profile : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Range(0, 5)]
         public double Rating { get; set; }
@@ -21,9 +21,7 @@ namespace GivingChampion.Domain.Entities
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
 
-        public Guid AvatarId { get; set; }
-        public Avatar Avatar { get; set; } 
-
+        [ForeignKey("Level")]
         public Guid LevelId { get; set; }
         public Level Level { get; set; }
         //public bool IsDeleted { get; set; } = false;

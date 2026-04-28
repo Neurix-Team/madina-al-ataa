@@ -2,6 +2,8 @@ using GivingChampion.Domain.Contexts;
 using GivingChampion.Migrator;
 using Microsoft.EntityFrameworkCore;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
@@ -14,17 +16,29 @@ var _env = builder.Environment;
 //builder.Services.AddDbContext<AppDbContext>(options =>
 //    options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
 
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
 if (_env.IsDevelopment())
 {
-    builder.AddNpgsqlDbContext<AppDbContext>("DefaultConnection");
+    builder.AddNpgsqlDbContext<AppDbContext>(
+        "DefaultConnection",
+        configureDbContextOptions: options =>
+        {
+            options.UseNpgsql(npgsql =>
+                npgsql.MigrationsAssembly("GivingChampion.Domain"));
+        });
 }
 else
 {
-    var connectionstring = _conf.GetConnectionString("DefaultConnection")
+    var connectionString = _conf.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found");
 
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
+        options.UseNpgsql(connectionString, npgsql =>
+            npgsql.MigrationsAssembly("GivingChampion.Domain")));
 }
 
 builder.Services.AddHostedService<MigrationWorker>();

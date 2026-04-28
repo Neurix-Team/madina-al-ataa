@@ -16,7 +16,7 @@ namespace GivingChampion.Domain.Entities
 		/// Primary key (unique identifier)
 		/// </summary>
 		[Key]
-		public Guid Id { get; set; } = Guid.NewGuid();
+		public Guid Id { get; set; }
 
 		/// <summary>
 		/// Type of service provided by the volunteer (Medical, Teaching, etc.)

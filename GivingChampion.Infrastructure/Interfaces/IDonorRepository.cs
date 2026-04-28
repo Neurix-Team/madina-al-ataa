@@ -14,7 +14,7 @@ namespace GivingChampion.Persistance.Interfaces
         /// <summary>
         /// Creates a new Donor profile for a user
         /// </summary>
-        Task CreateAsync(Donor donor);
+        Task CreateAsync(Guid userId);
 
         /// <summary>
         /// Updates donor profile (e.g. TotalDonated, PreferredCategory)

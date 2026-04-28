@@ -13,7 +13,7 @@ namespace GivingChampion.Common.DTO
         public class ActivityDto
         {
             [Key]
-            public Guid Id { get; set; }= Guid.NewGuid();
+            public Guid Id { get; set; }
 
             public string Name { get; set; } 
 

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace GivingChampion.Common.Extensions.SoftDelete
 {
@@ -16,11 +17,20 @@ namespace GivingChampion.Common.Extensions.SoftDelete
             {
                 if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
                 {
-                    var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                    var property = System.Linq.Expressions.Expression.Property(parameter, nameof(ISoftDeletable.IsDeleted));
-                    var filter = System.Linq.Expressions.Expression.Lambda(
-                        System.Linq.Expressions.Expression.Equal(property, System.Linq.Expressions.Expression.Constant(false)),
-                        parameter);
+                    var parameter = Expression.Parameter(entityType.ClrType, "e");
+
+                    var property = Expression.Property(
+                        parameter,
+                        nameof(ISoftDeletable.IsDeleted)
+                    );
+
+                    var filter = Expression.Lambda(
+                        Expression.Equal(
+                            property,
+                            Expression.Constant(false, typeof(bool))
+                        ),
+                        parameter
+                    );
 
                     modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
                 }
