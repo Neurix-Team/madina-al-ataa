@@ -51,7 +51,7 @@ namespace GivingChampion.Domain.Contexts
 
             // ====================== GLOBAL SOFT DELETE FILTER ======================
             // This applies automatically to ALL entities that implement ISoftDeletable
-            //modelBuilder.ApplySoftDeleteQueryFilter();
+            modelBuilder.ApplySoftDeleteQueryFilter();
 
             // ====================== Specific Configurations ======================
             // Only add manual configurations here if needed (relationships, indexes, etc.)

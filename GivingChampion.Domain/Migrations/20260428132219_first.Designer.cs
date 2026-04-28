@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GivingChampion.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260428123703_first")]
+    [Migration("20260428132219_first")]
     partial class first
     {
         /// <inheritdoc />

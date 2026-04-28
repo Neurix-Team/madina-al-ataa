@@ -40,6 +40,7 @@ builder.Services.AddDataProtection();
 
 builder.Services.AddSingleton<RoleSeeder>();
 builder.Services.AddSingleton<UserSeeder>();
+builder.Services.AddSingleton<LevelSeeder>();
 
 builder.Services.AddHostedService<SeedingWorker>();
 

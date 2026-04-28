@@ -9,17 +9,20 @@ public class SeedingWorker : BackgroundService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly RoleSeeder _roleSeeder;
     private readonly UserSeeder _userSeeder;
+    private readonly LevelSeeder _levelSeeder;
 
     public SeedingWorker(
         ILogger<SeedingWorker> logger,
         IHostApplicationLifetime applicationLifetime,
         RoleSeeder roleSeeder,
-        UserSeeder userSeeder)
+        UserSeeder userSeeder,
+        LevelSeeder levelSeeder)
     {
         _logger = logger;
         _applicationLifetime = applicationLifetime;
         _roleSeeder = roleSeeder;
         _userSeeder = userSeeder;
+        _levelSeeder = levelSeeder;
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -36,6 +39,12 @@ public class SeedingWorker : BackgroundService
 
             var userSeedingResult = await _userSeeder.Seed();
             if (!userSeedingResult)
+            {
+                allSuccessfull = false;
+            }
+
+            var levelSeedingResult = await _levelSeeder.Seed();
+            if (!levelSeedingResult)
             {
                 allSuccessfull = false;
             }
