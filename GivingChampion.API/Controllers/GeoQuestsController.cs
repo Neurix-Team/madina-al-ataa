@@ -79,16 +79,16 @@ namespace GivingChampion.API.Controllers
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrWhiteSpace(userIdClaim))
-                return Unauthorized("User is not authenticated.");
+            if (userGeoQuestResult.Succeeded)
+            {
+                var userGeoQuest = userGeoQuestResult.Value;
 
             if (!Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized("Invalid user id in token.");
 
             var result = await _userGeoQuestService.StartAsync(geoQuestId, userId);
 
-            if (!result.IsSuccess)
-                return BadRequest(new
+                if (updateResult.Succeeded)
                 {
                     message = result.Error
                 });
@@ -112,8 +112,11 @@ namespace GivingChampion.API.Controllers
 
             var userGeoQuestResult = await _userGeoQuestService.GetByIdAsync(dto.UserGeoQuestId);
 
-            if (userGeoQuestResult.IsFailure || userGeoQuestResult.Value == null)
-                return NotFound("UserGeoQuest not found.");
+            // Check if the userGeoQuest was successfully retrieved
+            if (!userGeoQuestResult.Succeeded)
+            {
+                return NotFound("UserGeoQuest not found");
+            }
 
             var userGeoQuest = userGeoQuestResult.Value;
 

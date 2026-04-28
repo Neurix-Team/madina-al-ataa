@@ -25,20 +25,19 @@ namespace GivingChampion.API.Controllers
 
         // Parent creates a child request
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<Result<ChildDto>>> CreateChild([FromBody] CreateChildDto dto)
         {
             var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
 
-            // You should pass parentId to service if needed, or use ICurrentUserService
 
-            var result = await _childService.CreateChildAsync(dto);
+            var result = await _childService.CreateChildAsync(dto, parentId);
             return result.Succeeded ? CreatedAtAction(nameof(GetMyChildren), result) : BadRequest(result);
         }
 
         // Parent views their children
         [HttpGet("my-children")]
-        [Authorize]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<Result<List<ChildDto>>>> GetMyChildren()
         {
             var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");

@@ -17,8 +17,8 @@ namespace GivingChampion.Domain.Contexts
         }
 
         // DbSets
-        public DbSet<ApplicationUser> Users { get; set; }
-        public DbSet<ApplicationRole> Roles { get; set; }
+        //public DbSet<ApplicationUser> Users { get; set; }
+        //public DbSet<ApplicationRole> Roles { get; set; }
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
         public DbSet<Badge> Badges { get; set; }

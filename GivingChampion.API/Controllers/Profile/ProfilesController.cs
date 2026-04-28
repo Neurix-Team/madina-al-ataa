@@ -30,20 +30,19 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/profiles
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProfileDto dto)
-        {
-            try
-            {
-                var created = await _profileService.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message); // Return error message if user/profile is not found
-            }
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] CreateProfileDto dto)
+        //{
+        //    try
+        //    {
+        //        var created = await _profileService.CreateAsync(dto);
+        //        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message); // Return error message if user/profile is not found
+        //    }
+        //}
 
         // PUT api/profiles/{id}
         [Authorize]

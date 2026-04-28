@@ -58,6 +58,7 @@ namespace GivingChampion.Application.Mapper
             // Partner -> PartnerDto
             CreateMap<Partner, PartnerDto>()
                 .ForMember(dest => dest.OrgTypeName, opt => opt.MapFrom(src => src.OrgType.ToString()));
+            CreateMap<Partner, CreatePartnerDto>().ReverseMap();
 
             // UpdatePartnerDto -> Partner
             CreateMap<UpdatePartnerDto, Partner>().ReverseMap();
@@ -79,7 +80,9 @@ namespace GivingChampion.Application.Mapper
 
             CreateMap<UpdateGeoQuestDto, GeoQuest>().ReverseMap();
 
-            CreateMap<UpdateDonationRequestDto, DonationRequest>().ReverseMap();
+            CreateMap<DonationRequest, DonationRequestDto>();
+            CreateMap<CreateDonationRequestDto, DonationRequest>();
+            CreateMap<UpdateDonationRequestDto, DonationRequest>();
 
             #region UserGeoQuest Mappings
 
@@ -111,6 +114,10 @@ namespace GivingChampion.Application.Mapper
             CreateMap<CreateDonationOrderDto, DonationOrder>().ReverseMap();
             // Mapping from UpdateDonationOrderDTO to DonationOrder Entity
             CreateMap<UpdateDonationOrderDTO, DonationOrder>().ReverseMap();
+            CreateMap<DonationOrder, DonationOrderReadDto>();
+            CreateMap<DonationOrder, DonationOrderDetailsDto>();
+            CreateMap<CreateDonationOrderDto, DonationOrder>();
+            CreateMap<UpdateDonationOrderDTO, DonationOrder>();
 
             #region AiAvatar Mappings
             CreateMap<AiAvatar, AiAvatarDto>().ReverseMap();

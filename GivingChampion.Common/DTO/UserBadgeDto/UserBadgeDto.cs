@@ -5,8 +5,7 @@ namespace GivingChampion.Common.DTO.UserBadgeDto
 {
     public class UserBadgeDto
     {
-        [Key]
-        public Guid Id { get; set; }= Guid.NewGuid();
+        public Guid Id { get; set; }
 
         public Guid ProfileId { get; set; }
 

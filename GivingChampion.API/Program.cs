@@ -1,4 +1,3 @@
-using GivingChampion.API.Handlers;
 using GivingChampion.API.Interfaces;
 using GivingChampion.API.Repositories;
 using GivingChampion.API.Services;
@@ -32,9 +31,11 @@ using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Application.Services.Certificate;
-using GivingChampion.Application.Interfaces.DonationRequest;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
+using GivingChampion.API.Handlers;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,15 +60,22 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 
 if (_env.IsDevelopment())
 {
-    builder.AddNpgsqlDbContext<AppDbContext>("DefaultConnection");
+    builder.AddNpgsqlDbContext<AppDbContext>(
+        "DefaultConnection",
+        configureDbContextOptions: options =>
+        {
+            options.UseNpgsql(npgsql =>
+                npgsql.MigrationsAssembly("GivingChampion.Domain"));
+        });
 }
 else
 {
-    var connectionstring = _conf.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    var connectionString = _conf.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found");
 
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(connectionstring, b => b.MigrationsAssembly("GivingChampion.Domain")));
+        options.UseNpgsql(connectionString, npgsql =>
+            npgsql.MigrationsAssembly("GivingChampion.Domain")));
 }
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -207,6 +215,8 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.MapDefaultEndpoints();
 

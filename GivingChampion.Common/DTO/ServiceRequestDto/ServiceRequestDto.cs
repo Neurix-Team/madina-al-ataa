@@ -15,7 +15,7 @@ namespace GivingChampion.Common.DTO.ServiceRequestDto
 
             public string RequiredSkill { get; set; } = string.Empty;
 
-            public UrgencyLevel UrgencyLevel { get; set; }
+            public string UrgencyLevel { get; set; }
 
             public DateTime ScheduleDate { get; set; }
 

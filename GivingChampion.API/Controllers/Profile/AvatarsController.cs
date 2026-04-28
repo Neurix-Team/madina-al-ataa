@@ -31,14 +31,12 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/avatars
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateAvatarDto dto)
-        {
-            var createdAvatar = await _avatarService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = createdAvatar.Id }, createdAvatar);
-        }
-
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] CreateAvatarDto dto)
+        //{
+        //    var createdAvatar = await _avatarService.CreateAsync(dto);
+        //    return CreatedAtAction(nameof(GetById), new { id = createdAvatar.Id }, createdAvatar);
+        //}
         // PUT api/avatars/{id}
         [Authorize]
         [HttpPut("{id}")]

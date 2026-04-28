@@ -29,15 +29,14 @@ namespace GivingChampion.API.Controllers
             return Ok(userLevel);
         }
 
-        // POST api/userlevels
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateUserLevelDto dto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var created = await _userLevelService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
+        //// POST api/userlevels
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] CreateUserLevelDto dto)
+        //{
+        //    if (!ModelState.IsValid) return BadRequest(ModelState);
+        //    var created = await _userLevelService.CreateAsync(dto);
+        //    return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        //}
 
         // PUT api/userlevels/{id}
         [Authorize]

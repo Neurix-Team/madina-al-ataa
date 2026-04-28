@@ -61,18 +61,18 @@ namespace GivingChampion.Application.Services
 
         #region CreateVolunteer
 
-        public async Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto)
-        {
-            // Map the incoming CreateVolunteerDto to Volunteer entity
-            var volunteer = _mapper.Map<Volunteer>(dto);
+        //public async Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto)
+        //{
+        //    // Map the incoming CreateVolunteerDto to Volunteer entity
+        //    var volunteer = _mapper.Map<Volunteer>(dto);
 
-            // Add the volunteer to the repository
-            await _volunteerRepository.AddAsync(volunteer);
-            await _volunteerRepository.SaveChangesAsync();
+        //    // Add the volunteer to the repository
+        //    await _volunteerRepository.AddAsync(volunteer);
+        //    await _volunteerRepository.SaveChangesAsync();
 
-            // Map to VolunteerDto to return to controller
-            return _mapper.Map<VolunteerDto>(volunteer);
-        } 
+        //    // Map to VolunteerDto to return to controller
+        //    return _mapper.Map<VolunteerDto>(volunteer);
+        //} 
         #endregion
 
         #region UpdateVolunteer

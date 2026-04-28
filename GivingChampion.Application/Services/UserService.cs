@@ -7,13 +7,8 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using GivingChampion.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {
@@ -43,34 +38,401 @@ namespace GivingChampion.Application.Services
         }
 
         // ====================== READ OPERATIONS ======================
-        public async Task<PagedList<GetUserDto>> GetAllUsersAsync(PageParameters pageParameters, string? search = null)
+
+        public async Task<PagedList<GetUserDto>> GetAllUsersAsync(
+            PageParameters pageParameters,
+            string? search = null)
         {
             var users = await _userRepository.GetAllAsync(pageParameters, search);
 
-            // Map entities to DTOs using AutoMapper
             return _mapper.MapPagedList<ApplicationUser, GetUserDto>(users);
         }
 
         public async Task<GetUserDto?> GetUserByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
             var user = await _userRepository.GetByIdAsync(id);
-            if (user == null) return null;
 
-            var roles = await _userManager.GetRolesAsync(user);
+            if (user == null)
+                throw new NotFoundException($"User with ID {id} was not found.");
 
-            var dto = _mapper.Map<GetUserDto>(user);
-            dto.Roles = roles.ToList();        // Roles must be set manually
-
-            return dto;
+            return await MapUserWithRolesAsync(user);
         }
 
         public async Task<GetUserDto?> GetUserByEmailAsync(string email)
         {
-            if (string.IsNullOrWhiteSpace(email)) return null;
+            if (string.IsNullOrWhiteSpace(email))
+                throw new BadRequestException("Email is required.");
 
             var user = await _userRepository.GetByEmailAsync(email);
-            if (user == null) return null;
 
+            if (user == null)
+                throw new NotFoundException($"User with email '{email}' was not found.");
+
+            return await MapUserWithRolesAsync(user);
+        }
+
+        // ====================== CREATE OPERATIONS ======================
+
+        public async Task<Result<GetUserDto>> CreateUserAsync(CreateUserDto dto)
+        {
+            ValidateCreateUserDto(dto);
+
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (existingUser != null)
+            {
+                if (!existingUser.IsDeleted)
+                    throw new ConflictException("User with this email already exists.");
+
+                var restoredUser = await RestoreDeletedUserAsync(existingUser, dto.Password);
+
+                return Result<GetUserDto>.Success(restoredUser);
+            }
+
+            var user = _mapper.Map<ApplicationUser>(dto);
+
+            user.EmailConfirmed = true;
+            user.UserName = dto.Email;
+
+            var createResult = await _userManager.CreateAsync(user, dto.Password);
+
+            if (!createResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(createResult));
+
+            await AddRolesOrThrowAsync(user, new[] { "User", "Volunteer", "Donor" });
+
+            await _donorRepository.CreateAsync(user.Id);
+
+            _logger.LogInformation("New user created: {Email}", dto.Email);
+
+            var createdUser = await GetUserByIdAsync(user.Id);
+
+            if (createdUser == null)
+                throw new NotFoundException("Failed to retrieve created user.");
+
+            return Result<GetUserDto>.Success(createdUser);
+        }
+
+        public async Task<Result<GetUserDto>> CreateUserByAdminAsync(CreateUserDto dto)
+        {
+            return await CreateUserAsync(dto);
+        }
+
+        public async Task<Result<GetUserDto>> CreateAdminUserAsync(CreateUserDto dto)
+        {
+            ValidateCreateUserDto(dto);
+
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (existingUser != null && !existingUser.IsDeleted)
+                throw new ConflictException("User already exists.");
+
+            if (existingUser != null && existingUser.IsDeleted)
+            {
+                var restoredUser = await RestoreDeletedUserAsync(existingUser, dto.Password);
+
+                await AddMissingRolesOrThrowAsync(existingUser, new[] { "Admin", "User", "Volunteer", "Donor" });
+
+                return Result<GetUserDto>.Success(restoredUser);
+            }
+
+            var user = _mapper.Map<ApplicationUser>(dto);
+
+            user.EmailConfirmed = true;
+            user.UserName = dto.Email;
+
+            var createResult = await _userManager.CreateAsync(user, dto.Password);
+
+            if (!createResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(createResult));
+
+            await AddRolesOrThrowAsync(user, new[] { "Admin", "User", "Volunteer", "Donor" });
+
+            await _donorRepository.CreateAsync(user.Id);
+
+            _logger.LogInformation("Admin user created: {Email}", dto.Email);
+
+            var createdUser = await GetUserByIdAsync(user.Id);
+
+            if (createdUser == null)
+                throw new NotFoundException("Failed to retrieve created admin user.");
+
+            return Result<GetUserDto>.Success(createdUser);
+        }
+
+        // ====================== UPDATE & ROLE OPERATIONS ======================
+
+        public async Task<Result<bool>> UpdateUserByAdminAsync(Guid id, UpdateUser dto)
+        {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
+            if (dto == null)
+                throw new BadRequestException("User update data is required.");
+
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+                throw new NotFoundException($"User with ID {id} was not found.");
+
+            _mapper.Map(dto, user);
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(updateResult));
+
+            return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<bool>> AssignRolesAsync(Guid userId, IEnumerable<string> roles)
+        {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
+            if (roles == null)
+                throw new BadRequestException("Roles are required.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+                throw new NotFoundException($"User with ID {userId} was not found.");
+
+            var validRoles = roles
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Select(r => r.Trim())
+                .Distinct()
+                .ToList();
+
+            if (!validRoles.Any())
+                throw new BadRequestException("At least one role is required.");
+
+            foreach (var role in validRoles)
+            {
+                var roleExists = await _roleManager.RoleExistsAsync(role);
+
+                if (!roleExists)
+                    throw new BadRequestException($"Role '{role}' does not exist.");
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            if (currentRoles.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                if (!removeResult.Succeeded)
+                    throw new BadRequestException(BuildIdentityErrorMessage(removeResult));
+            }
+
+            var addResult = await _userManager.AddToRolesAsync(user, validRoles);
+
+            if (!addResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(addResult));
+
+            return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<bool>> RemoveRolesAsync(Guid userId, IEnumerable<string> roles)
+        {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
+            if (roles == null)
+                throw new BadRequestException("Roles are required.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+                throw new NotFoundException($"User with ID {userId} was not found.");
+
+            var rolesToRemove = roles
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Select(r => r.Trim())
+                .Distinct()
+                .ToList();
+
+            if (!rolesToRemove.Any())
+                throw new BadRequestException("At least one role is required.");
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            var invalidAssignedRoles = rolesToRemove
+                .Where(role => !currentRoles.Contains(role))
+                .ToList();
+
+            if (invalidAssignedRoles.Any())
+                throw new BadRequestException($"User does not have role(s): {string.Join(", ", invalidAssignedRoles)}");
+
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+
+            if (!removeResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(removeResult));
+
+            return Result<bool>.Success(true);
+        }
+
+        // ====================== DELETE OPERATIONS ======================
+
+        public async Task<Result<bool>> DeleteMyAccountAsync(Guid userId, string? reason = null)
+        {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+                throw new NotFoundException($"User with ID {userId} was not found.");
+
+            var deleteResult = await _userManager.DeleteAsync(user);
+
+            if (!deleteResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(deleteResult));
+
+            await _donorRepository.SoftDeleteAsync(user.Id);
+
+            _logger.LogWarning(
+                "User deleted own account. UserId: {UserId}. Reason: {Reason}",
+                userId,
+                reason ?? "No reason provided"
+            );
+
+            return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<bool>> DeleteUserByAdminAsync(Guid id, string? reason = null)
+        {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+                throw new NotFoundException($"User with ID {id} was not found.");
+
+            var deleteResult = await _userManager.DeleteAsync(user);
+
+            if (!deleteResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(deleteResult));
+
+            await _donorRepository.SoftDeleteAsync(id);
+
+            _logger.LogWarning(
+                "Admin soft-deleted user {UserId}. Reason: {Reason}",
+                id,
+                reason ?? "No reason provided"
+            );
+
+            return Result<bool>.Success(true);
+        }
+
+        // ====================== PRIVATE HELPERS ======================
+
+        private void ValidateCreateUserDto(CreateUserDto dto)
+        {
+            if (dto == null)
+                throw new BadRequestException("User data is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                throw new BadRequestException("Email is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                throw new BadRequestException("Password is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.FullName))
+                throw new BadRequestException("Full name is required.");
+        }
+
+        private async Task<GetUserDto> RestoreDeletedUserAsync(
+            ApplicationUser existingUser,
+            string newPassword)
+        {
+            existingUser.IsDeleted = false;
+            existingUser.DeletedAt = null;
+            existingUser.EmailConfirmed = true;
+
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
+
+            var resetPasswordResult = await _userManager.ResetPasswordAsync(
+                existingUser,
+                resetToken,
+                newPassword
+            );
+
+            if (!resetPasswordResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(resetPasswordResult));
+
+            var updateResult = await _userManager.UpdateAsync(existingUser);
+
+            if (!updateResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(updateResult));
+
+            _logger.LogInformation("Soft-deleted user restored: {Email}", existingUser.Email);
+
+            var restoredUser = await GetUserByIdAsync(existingUser.Id);
+
+            if (restoredUser == null)
+                throw new NotFoundException("Failed to retrieve restored user.");
+
+            return restoredUser;
+        }
+
+        private async Task CreateDonorProfileAsync(Guid userId)
+        {
+            
+        }
+
+        private async Task AddRolesOrThrowAsync(
+            ApplicationUser user,
+            IEnumerable<string> roles)
+        {
+            var roleList = roles
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Select(r => r.Trim())
+                .Distinct()
+                .ToList();
+
+            if (!roleList.Any())
+                throw new BadRequestException("At least one role is required.");
+
+            foreach (var role in roleList)
+            {
+                var roleExists = await _roleManager.RoleExistsAsync(role);
+
+                if (!roleExists)
+                    throw new BadRequestException($"Role '{role}' does not exist.");
+            }
+
+            var addResult = await _userManager.AddToRolesAsync(user, roleList);
+
+            if (!addResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(addResult));
+        }
+
+        private async Task AddMissingRolesOrThrowAsync(
+            ApplicationUser user,
+            IEnumerable<string> roles)
+        {
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            var missingRoles = roles
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Select(r => r.Trim())
+                .Distinct()
+                .Where(r => !currentRoles.Contains(r))
+                .ToList();
+
+            if (!missingRoles.Any())
+                return;
+
+            await AddRolesOrThrowAsync(user, missingRoles);
+        }
+
+        private async Task<GetUserDto> MapUserWithRolesAsync(ApplicationUser user)
+        {
             var roles = await _userManager.GetRolesAsync(user);
 
             var dto = _mapper.Map<GetUserDto>(user);
@@ -79,164 +441,9 @@ namespace GivingChampion.Application.Services
             return dto;
         }
 
-        // ====================== CREATE OPERATIONS ======================
-        public async Task<Result<GetUserDto>> CreateUserAsync(CreateUserDto dto)
+        private static string BuildIdentityErrorMessage(IdentityResult result)
         {
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
-                return Result<GetUserDto>.Failure("Email and Password are required.");
-
-            if (await _userRepository.ExistsByEmailAsync(dto.Email))
-                return Result<GetUserDto>.Failure("User with this email already exists.");
-
-            // Use AutoMapper to create ApplicationUser from DTO
-            var user = _mapper.Map<ApplicationUser>(dto);
-            user.EmailConfirmed = true;
-
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
-                return Result<GetUserDto>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-            // Assign default role
-            await _userManager.AddToRolesAsync(user, new[] { "User", "Volunteer", "Donor" });
-
-            var donor = new Donor
-            {
-                Id = Guid.NewGuid(),
-                UserId = user.Id,
-                TotalDonated = 0,
-                PreferedCategory = 0,           // or default value
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _donorRepository.CreateAsync(donor);
-
-            _logger.LogInformation("New user created: {Email}", dto.Email);
-
-            return await GetUserByIdAsync(user.Id) is var created
-                ? Result<GetUserDto>.Success(created)
-                : Result<GetUserDto>.Failure("Failed to retrieve created user");
-        }
-
-        public async Task<Result<GetUserDto>> CreateUserByAdminAsync(CreateUserDto dto)
-        {
-            // Can be extended later with admin-specific logic (e.g. auto-confirm email)
-            return await CreateUserAsync(dto);
-        }
-
-        public async Task<Result<GetUserDto>> CreateAdminUserAsync(CreateUserDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
-                return Result<GetUserDto>.Failure("Email and Password are required.");
-
-            if (await _userRepository.ExistsByEmailAsync(dto.Email))
-                return Result<GetUserDto>.Failure("User already exists.");
-
-            var user = _mapper.Map<ApplicationUser>(dto);
-            user.EmailConfirmed = true;
-
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
-                return Result<GetUserDto>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
-
-            await _userManager.AddToRolesAsync(user, new[] { "Admin", "User", "Volunteer", "Donor" });
-
-            var donor = new Donor
-            {
-                Id = Guid.NewGuid(),
-                UserId = user.Id,
-                TotalDonated = 0,
-                PreferedCategory = 0,           // or default value
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _donorRepository.CreateAsync(donor);
-
-            _logger.LogInformation("Admin user created: {Email}", dto.Email);
-
-            return await GetUserByIdAsync(user.Id) is var created
-                ? Result<GetUserDto>.Success(created)
-                : Result<GetUserDto>.Failure("Failed to retrieve created user");
-        }
-
-        // ====================== UPDATE & ROLE OPERATIONS ======================
-        public async Task<Result<bool>> UpdateUserByAdminAsync(Guid id, UpdateUser dto)
-        {
-            var user = await _userRepository.GetByIdAsync(id);
-            if (user == null)
-                return Result<bool>.Failure("User not found.");
-
-            // Use AutoMapper to update existing entity (preserves Id and Identity fields)
-            _mapper.Map(dto, user);
-
-            var result = await _userManager.UpdateAsync(user);
-
-            return result.Succeeded
-                ? Result<bool>.Success(true)
-                : Result<bool>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
-        }
-
-        public async Task<Result<bool>> AssignRolesAsync(Guid userId, IEnumerable<string> roles)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
-                return Result<bool>.Failure("User not found.");
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
-
-            var validRoles = roles.Where(r => !string.IsNullOrWhiteSpace(r)).Distinct().ToList();
-
-            var result = await _userManager.AddToRolesAsync(user, validRoles);
-
-            return result.Succeeded
-                ? Result<bool>.Success(true)
-                : Result<bool>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
-        }
-
-        public async Task<Result<bool>> RemoveRolesAsync(Guid userId, IEnumerable<string> roles)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
-                return Result<bool>.Failure("User not found.");
-
-            var result = await _userManager.RemoveFromRolesAsync(user, roles);
-
-            return result.Succeeded
-                ? Result<bool>.Success(true)
-                : Result<bool>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
-        }
-
-        // ====================== DELETE OPERATIONS ======================
-        public async Task<Result<bool>> DeleteMyAccountAsync(Guid userId, string? reason = null)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
-                return Result<bool>.Failure("User not found.");
-
-            var result = await _userManager.DeleteAsync(user);
-            await _donorRepository.SoftDeleteAsync(user.Id);
-
-
-            return result.Succeeded
-                ? Result<bool>.Success(true)
-                : Result<bool>.Failure("Failed to delete account.");
-        }
-
-        public async Task<Result<bool>> DeleteUserByAdminAsync(Guid id, string? reason = null)
-        {
-            var user = await _userRepository.GetByIdAsync(id);
-            if (user == null)
-                return Result<bool>.Failure("User not found.");
-
-            _logger.LogWarning("Admin deleted user {UserId}. Reason: {Reason}", id, reason ?? "No reason provided");
-
-            var result = await _userManager.DeleteAsync(user);
-
-            await _donorRepository.SoftDeleteAsync(id);
-
-            return result.Succeeded
-                ? Result<bool>.Success(true)
-                : Result<bool>.Failure(string.Join("; ", result.Errors.Select(e => e.Description)));
+            return string.Join("; ", result.Errors.Select(e => e.Description));
         }
     }
 }

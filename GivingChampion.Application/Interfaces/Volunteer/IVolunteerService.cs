@@ -42,7 +42,7 @@ namespace GivingChampion.Application.Interfaces.Volunteer
         /// This operation should be allowed for Admin only in the Controller.
         /// </summary>
         /// <param name="dto">Volunteer creation data.</param>
-        Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto);
+        //Task<VolunteerDto> CreateAsync(CreateVolunteerDto dto);
 
         #endregion
 

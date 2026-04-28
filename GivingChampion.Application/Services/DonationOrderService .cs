@@ -1,77 +1,232 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Common.DTO.DonationOrder;
+using GivingChampion.Common.Enums;
+using GivingChampion.Common.Extensions.Mapper;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services.DonationOrderService
 {
     public class DonationOrderService : IDonationOrderService
     {
         private readonly IDonationOrderRepository _donationOrderRepository;
+        private readonly IDonationRequestRepository _donationRequestRepository;
+        private readonly IDonorRepository _donorRepository;
         private readonly IMapper _mapper;
 
-        // Constructor - Inject the repository and AutoMapper
-        public DonationOrderService(IDonationOrderRepository donationOrderRepository, IMapper mapper)
+        public DonationOrderService(
+            IDonationOrderRepository donationOrderRepository,
+            IDonationRequestRepository donationRequestRepository,
+            IDonorRepository donorRepository,
+            IMapper mapper)
         {
             _donationOrderRepository = donationOrderRepository;
+            _donationRequestRepository = donationRequestRepository;
+            _donorRepository = donorRepository;
             _mapper = mapper;
         }
 
-        #region Query Methods
+        public async Task<Result<PagedList<DonationOrderReadDto>>> GetAllAsync(
+            PageParameters pageParameters)
+        {
+            var donationOrders = await _donationOrderRepository.GetAllAsync(pageParameters);
 
-        // Get DonationOrder by Id
-        public async Task<DonationOrderDetailsDto> GetByIdAsync(Guid id)
+            var result = _mapper.MapPagedList<DonationOrder, DonationOrderReadDto>(donationOrders);
+
+            return Result<PagedList<DonationOrderReadDto>>.Success(result);
+        }
+
+        public async Task<Result<PagedList<DonationOrderReadDto>>> GetMyOrdersAsync(
+            Guid donorUserId,
+            PageParameters pageParameters)
+        {
+            var donationOrders = await _donationOrderRepository.GetByDonorIdAsync(
+                donorUserId,
+                pageParameters
+            );
+
+            var result = _mapper.MapPagedList<DonationOrder, DonationOrderReadDto>(donationOrders);
+
+            return Result<PagedList<DonationOrderReadDto>>.Success(result);
+        }
+
+        public async Task<Result<DonationOrderDetailsDto?>> GetByIdAsync(
+            Guid id,
+            Guid currentUserId,
+            bool isAdmin = false)
         {
             var donationOrder = await _donationOrderRepository.GetByIdAsync(id);
+
             if (donationOrder == null)
-            {
-                throw new KeyNotFoundException($"DonationOrder with ID {id} not found.");
-            }
+                throw new NotFoundException($"Donation order with ID {id} was not found.");
 
-            return _mapper.Map<DonationOrderDetailsDto>(donationOrder);
+            if (!isAdmin && donationOrder.DonorId != currentUserId)
+                throw new UnauthorizedAccessException("You are not allowed to view this donation order.");
+
+            var dto = _mapper.Map<DonationOrderDetailsDto>(donationOrder);
+
+            return Result<DonationOrderDetailsDto?>.Success(dto);
         }
 
-        // Get all DonationOrders
-        public async Task<IEnumerable<DonationOrderReadDto>> GetAllAsync()
+        public async Task<Result<DonationOrderDetailsDto>> CreateAsync(
+            CreateDonationOrderDto dto,
+            Guid donorUserId)
         {
-            var donationOrders = await _donationOrderRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<DonationOrderReadDto>>(donationOrders);
-        }
+            if (dto == null)
+                throw new BadRequestException("Donation order data is required.");
 
-        #endregion
+            if (dto.Amount <= 0)
+                throw new BadRequestException("Donation amount must be greater than zero.");
 
-        #region Command Methods
+            var donationRequest = await _donationRequestRepository.GetByIdAsync(dto.DonationRequestId);
 
-        // Create a new DonationOrder
-        public async Task CreateAsync(CreateDonationOrderDto donationOrderDto)
-        {
-            // Map the DTO to the entity
-            var donationOrder = _mapper.Map<DonationOrder>(donationOrderDto);
+            if (donationRequest == null)
+                throw new NotFoundException($"Donation request with ID {dto.DonationRequestId} was not found.");
 
-            // Add the donation order to the repository
+            if (donationRequest.Status != RequestStatus.Approved)
+                throw new BadRequestException("You can donate only to approved donation requests.");
+
+            if (donationRequest.Status == RequestStatus.Completed)
+                throw new BadRequestException("This donation request is already completed.");
+
+            if (dto.Amount > donationRequest.AmountRemaining)
+                throw new BadRequestException("Donation amount cannot be greater than the remaining amount.");
+
+            var donationOrder = _mapper.Map<DonationOrder>(dto);
+
+            donationOrder.DonorId = donorUserId;
+            donationOrder.Status = OrderStatus.Pending;
+
             await _donationOrderRepository.CreateAsync(donationOrder);
+
+            var createdOrder = await _donationOrderRepository.GetByIdAsync(donationOrder.Id) ?? throw new NotFoundException("Created donation order could not be retrieved.");
+            var createdDto = _mapper.Map<DonationOrderDetailsDto>(createdOrder);
+
+            return Result<DonationOrderDetailsDto>.Success(createdDto);
         }
 
-        // Update an existing DonationOrder
-        public async Task UpdateAsync(UpdateDonationOrderDTO donationOrderDto, Guid id)
+        public async Task<Result<UpdateDonationOrderDTO>> UpdateAsync(
+            Guid id,
+            UpdateDonationOrderDTO dto)
         {
-            var existingDonationOrder = await _donationOrderRepository.GetByIdAsync(id);
-            if (existingDonationOrder == null)
+            if (dto == null)
+                throw new BadRequestException("Donation order data is required.");
+
+            var donationOrder = await _donationOrderRepository.GetByIdAsync(id);
+
+            if (donationOrder == null)
+                throw new NotFoundException($"Donation order with ID {id} was not found.");
+
+            if (donationOrder.Status != OrderStatus.Pending)
+                throw new BadRequestException("Only pending donation orders can be updated.");
+
+            if (dto.Amount <= 0)
+                throw new BadRequestException("Donation amount must be greater than zero.");
+
+            var donationRequest = await _donationRequestRepository.GetByIdAsync(
+                donationOrder.DonationRequestId
+            );
+
+            if (donationRequest == null)
+                throw new NotFoundException("Related donation request was not found.");
+
+            if (donationRequest.Status != RequestStatus.Approved)
+                throw new BadRequestException("Cannot update donation order for a request that is not approved.");
+
+            if (dto.Amount > donationRequest.AmountRemaining)
+                throw new BadRequestException("Donation amount cannot be greater than the remaining amount.");
+
+            _mapper.Map(dto, donationOrder);
+
+            await _donationOrderRepository.UpdateAsync(donationOrder);
+
+            var updatedDto = _mapper.Map<UpdateDonationOrderDTO>(donationOrder);
+
+            return Result<UpdateDonationOrderDTO>.Success(updatedDto);
+        }
+
+        public async Task<Result<DonationOrderDetailsDto>> ApproveAsync(Guid id)
+        {
+            var donationOrder = await _donationOrderRepository.GetByIdAsync(id);
+
+            if (donationOrder == null)
+                throw new NotFoundException($"Donation order with ID {id} was not found.");
+
+            if (donationOrder.Status != OrderStatus.Pending)
+                throw new BadRequestException("Only pending donation orders can be approved.");
+
+            var donationRequest = await _donationRequestRepository.GetByIdAsync(
+                donationOrder.DonationRequestId
+            );
+
+            if (donationRequest == null)
+                throw new NotFoundException("Related donation request was not found.");
+
+            if (donationRequest.Status != RequestStatus.Approved)
+                throw new BadRequestException("Cannot approve donation for a request that is not approved.");
+
+            if (donationRequest.Status == RequestStatus.Completed)
+                throw new BadRequestException("This donation request is already completed.");
+
+            if (donationOrder.Amount > donationRequest.AmountRemaining)
+                throw new BadRequestException("Donation amount is greater than the remaining amount.");
+
+            donationOrder.Status = OrderStatus.Approved;
+
+            var donor = await _donorRepository.GetByIdAsync(donationOrder.DonorId);
+            if (donor == null)
+                throw new NotFoundException("Donor was not found.");
+            donor.TotalDonated += donationOrder.Amount;
+
+            donationRequest.AmountRemaining -= donationOrder.Amount;
+
+            if (donationRequest.AmountRemaining <= 0)
             {
-                throw new KeyNotFoundException($"DonationOrder with ID {id} not found.");
+                donationRequest.AmountRemaining = 0;
+                donationRequest.Status = RequestStatus.Completed;
             }
 
-            // Map the updated DTO to the existing entity
-            _mapper.Map(donationOrderDto, existingDonationOrder);
+            await _donorRepository.UpdateAsync(donor);
+            await _donationOrderRepository.UpdateAsync(donationOrder);
+            await _donationRequestRepository.UpdateAsync(donationRequest);
 
-            // Update the donation order in the repository
-            await _donationOrderRepository.UpdateAsync(existingDonationOrder);
+            var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
+
+            if (updatedOrder == null)
+                throw new NotFoundException("Updated donation order could not be retrieved.");
+
+            var dto = _mapper.Map<DonationOrderDetailsDto>(updatedOrder);
+
+            return Result<DonationOrderDetailsDto>.Success(dto);
         }
 
-        #endregion
+        public async Task<Result<DonationOrderDetailsDto>> RejectAsync(Guid id)
+        {
+            var donationOrder = await _donationOrderRepository.GetByIdAsync(id);
+
+            if (donationOrder == null)
+                throw new NotFoundException($"Donation order with ID {id} was not found.");
+
+            if (donationOrder.Status != OrderStatus.Pending)
+                throw new BadRequestException("Only pending donation orders can be rejected.");
+
+            donationOrder.Status = OrderStatus.Rejected;
+
+            await _donationOrderRepository.UpdateAsync(donationOrder);
+
+            var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
+
+            if (updatedOrder == null)
+                throw new NotFoundException("Updated donation order could not be retrieved.");
+
+            var dto = _mapper.Map<DonationOrderDetailsDto>(updatedOrder);
+
+            return Result<DonationOrderDetailsDto>.Success(dto);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.Child;
 using GivingChampion.Common.Results;
@@ -7,9 +8,6 @@ using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {
@@ -35,85 +33,154 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<ChildDto>> CreateChildAsync(CreateChildDto dto)
+        public async Task<Result<ChildDto>> CreateChildAsync(CreateChildDto dto, Guid parentId)
         {
-            var parentId = Guid.Parse(Thread.CurrentPrincipal?.Identity?.Name ?? ""); // Better to get from Claims in controller and pass down
+            if (dto == null)
+                throw new BadRequestException("Child data is required.");
 
-            // In real usage, parentId should be passed from controller
-            // For now, we'll assume it's handled in controller and passed
+            if (parentId == Guid.Empty)
+                throw new UnauthorizedAccessException("Invalid parent user token.");
 
-            // TODO: In production, inject ICurrentUserService or pass parentId as parameter
+            var parent = await _userRepository.GetByIdAsync(parentId);
+
+            if (parent == null)
+                throw new NotFoundException($"Parent user with ID {parentId} was not found.");
+
+            if (parent.IsDeleted)
+                throw new BadRequestException("Cannot create child for a deleted parent account.");
 
             var child = _mapper.Map<Child>(dto);
-            child.ParentId = parentId;   // Will be set from controller
 
-            // Note: The child's ApplicationUser should be created BEFORE or together with Child
-            // For simplicity, we assume it's created in this service (you can adjust)
+            child.ParentId = parentId;
+            child.Status = ObjectStatus.Pending;
 
             await _childRepository.CreateAsync(child);
 
             var childDto = _mapper.Map<ChildDto>(child);
+
             return Result<ChildDto>.Success(childDto);
         }
 
         public async Task<Result<List<ChildDto>>> GetMyChildrenAsync(Guid parentId)
         {
+            if (parentId == Guid.Empty)
+                throw new UnauthorizedAccessException("Invalid parent user token.");
+
+            var parent = await _userRepository.GetByIdAsync(parentId);
+
+            if (parent == null)
+                throw new NotFoundException($"Parent user with ID {parentId} was not found.");
+
             var children = await _childRepository.GetByParentIdAsync(parentId);
+
             var dtos = _mapper.Map<List<ChildDto>>(children);
+
             return Result<List<ChildDto>>.Success(dtos);
         }
 
         public async Task<Result<List<ChildDto>>> GetPendingApprovalsAsync()
         {
             var pending = await _childRepository.GetPendingApprovalsAsync();
+
             var dtos = _mapper.Map<List<ChildDto>>(pending);
+
             return Result<List<ChildDto>>.Success(dtos);
         }
 
-        /// <summary>
-        /// Admin approves child → activates child's user account
-        /// </summary>
         public async Task<Result> ApproveChildAsync(Guid childId, Guid approvedById)
         {
+            if (childId == Guid.Empty)
+                throw new BadRequestException("Child ID is required.");
+
+            if (approvedById == Guid.Empty)
+                throw new UnauthorizedAccessException("Invalid admin user token.");
+
             var child = await _childRepository.GetByIdAsync(childId);
+
             if (child == null)
-                return Result.Failure("Child not found");
+                throw new NotFoundException($"Child with ID {childId} was not found.");
 
             if (child.Status != ObjectStatus.Pending)
-                return Result.Failure("Child is not in pending status");
+                throw new BadRequestException("Child is not in pending status.");
 
-            // Activate the child's user account
             if (child.User != null)
             {
                 child.User.EmailConfirmed = true;
                 child.User.LockoutEnabled = false;
-                await _userManager.UpdateAsync(child.User);
+
+                var updateResult = await _userManager.UpdateAsync(child.User);
+
+                if (!updateResult.Succeeded)
+                {
+                    var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
+                    throw new BadRequestException(errors);
+                }
             }
 
             await _childRepository.ApproveAsync(childId, approvedById);
 
-            _logger.LogInformation("Child approved by admin {AdminId}. ChildId: {ChildId}", approvedById, childId);
+            _logger.LogInformation(
+                "Child approved by admin {AdminId}. ChildId: {ChildId}",
+                approvedById,
+                childId
+            );
 
             return Result.Success();
         }
 
         public async Task<Result> RejectChildAsync(RejectChildDto dto, Guid rejectedById)
         {
+            if (dto == null)
+                throw new BadRequestException("Reject child data is required.");
+
+            if (dto.ChildId == Guid.Empty)
+                throw new BadRequestException("Child ID is required.");
+
+            if (rejectedById == Guid.Empty)
+                throw new UnauthorizedAccessException("Invalid admin user token.");
+
+            if (string.IsNullOrWhiteSpace(dto.RejectionReason))
+                throw new BadRequestException("Rejection reason is required.");
+
             var child = await _childRepository.GetByIdAsync(dto.ChildId);
+
             if (child == null)
-                return Result.Failure("Child not found");
+                throw new NotFoundException($"Child with ID {dto.ChildId} was not found.");
 
-            await _childRepository.RejectAsync(dto.ChildId, dto.RejectionReason, rejectedById);
+            if (child.Status != ObjectStatus.Pending)
+                throw new BadRequestException("Only pending children can be rejected.");
 
-            _logger.LogWarning("Child rejected by admin {AdminId}. ChildId: {ChildId}, Reason: {Reason}",
-                rejectedById, dto.ChildId, dto.RejectionReason);
+            await _childRepository.RejectAsync(
+                dto.ChildId,
+                dto.RejectionReason,
+                rejectedById
+            );
+
+            _logger.LogWarning(
+                "Child rejected by admin {AdminId}. ChildId: {ChildId}, Reason: {Reason}",
+                rejectedById,
+                dto.ChildId,
+                dto.RejectionReason
+            );
 
             return Result.Success();
         }
 
         public async Task<Result> SoftDeleteChildAsync(Guid childId)
         {
+            if (childId == Guid.Empty)
+                throw new BadRequestException("Child ID is required.");
+
+            var child = await _childRepository.GetByIdAsync(childId);
+
+            if (child == null)
+                throw new NotFoundException($"Child with ID {childId} was not found.");
+
+            if (child.IsDeleted)
+                throw new BadRequestException("Child is already deleted.");
+
             await _childRepository.SoftDeleteAsync(childId);
+
             return Result.Success();
         }
     }

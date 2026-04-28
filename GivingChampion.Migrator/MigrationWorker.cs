@@ -1,5 +1,7 @@
 using GivingChampion.Domain.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Hosting.Internal;
 
 namespace GivingChampion.Migrator;
@@ -33,6 +35,27 @@ public class MigrationWorker : BackgroundService
                 var availableMigrations = await _context.Database.GetPendingMigrationsAsync(stoppingToken);
                 if (availableMigrations != null)
                 {
+                    var conn = _context.Database.GetConnectionString();
+                    Console.WriteLine($"DB Connection: {conn}");
+
+                    var pending = await _context.Database.GetPendingMigrationsAsync(stoppingToken);
+                    var applied = await _context.Database.GetAppliedMigrationsAsync(stoppingToken);
+
+                    Console.WriteLine("Pending migrations:");
+                    foreach (var m in pending)
+                        Console.WriteLine(m);
+
+                    Console.WriteLine("Applied migrations:");
+                    foreach (var m in applied)
+                        Console.WriteLine(m);
+
+                    var provider = _context.Database.ProviderName;
+                    var assembly = _context.GetService<IMigrationsAssembly>();
+
+                    Console.WriteLine(provider);
+                    Console.WriteLine(assembly.Assembly.FullName);
+
+
                     _logger.LogInformation("Applying EF Core migrations...");
                     await _context.Database.MigrateAsync(stoppingToken);
                     _logger.LogInformation("Database migrations applied successfully.");

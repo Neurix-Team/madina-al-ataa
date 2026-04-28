@@ -6,7 +6,7 @@ namespace GivingChampion.Common.DTO.ProfileDto
     public class ProfileDto
     {
         [Key]
-        public Guid Id { get; set; }= Guid.NewGuid();
+        public Guid Id { get; set; }
         public double Rating { get; set; }
 
         public int Impact { get; set; }

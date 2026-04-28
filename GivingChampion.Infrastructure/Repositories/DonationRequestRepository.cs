@@ -1,56 +1,93 @@
 ﻿using GivingChampion.Common.Enums;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GivingChampion.Persistance.Repositories
 {
-   
-        public class DonationRequestRepository : IDonationRequestRepository
-    { 
-    
-        
-            private readonly AppDbContext _context;
+    public class DonationRequestRepository : IDonationRequestRepository
+    {
+        private readonly AppDbContext _context;
 
-            // Constructor to inject the ApplicationDbContext (database context)
-            public DonationRequestRepository(AppDbContext context)
-            {
-                _context = context;
-            }
+        public DonationRequestRepository(AppDbContext context)
+        {
+            _context = context;
+        }
 
-            // Get a single DonationRequest by its ID
-            public async Task<DonationRequest?> GetByIdAsync(Guid id)
-            {
-                return await _context.DonationRequests
-                    .AsNoTracking()  // No tracking as we are only reading data
-                    .FirstOrDefaultAsync(dr => dr.Id == id);
-            }
+        public async Task AddAsync(DonationRequest donationRequest)
+        {
+            await _context.DonationRequests.AddAsync(donationRequest);
+            await _context.SaveChangesAsync();
+        }
 
-            // Get all DonationRequests (without tracking changes in memory)
-            public async Task<IEnumerable<DonationRequest>> GetAllAsync()
-            {
-                return await _context.DonationRequests
-                    .AsNoTracking()
-                    .ToListAsync();
-            }
+        public Task DeleteAsync(DonationRequest donationRequest)
+        {
+            _context.DonationRequests.Remove(donationRequest);
+            return _context.SaveChangesAsync(); 
+        }
 
-            // Add a new DonationRequest
-            public async Task AddAsync(DonationRequest donationRequest)
-            {
-                await _context.DonationRequests.AddAsync(donationRequest);  // Add the entity to the DbContext
-                await _context.SaveChangesAsync();  // Save the changes to the database
-            }
+        public async Task<PagedList<DonationRequest>> GetAllAsync(PageParameters pageParameters)
+        {
+            return await _context.DonationRequests
+                .AsNoTracking()
+                .Where(dr => !dr.IsDeleted).ToPagedListAsync(pageParameters);
+        }
 
-            // Update an existing DonationRequest
-            public async Task UpdateAsync(DonationRequest donationRequest)
-            {
-                // Attach the entity to the DbContext to track it
-                _context.DonationRequests.Update(donationRequest);
-                await _context.SaveChangesAsync();  // Save changes to the database
-            }
+        public async Task<PagedList<DonationRequest>> GetApprovedAsync(PageParameters pageParameters)
+        {
+            return await _context.DonationRequests
+                .AsNoTracking()
+                .Where(dr =>
+                    !dr.IsDeleted && dr.Status == RequestStatus.Approved)
+                .ToPagedListAsync(pageParameters);
+        }
+
+        //public async Task<IEnumerable<DonationRequest>> GetByParentIdAsync(string parentUserId)
+        //{
+        //    return await _context.DonationRequests
+        //        .AsNoTracking()
+        //        .Where(dr =>
+        //            !dr.IsDeleted)
+        //        .ToListAsync();
+        //}
+
+        public async Task<DonationRequest?> GetByIdAsync(Guid id)
+        {
+            return await _context.DonationRequests
+                .AsNoTracking()
+                .FirstOrDefaultAsync(dr => dr.Id == id && !dr.IsDeleted);
+        }
+
+        public async Task<PagedList<DonationRequest>> GetRequestsByUserAsync(Guid userId, PageParameters pageParameters)
+        {
+            var requestIds = await _context.DonationOrders
+                .AsNoTracking()
+                .Where(o =>
+                    o.DonorId == userId &&
+                    !o.IsDeleted)
+                .Select(o => o.DonationRequestId)
+                .Distinct()
+                .ToListAsync();
+
+            return await _context.DonationRequests
+                .AsNoTracking()
+                .Where(r =>
+                    requestIds.Contains(r.Id) &&
+                    !r.IsDeleted)
+                .ToPagedListAsync(pageParameters);
+        }
+
+        public async Task UpdateAsync(DonationRequest donationRequest)
+        {
+            _context.DonationRequests.Update(donationRequest);
+            await _context.SaveChangesAsync();
         }
     }
+}

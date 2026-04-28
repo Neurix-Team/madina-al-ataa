@@ -7,7 +7,7 @@ namespace GivingChampion.Domain.Entities
     public class Activity : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Required]
         [StringLength(100)]

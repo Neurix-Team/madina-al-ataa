@@ -19,7 +19,7 @@ namespace GivingChampion.Common.DTO.VolunteerOrder
 
             public string Location { get; set; } = string.Empty;
 
-            public OrderStatus Status { get; set; }
+            public string Status { get; set; }
 
             public string? Notes { get; set; }
 

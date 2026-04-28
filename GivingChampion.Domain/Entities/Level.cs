@@ -10,7 +10,7 @@ namespace GivingChampion.Domain.Entities
     public class Level : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         [Range(1, int.MaxValue)]
         public int Number { get; set; }
         [Range(0, int.MaxValue)]

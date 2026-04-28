@@ -10,7 +10,7 @@ namespace GivingChampion.Domain.Entities
     public class ServiceRequest : BaseEntity
 	{
 		[Key]
-		public Guid Id { get; set; } = Guid.NewGuid();
+		public Guid Id { get; set; }
 		// Title of the request
 		[Required]
 		[MaxLength(200)]

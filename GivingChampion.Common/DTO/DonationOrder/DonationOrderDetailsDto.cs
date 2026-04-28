@@ -21,6 +21,7 @@ namespace GivingChampion.Common.DTO.DonationOrder
 
         // Useful for showing whether proof exists without loading full file path
         public bool HasReceipt { get; set; }
+        public string? Receipt { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }

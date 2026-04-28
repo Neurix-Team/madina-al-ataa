@@ -12,15 +12,24 @@ namespace GivingChampion.Persistance.Repositories
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IDonorRepository _donorRepository;
+        private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IAvatarRepository _avatarRepository;
 
         public IdentityRepository(
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            IDonorRepository donorRepository)
+            IDonorRepository donorRepository,
+            IVolunteerRepository volunteerRepository,
+            IProfileRepository profileRepository,
+            IAvatarRepository avatarRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _donorRepository = donorRepository;
+            _volunteerRepository = volunteerRepository;
+            _profileRepository = profileRepository;
+            _avatarRepository = avatarRepository;
         }
 
         public Task<ApplicationUser?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -49,14 +58,14 @@ namespace GivingChampion.Persistance.Repositories
 
             if (result.Succeeded)
             {
-                Donor donorDto = new()
-                {
-                    UserId = user.Id,
-                };
 
-                await _donorRepository.CreateAsync(donorDto);
+                await _donorRepository.CreateAsync(user.Id);
+
+                await _volunteerRepository.AddAsync(user.Id);
+
+                var profile = await _profileRepository.AddAsync(user.Id);
+                var avatar = await _avatarRepository.AddAsync(user.Id);
             }
-            
 
             return result.Succeeded
                 ? AuthServiceResult<ApplicationUser>.Success(user)
@@ -74,10 +83,22 @@ namespace GivingChampion.Persistance.Repositories
                 UserName = email,
                 Email = email,
                 FullName = fullName,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                IsExternal = true
             };
 
             var result = await _userManager.CreateAsync(user);
+
+            if (result.Succeeded)
+            {
+
+                await _donorRepository.CreateAsync(user.Id);
+
+                await _volunteerRepository.AddAsync(user.Id);
+
+                var profile = await _profileRepository.AddAsync(user.Id);
+                var avatar = await _avatarRepository.AddAsync(user.Id);
+            }
 
             return result.Succeeded
                 ? AuthServiceResult<ApplicationUser>.Success(user)

@@ -13,17 +13,26 @@ namespace GivingChampion.Application.Services
         private readonly IJwtTokenFactory _jwtTokenFactory;
         private readonly IExternalLoginCodeStore _externalLoginCodeStore;
         private readonly IDonorRepository _donorRepository;
+        private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IAvatarRepository _avatarRepository;
 
         public AuthService(
             IIdentityRepository identityRepository,
             IJwtTokenFactory jwtTokenFactory,
             IExternalLoginCodeStore externalLoginCodeStore,
-            IDonorRepository donorRepository)
+            IDonorRepository donorRepository,
+            IVolunteerRepository volunteerRepository,
+            IProfileRepository profileRepository,
+            IAvatarRepository avatarRepository)
         {
             _identityRepository = identityRepository;
             _jwtTokenFactory = jwtTokenFactory;
             _externalLoginCodeStore = externalLoginCodeStore;
             _donorRepository = donorRepository;
+            _volunteerRepository = volunteerRepository;
+            _profileRepository = profileRepository;
+            _avatarRepository = avatarRepository;
         }
 
         public async Task<AuthServiceResult<TokenResponse>> RegisterAsync(
@@ -31,8 +40,16 @@ namespace GivingChampion.Application.Services
             CancellationToken cancellationToken = default)
         {
             var existingUser = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
+
             if (existingUser is not null)
             {
+                // 2. Check if the user is soft-deleted
+                if (existingUser.IsDeleted)
+                {
+                    return AuthServiceResult<TokenResponse>.Failure(
+                        new ServiceError("AccountDisabled", "This account has been deactivated. Please contact support to reactivate your account."));
+                }
+
                 return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("DuplicateEmail", "A user with this email already exists."));
             }
@@ -68,16 +85,26 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<AuthServiceResult<TokenResponse>> LoginAsync(
-            LoginRequest request,
-            CancellationToken cancellationToken = default)
+    LoginRequest request,
+    CancellationToken cancellationToken = default)
         {
             var user = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
+
+            // 1. Check if user exists
             if (user is null)
             {
                 return AuthServiceResult<TokenResponse>.Failure(
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
+            // 2. Check if the account is soft-deleted/disabled
+            if (user.IsDeleted) // or user.IsDisabled, depending on your property name
+            {
+                return AuthServiceResult<TokenResponse>.Failure(
+                    new ServiceError("AccountDisabled", "Your account has been deactivated. Please contact support."));
+            }
+
+            // 3. Validate password
             var passwordValid = await _identityRepository.CheckPasswordAsync(user, request.Password, cancellationToken);
             if (!passwordValid)
             {
@@ -85,6 +112,7 @@ namespace GivingChampion.Application.Services
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
+            // 4. Generate Token
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
             var token = _jwtTokenFactory.Create(user, roles);
 
@@ -133,16 +161,10 @@ namespace GivingChampion.Application.Services
                     user = createUserResult.Data;
                     isNewUser = true;
 
-                    var donor = new Donor
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = user.Id,
-                        TotalDonated = 0,
-                        PreferedCategory = 0,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await _donorRepository.CreateAsync(donor);
+                    //await _donorRepository.CreateAsync(user.Id);
+                    //await _volunteerRepository.AddAsync(user.Id);
+                    //await _profileRepository.AddAsync(user.Id);
+                    //await _avatarRepository.AddAsync(user.Id);
 
                     user = createUserResult.Data;
                     isNewUser = true;

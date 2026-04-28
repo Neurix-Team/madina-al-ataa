@@ -119,30 +119,30 @@ namespace GivingChampion.API.Controllers.Volunteer
         /// </summary>
         /// <param name="dto">Volunteer creation data.</param>
         /// <returns>The created volunteer with 201 Created response.</returns>
-        [Authorize(Roles = "User")]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateVolunteerDto dto)
-        {
-            try
-            {
-                // Create volunteer using service layer.
-                var createdVolunteer = await _volunteerService.CreateAsync(dto);
+        //[Authorize(Roles = "User")]
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] CreateVolunteerDto dto)
+        //{
+        //    try
+        //    {
+        //        // Create volunteer using service layer.
+        //        var createdVolunteer = await _volunteerService.CreateAsync(dto);
 
-                // Return 201 Created with route to the created volunteer.
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = createdVolunteer.Id },
-                    createdVolunteer);
-            }
-            catch (Exception ex)
-            {
-                // Log unexpected errors for production tracking.
-                _logger.LogError(ex, "Error occurred while creating the volunteer.");
+        //        // Return 201 Created with route to the created volunteer.
+        //        return CreatedAtAction(
+        //            nameof(GetById),
+        //            new { id = createdVolunteer.Id },
+        //            createdVolunteer);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log unexpected errors for production tracking.
+        //        _logger.LogError(ex, "Error occurred while creating the volunteer.");
 
-                // Return generic error message to avoid exposing internal details.
-                return StatusCode(500, "Internal server error");
-            }
-        }
+        //        // Return generic error message to avoid exposing internal details.
+        //        return StatusCode(500, "Internal server error");
+        //    }
+        //}
 
         #endregion
 
