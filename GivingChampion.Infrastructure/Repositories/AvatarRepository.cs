@@ -27,9 +27,15 @@ namespace GivingChampion.API.Repositories
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
-        public async Task AddAsync(Avatar avatar)
+        public async Task<Avatar> AddAsync(Guid profileId)
         {
+            var avatar = new Avatar
+            {
+                ProfileId = profileId
+            };
             await _context.Avatars.AddAsync(avatar);
+            await _context.SaveChangesAsync();
+            return avatar;
         }
 
         public void Update(Avatar avatar)

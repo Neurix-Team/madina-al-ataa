@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.DTO.UserLevelDto;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
@@ -11,55 +11,72 @@ namespace GivingChampion.API.Services
         private readonly IUserLevelRepository _userLevelRepository;
         private readonly IMapper _mapper;
 
-        public UserLevelService(IUserLevelRepository userLevelRepository, IMapper mapper)
+        public UserLevelService(
+            IUserLevelRepository userLevelRepository,
+            IMapper mapper)
         {
             _userLevelRepository = userLevelRepository;
             _mapper = mapper;
         }
 
-        //public async Task<List<UserLevelDto>> GetAllAsync()
-        //{
-        //    var userLevels = await _userLevelRepository.GetAllAsync();
-        //    return _mapper.Map<List<UserLevelDto>>(userLevels); // AutoMapper
-        //}
-
         public async Task<UserLevelDto?> GetByProfileIdAsync(Guid profileId)
         {
+            if (profileId == Guid.Empty)
+                throw new BadRequestException("Profile ID is required.");
+
             var userLevel = await _userLevelRepository.GetByProfileIdAsync(profileId);
-            return userLevel == null ? null : _mapper.Map<UserLevelDto>(userLevel); // AutoMapper
-        }
 
-        public async Task<UserLevelDto> CreateAsync(CreateUserLevelDto dto)
-        {
-            var userLevel = _mapper.Map<UserLevel>(dto);
-            await _userLevelRepository.AddAsync(userLevel);
-            await _userLevelRepository.SaveChangesAsync();
+            if (userLevel == null)
+                throw new NotFoundException($"User level for profile ID {profileId} was not found.");
 
-            return _mapper.Map<UserLevelDto>(userLevel); // AutoMapper
+            return _mapper.Map<UserLevelDto>(userLevel);
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateUserLevelDto dto)
         {
-            var userLevel = await _userLevelRepository.GetByIdAsync(id);
-            if (userLevel == null)
-                return false;
+            if (id == Guid.Empty)
+                throw new BadRequestException("User level ID is required.");
 
-            _mapper.Map(dto, userLevel); // AutoMapper
+            if (dto == null)
+                throw new BadRequestException("User level update data is required.");
+
+            var userLevel = await _userLevelRepository.GetByIdAsync(id);
+
+            if (userLevel == null)
+                throw new NotFoundException($"User level with ID {id} was not found.");
+
+            if (userLevel.IsDeleted)
+                throw new BadRequestException("Cannot update a deleted user level.");
+
+            _mapper.Map(dto, userLevel);
+
             _userLevelRepository.Update(userLevel);
+
             await _userLevelRepository.SaveChangesAsync();
+
             return true;
         }
 
         public async Task<bool> SoftDeleteAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("User level ID is required.");
+
             var userLevel = await _userLevelRepository.GetByIdAsync(id);
+
             if (userLevel == null)
-                return false;
+                throw new NotFoundException($"User level with ID {id} was not found.");
+
+            if (userLevel.IsDeleted)
+                throw new BadRequestException("User level is already deleted.");
 
             userLevel.IsDeleted = true;
             userLevel.DeletedAt = DateTime.UtcNow;
+
             _userLevelRepository.Update(userLevel);
+
             await _userLevelRepository.SaveChangesAsync();
+
             return true;
         }
     }

@@ -13,38 +13,38 @@ namespace GivingChampion.Application.Services
     public class DonorService : IDonorService
     {
         private readonly IDonorRepository _donorRepository;
-        private readonly IUserRepository _userRepository;
+        //private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<DonorService> _logger;
 
         public DonorService(
             IDonorRepository donorRepository,
-            IUserRepository userRepository,
+            //IUserRepository userRepository,
             IMapper mapper,
             ILogger<DonorService> logger)
         {
             _donorRepository = donorRepository;
-            _userRepository = userRepository;
+            //_userRepository = userRepository;
             _mapper = mapper;
             _logger = logger;
         }
 
-        public async Task<DonorDto> CreateDonorAsync(CreateDonorDto dto, Guid userId)
-        {
-            // Check if donor profile already exists for this user
-            if (await _donorRepository.ExistsByUserIdAsync(userId))
-                throw new InvalidOperationException("Donor profile already exists for this user.");
-            var donor = _mapper.Map<Donor>(dto);
-            donor.UserId = userId;
-            donor.CreatedAt = DateTime.UtcNow;
+        //public async Task<DonorDto> CreateDonorAsync(CreateDonorDto dto, Guid userId)
+        //{
+        //    // Check if donor profile already exists for this user
+        //    if (await _donorRepository.ExistsByUserIdAsync(userId))
+        //        throw new InvalidOperationException("Donor profile already exists for this user.");
+        //    var donor = _mapper.Map<Donor>(dto);
+        //    donor.UserId = userId;
+        //    donor.CreatedAt = DateTime.UtcNow;
 
-            await _donorRepository.CreateAsync(donor);
+        //    await _donorRepository.CreateAsync(donor);
 
-            _logger.LogInformation("Donor profile created for user {UserId}", userId);
+        //    _logger.LogInformation("Donor profile created for user {UserId}", userId);
 
-            var donorDto = _mapper.Map<DonorDto>(donor);
-            return donorDto;
-        }
+        //    var donorDto = _mapper.Map<DonorDto>(donor);
+        //    return donorDto;
+        //}
 
         public async Task<DonorDto> GetMyDonorProfileAsync(Guid userId)
         {

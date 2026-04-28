@@ -4,13 +4,14 @@ using GivingChampion.Common.Enums;
 ﻿using GivingChampion.Common.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using GivingChampion.Domain.Entities.Base;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GivingChampion.Domain.Entities
 {
     public class Avatar : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Required]
         public GenderType Gender { get; set; }
@@ -34,6 +35,10 @@ namespace GivingChampion.Domain.Entities
         [Required]
         [StringLength(100)]
         public string CharacterName { get; set; }
+
+        [ForeignKey("Profile")]
+        public Guid ProfileId { get; set; }
+        public Profile Profile { get; set; }
         //public bool IsDeleted { get; set; }
         //public DateTime? DeletedAt { get; set; }
     }

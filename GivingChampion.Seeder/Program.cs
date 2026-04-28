@@ -5,6 +5,8 @@ using GivingChampion.Seeder.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = Host.CreateApplicationBuilder(args);
 
 // Bind the DefaultAdminUser section (optional but recommended)

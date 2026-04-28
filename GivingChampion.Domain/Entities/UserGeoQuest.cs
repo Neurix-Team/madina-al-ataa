@@ -10,7 +10,7 @@ namespace GivingChampion.Domain.Entities
     public class UserGeoQuest : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         [Required]
         [StringLength(200)]
         public string Title { get; set; }

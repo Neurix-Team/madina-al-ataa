@@ -13,17 +13,26 @@ namespace GivingChampion.Application.Services
         private readonly IJwtTokenFactory _jwtTokenFactory;
         private readonly IExternalLoginCodeStore _externalLoginCodeStore;
         private readonly IDonorRepository _donorRepository;
+        private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IAvatarRepository _avatarRepository;
 
         public AuthService(
             IIdentityRepository identityRepository,
             IJwtTokenFactory jwtTokenFactory,
             IExternalLoginCodeStore externalLoginCodeStore,
-            IDonorRepository donorRepository)
+            IDonorRepository donorRepository,
+            IVolunteerRepository volunteerRepository,
+            IProfileRepository profileRepository,
+            IAvatarRepository avatarRepository)
         {
             _identityRepository = identityRepository;
             _jwtTokenFactory = jwtTokenFactory;
             _externalLoginCodeStore = externalLoginCodeStore;
             _donorRepository = donorRepository;
+            _volunteerRepository = volunteerRepository;
+            _profileRepository = profileRepository;
+            _avatarRepository = avatarRepository;
         }
 
         public async Task<AuthServiceResult<TokenResponse>> RegisterAsync(
@@ -152,16 +161,10 @@ namespace GivingChampion.Application.Services
                     user = createUserResult.Data;
                     isNewUser = true;
 
-                    var donor = new Donor
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = user.Id,
-                        TotalDonated = 0,
-                        PreferedCategory = 0,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await _donorRepository.CreateAsync(donor);
+                    //await _donorRepository.CreateAsync(user.Id);
+                    //await _volunteerRepository.AddAsync(user.Id);
+                    //await _profileRepository.AddAsync(user.Id);
+                    //await _avatarRepository.AddAsync(user.Id);
 
                     user = createUserResult.Data;
                     isNewUser = true;

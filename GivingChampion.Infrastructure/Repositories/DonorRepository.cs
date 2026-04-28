@@ -35,8 +35,12 @@ namespace GivingChampion.Persistence.Repositories
                 .AnyAsync(d => d.UserId == userId && !d.IsDeleted);
         }
 
-        public async Task CreateAsync(Donor donor)
+        public async Task CreateAsync(Guid userId)
         {
+            Donor donor = new Donor()
+            {
+                UserId = userId,
+            };
             await _context.Donors.AddAsync(donor);
             await _context.SaveChangesAsync();
         }

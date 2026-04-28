@@ -36,7 +36,6 @@ namespace GivingChampion.API.Services
         public async Task<AiAvatarDto> CreateAsync(CreateAiAvatarDto dto)
         {
             var aiAvatar = _mapper.Map<AiAvatar>(dto);
-            aiAvatar.Id = Guid.NewGuid();
             await _aiAvatarRepository.AddAsync(aiAvatar);
             await _aiAvatarRepository.SaveChangesAsync();
 

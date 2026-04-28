@@ -6,7 +6,7 @@ namespace GivingChampion.Common.DTO.LevelDto
     public class LevelDto
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Required]
         public int Number { get; set; }

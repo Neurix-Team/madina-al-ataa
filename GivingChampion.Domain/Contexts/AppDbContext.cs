@@ -17,8 +17,8 @@ namespace GivingChampion.Domain.Contexts
         }
 
         // DbSets
-        public DbSet<ApplicationUser> Users { get; set; }
-        public DbSet<ApplicationRole> Roles { get; set; }
+        //public DbSet<ApplicationUser> Users { get; set; }
+        //public DbSet<ApplicationRole> Roles { get; set; }
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
         public DbSet<Badge> Badges { get; set; }
@@ -51,7 +51,7 @@ namespace GivingChampion.Domain.Contexts
 
             // ====================== GLOBAL SOFT DELETE FILTER ======================
             // This applies automatically to ALL entities that implement ISoftDeletable
-            modelBuilder.ApplySoftDeleteQueryFilter();
+            //modelBuilder.ApplySoftDeleteQueryFilter();
 
             // ====================== Specific Configurations ======================
             // Only add manual configurations here if needed (relationships, indexes, etc.)

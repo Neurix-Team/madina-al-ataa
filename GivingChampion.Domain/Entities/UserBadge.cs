@@ -8,7 +8,7 @@ namespace GivingChampion.Domain.Entities
     public class UserBadge : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }

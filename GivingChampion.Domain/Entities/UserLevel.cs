@@ -8,7 +8,7 @@ namespace GivingChampion.Domain.Entities
     public class UserLevel : BaseEntity
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Range(0, int.MaxValue)]
         public int Xp { get; set; }
