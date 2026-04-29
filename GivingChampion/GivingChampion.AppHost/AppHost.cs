@@ -4,7 +4,7 @@ using ModelContextProtocol.Protocol;
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Shared image tag for all app services
-var imageTag = builder.Configuration["IMAGE_TAG"] ?? "v1.0.0";
+var imageTag = builder.Configuration["IMAGE_TAG"] ?? "latest";
 
 // Add Docker Compose environment
 var compose = builder.AddDockerComposeEnvironment("compose")
