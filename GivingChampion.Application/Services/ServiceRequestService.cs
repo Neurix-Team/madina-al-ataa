@@ -92,7 +92,7 @@ namespace GivingChampion.Application.Services
 
             var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
 
-            return _mapper.Map<List<ServiceRequestDto>>(filtered);
+            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
         }
 
         #endregion

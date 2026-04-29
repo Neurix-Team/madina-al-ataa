@@ -3,6 +3,7 @@ using GivingChampion.Common.DTO.CertificateDto;
 using GivingChampion.Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers.Certificate
 {
@@ -65,7 +66,8 @@ namespace GivingChampion.API.Controllers.Certificate
             {
                 try
                 {
-                    var certificates = await _certificateService.GetCertificateByIdAsync(cancellationToken);
+                var userId = new Guid(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+                var certificates = await _certificateService.GetCertificatesByIdAsync(userId, cancellationToken);
                     return Ok(certificates);
                 }
                 catch (Exception ex)

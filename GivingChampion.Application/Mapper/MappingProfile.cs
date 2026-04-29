@@ -150,7 +150,6 @@ namespace GivingChampion.Application.Mapper
             CreateMap<Partner, PartnerDto>()
                 .ForMember(dest => dest.OrgTypeName,
                     opt => opt.MapFrom(src => src.OrgType.ToString()));
-                .ForMember(dest => dest.OrgTypeName, opt => opt.MapFrom(src => src.OrgType.ToString()));
             CreateMap<Partner, CreatePartnerDto>().ReverseMap();
 
             CreateMap<UpdatePartnerDto, Partner>()
@@ -230,12 +229,6 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.DonateAmount, opt => opt.Condition(src => src.DonateAmount.HasValue))
                 .ForMember(dest => dest.UrgencyLevel, opt => opt.Condition(src => src.UrgencyLevel.HasValue))
                 .ForMember(dest => dest.BriefDescription, opt => opt.Condition(src => !string.IsNullOrEmpty(src.BriefDescription)));
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Title, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Title)))  // Only map if not null or empty
-            .ForMember(dest => dest.Location, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Location)))
-            .ForMember(dest => dest.DonateAmount, opt => opt.Condition(src => src.DonateAmount.HasValue))
-            .ForMember(dest => dest.UrgencyLevel, opt => opt.Condition(src => src.UrgencyLevel.HasValue))
-            .ForMember(dest => dest.BriefDescription, opt => opt.Condition(src => !string.IsNullOrEmpty(src.BriefDescription)));
             CreateMap<CreateUserGeoQuestDto, UserGeoQuest>().ReverseMap();
 
             #endregion
@@ -267,7 +260,6 @@ namespace GivingChampion.Application.Mapper
             CreateMap<CreateDonationOrderDto, DonationOrder>();
             CreateMap<UpdateDonationOrderDTO, DonationOrder>();
 
-            #endregion
   
 
             #region AiAvatar Mappings
@@ -391,13 +383,8 @@ namespace GivingChampion.Application.Mapper
             CreateMap<UpdateLocationDto, Location>().ReverseMap();
 
             #endregion
-        }
-    }
-}
-            #endregion
-            #region Service Request Mapping
+        
 
-            #region ServiceRequest To ServiceRequestDto
 
             /*
              * Maps ServiceRequest entity to ServiceRequestDto.
@@ -445,7 +432,6 @@ namespace GivingChampion.Application.Mapper
             // CreateVolunteerOrderDto -> VolunteerOrder
             CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(dest => dest.VolunteerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Status, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
@@ -566,6 +552,5 @@ namespace GivingChampion.Application.Mapper
     //            source.PageSize
     //        );
     //    }
-    //}
-}
+    }
 }

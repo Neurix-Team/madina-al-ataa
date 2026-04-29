@@ -76,12 +76,6 @@ namespace GivingChampion.Domain.Entities
         public ApplicationUser Donor { get; set; }
 
         /// <summary>
-        /// Donor Reference
-        /// </summary>
-        [ForeignKey("DonorId")]
-        public Donor Donor { get; set; }
-
-        /// <summary>
         /// Foreign key to Donation Request
         /// </summary>
         public Guid DonationRequestId { get; set; }
