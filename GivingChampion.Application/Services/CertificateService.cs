@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace GivingChampion.Application.Services.Certificate
 {
     public class CertificateService : ICertificateService
@@ -14,48 +11,57 @@ namespace GivingChampion.Application.Services.Certificate
         private readonly ICertificateRepository _certificateRepository;
         private readonly IMapper _mapper;
 
-        // Constructor to initialize repository and mapper
-        public CertificateService(ICertificateRepository certificateRepository, IMapper mapper)
+        public CertificateService(
+            ICertificateRepository certificateRepository,
+            IMapper mapper)
         {
-            _certificateRepository = certificateRepository ?? throw new ArgumentNullException(nameof(certificateRepository));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _certificateRepository = certificateRepository
+                ?? throw new ArgumentNullException(nameof(certificateRepository));
+
+            _mapper = mapper
+                ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // Create a new certificate
-        public async Task<CertificateReadAllDto?> CreateAsync(CertificateCreateDto dto, CancellationToken cancellationToken = default)
+        public async Task<CertificateReadAllDto?> CreateAsync(
+            CertificateCreateDto dto,
+            CancellationToken cancellationToken = default)
         {
-            // Step 1: Check if the volunteer exists
-            var volunteerExists = await _certificateRepository.VolunteerExistsAsync(dto.VolunteerId, cancellationToken);
-            if (!volunteerExists)
-            {
-                return null; // Return null if the volunteer does not exist
-            }
+            if (dto == null)
+                throw new BadRequestException("Certificate create data is required.");
 
-            // Step 2: Map the CertificateCreateDto to Certificate entity
+            if (dto.VolunteerId == Guid.Empty)
+                throw new BadRequestException("Volunteer ID is required.");
+
+            var volunteerExists = await _certificateRepository
+                .VolunteerExistsAsync(dto.VolunteerId, cancellationToken);
+
+            if (!volunteerExists)
+                throw new NotFoundException($"Volunteer with ID {dto.VolunteerId} was not found.");
+
             var certificate = _mapper.Map<Domain.Entities.Certificate>(dto);
 
-
-            // Step 4: Add the certificate to the repository
             await _certificateRepository.AddAsync(certificate, cancellationToken);
 
-            // Step 5: Return the created certificate as a DTO
             return _mapper.Map<CertificateReadAllDto>(certificate);
         }
 
-        // Check if a volunteer exists by their ID
-        public async Task<bool> CheckVolunteerExists(Guid volunteerId, CancellationToken cancellationToken = default)
+        public async Task<bool> CheckVolunteerExists(
+            Guid volunteerId,
+            CancellationToken cancellationToken = default)
         {
-            // Check if volunteer exists in the repository
-            return await _certificateRepository.VolunteerExistsAsync(volunteerId, cancellationToken);
+            if (volunteerId == Guid.Empty)
+                throw new BadRequestException("Volunteer ID is required.");
+
+            return await _certificateRepository.VolunteerExistsAsync(
+                volunteerId,
+                cancellationToken);
         }
 
-        // Get all certificates (fetch all certificates)
-        public async Task<List<CertificateReadAllDto>> GetCertificateByIdAsync(CancellationToken cancellationToken = default)
+        public async Task<List<CertificateReadAllDto>> GetCertificateByIdAsync(
+            CancellationToken cancellationToken = default)
         {
-            // Step 1: Retrieve all certificates from the repository
             var certificates = await _certificateRepository.GetAllAsync(cancellationToken);
 
-            // Step 2: Map certificates to DTOs and return the list
             return _mapper.Map<List<CertificateReadAllDto>>(certificates);
         }
     }

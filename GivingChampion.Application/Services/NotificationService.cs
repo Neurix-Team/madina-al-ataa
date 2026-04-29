@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO.Notification;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {
@@ -27,36 +25,73 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<PagedList<NotificationDto>>> GetMyNotificationsAsync(Guid userId, bool unreadOnly = false, PageParameters pageParameters = null)
+        public async Task<Result<PagedList<NotificationDto>>> GetMyNotificationsAsync(
+            Guid userId,
+            bool unreadOnly = false,
+            PageParameters pageParameters = null)
         {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
 
             var notifications = unreadOnly
                 ? await _notificationRepository.GetUnreadByUserIdAsync(userId)
                 : await _notificationRepository.GetByUserIdAsync(userId);
 
             var dtos = _mapper.Map<List<NotificationDto>>(notifications);
-            var pagedList = new PagedList<NotificationDto>(dtos, dtos.Count, pageParameters?.PageNumber ?? 1, pageParameters?.PageSize ?? dtos.Count);
+
+            var pageNumber = pageParameters?.PageNumber ?? 1;
+            var pageSize = pageParameters?.PageSize ?? dtos.Count;
+
+            var pagedList = new PagedList<NotificationDto>(
+                dtos,
+                dtos.Count,
+                pageNumber,
+                pageSize
+            );
+
             return Result<PagedList<NotificationDto>>.Success(pagedList);
         }
 
         public async Task<Result> MarkAsReadAsync(Guid userId, Guid notificationId)
         {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
+
+            if (notificationId == Guid.Empty)
+                throw new BadRequestException("Notification ID is required.");
+
             await _notificationRepository.MarkAsReadAsync(userId, notificationId);
+
             return Result.Success();
         }
 
         public async Task<Result> MarkAllAsReadAsync(Guid userId)
         {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
+
             await _notificationRepository.MarkAllAsReadAsync(userId);
+
             return Result.Success();
         }
 
-        // Internal method for other services to send notifications
         public async Task CreateNotificationAsync(Notification notification)
         {
+            if (notification == null)
+                throw new BadRequestException("Notification data is required.");
+
+            if (notification.UserId == Guid.Empty)
+                throw new BadRequestException("Notification user ID is required.");
+
+            if (string.IsNullOrWhiteSpace(notification.Title))
+                throw new BadRequestException("Notification title is required.");
+
             await _notificationRepository.CreateAsync(notification);
-            _logger.LogInformation("Notification sent to user {UserId}: {Title}",
-                notification.UserId, notification.Title);
+
+            _logger.LogInformation(
+                "Notification sent to user {UserId}: {Title}",
+                notification.UserId,
+                notification.Title);
         }
     }
 }

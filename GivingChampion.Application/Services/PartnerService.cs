@@ -1,133 +1,107 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Common.DTO.Partner;
 using GivingChampion.Common.DTO.PartnerDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {
     public class PartnerService : IPartnerService
     {
-
         private readonly IPartnerRepository _partnerRepository;
         private readonly IMapper _mapper;
 
-        #region Constructor
-
-        // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
-        public PartnerService(IPartnerRepository partnerRepository, IMapper mapper)
+        public PartnerService(
+            IPartnerRepository partnerRepository,
+            IMapper mapper)
         {
             _partnerRepository = partnerRepository;
             _mapper = mapper;
         }
 
-        #endregion
-
-        #region GetAllPartner
-
-        /// <summary>
-        /// Retrieves all partners from the repository and maps them to PartnerDto.
-        /// </summary>
         public async Task<List<PartnerDto>> GetAllAsync()
         {
-            // Fetching all partners from the repository
             var partners = await _partnerRepository.GetAllAsync();
 
-            // Mapping the partners to PartnerDto
             return _mapper.Map<List<PartnerDto>>(partners);
         }
-        #endregion
 
-        #region GetById
-        /// <summary>
-        /// Retrieves a partner by ID and maps it to PartnerDto.
-        /// Returns null if partner is not found.
-        /// </summary>
         public async Task<PartnerDto?> GetByIdAsync(Guid id)
         {
-            // Fetching a partner by ID from the repository
+            if (id == Guid.Empty)
+                throw new BadRequestException("Partner ID is required.");
+
             var partner = await _partnerRepository.GetByIdAsync(id);
 
-            // Return null if partner is not found
             if (partner == null)
-                return null;
+                throw new NotFoundException($"Partner with ID {id} was not found.");
 
-            // Mapping the found partner to PartnerDto
+            if (partner.IsDeleted)
+                throw new NotFoundException($"Partner with ID {id} was not found.");
+
             return _mapper.Map<PartnerDto>(partner);
         }
-        #endregion
 
-        #region CreatePartner
-        /// <summary>
-        /// Creates a new partner in the repository and returns the mapped PartnerDto.
-        /// </summary>
         public async Task<PartnerDto> CreateAsync(CreatePartnerDto dto)
         {
-            // Mapping the incoming CreatePartnerDto to a Partner entity
+            if (dto == null)
+                throw new BadRequestException("Partner create data is required.");
+
             var partner = _mapper.Map<Partner>(dto);
 
-            
-
-            // Adding the partner to the repository
             await _partnerRepository.AddAsync(partner);
             await _partnerRepository.SaveChangesAsync();
 
-            // Returning the newly created partner as a DTO
             return _mapper.Map<PartnerDto>(partner);
         }
-        #endregion
 
-        #region UpdatePartner
-        /// <summary>
-        /// Updates an existing partner by ID and returns the updated PartnerDto.
-        /// </summary>
         public async Task<PartnerDto?> UpdateAsync(Guid id, UpdatePartnerDto dto)
         {
-            // Fetching the existing partner by ID
+            if (id == Guid.Empty)
+                throw new BadRequestException("Partner ID is required.");
+
+            if (dto == null)
+                throw new BadRequestException("Partner update data is required.");
+
             var partner = await _partnerRepository.GetByIdAsync(id);
 
-            // Return null if partner is not found
             if (partner == null)
-                return null;
+                throw new NotFoundException($"Partner with ID {id} was not found.");
 
-            // Mapping the incoming UpdatePartnerDto to the existing Partner entity
+            if (partner.IsDeleted)
+                throw new BadRequestException("Cannot update a deleted partner.");
+
             _mapper.Map(dto, partner);
+
             partner.UpdatedAt = DateTime.UtcNow;
 
-            // Updating the partner in the repository
             _partnerRepository.Update(partner);
+
             await _partnerRepository.SaveChangesAsync();
 
-            // Returning the updated partner as a DTO
             return _mapper.Map<PartnerDto>(partner);
         }
-        #endregion
 
-        #region  DeletePatner
-        /// <summary>
-        /// Soft deletes a partner by ID and returns a boolean indicating success.
-        /// </summary>
         public async Task<bool> DeleteAsync(Guid id)
         {
-            // Fetching the partner by ID
+            if (id == Guid.Empty)
+                throw new BadRequestException("Partner ID is required.");
+
             var partner = await _partnerRepository.GetByIdAsync(id);
 
-            // Return false if partner is not found
             if (partner == null)
-                return false;
+                throw new NotFoundException($"Partner with ID {id} was not found.");
 
-            // Soft deleting the partner
+            if (partner.IsDeleted)
+                throw new BadRequestException("Partner is already deleted.");
+
             _partnerRepository.SoftDelete(partner);
+
             await _partnerRepository.SaveChangesAsync();
 
-            // Returning true to indicate successful deletion
             return true;
         }
-        #endregion
     }
 }

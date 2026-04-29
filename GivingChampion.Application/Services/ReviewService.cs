@@ -1,5 +1,6 @@
 using AutoMapper;
 using GivingChampion.API.Interfaces;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.DTO.ReviewDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
@@ -11,7 +12,9 @@ namespace GivingChampion.API.Services
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public ReviewService(IReviewRepository reviewRepository, IMapper mapper)
+        public ReviewService(
+            IReviewRepository reviewRepository,
+            IMapper mapper)
         {
             _reviewRepository = reviewRepository;
             _mapper = mapper;
@@ -19,47 +22,91 @@ namespace GivingChampion.API.Services
 
         public async Task<List<ReviewDto>> GetAllByProfileIdAsync(Guid profileId)
         {
+            if (profileId == Guid.Empty)
+                throw new BadRequestException("Profile ID is required.");
+
             var reviews = await _reviewRepository.GetAllByProfileIdAsync(profileId);
+
             return _mapper.Map<List<ReviewDto>>(reviews);
         }
 
         public async Task<ReviewDto?> GetByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Review ID is required.");
+
             var review = await _reviewRepository.GetByIdAsync(id);
-            return review == null ? null : _mapper.Map<ReviewDto>(review);
+
+            if (review == null)
+                throw new NotFoundException($"Review with ID {id} was not found.");
+
+            if (review.IsDeleted)
+                throw new NotFoundException($"Review with ID {id} was not found.");
+
+            return _mapper.Map<ReviewDto>(review);
         }
 
         public async Task<ReviewDto> CreateAsync(CreateReviewDto dto)
         {
+            if (dto == null)
+                throw new BadRequestException("Review create data is required.");
+
             var review = _mapper.Map<Review>(dto);
+
             review.ReviewDate = DateTime.UtcNow;
+
             await _reviewRepository.AddAsync(review);
+
             await _reviewRepository.SaveChangesAsync();
+
             return _mapper.Map<ReviewDto>(review);
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateReviewDto dto)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Review ID is required.");
+
+            if (dto == null)
+                throw new BadRequestException("Review update data is required.");
+
             var review = await _reviewRepository.GetByIdAsync(id);
+
             if (review == null)
-                return false;
+                throw new NotFoundException($"Review with ID {id} was not found.");
+
+            if (review.IsDeleted)
+                throw new BadRequestException("Cannot update a deleted review.");
 
             _mapper.Map(dto, review);
+
             _reviewRepository.Update(review);
+
             await _reviewRepository.SaveChangesAsync();
+
             return true;
         }
 
         public async Task<bool> SoftDeleteAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Review ID is required.");
+
             var review = await _reviewRepository.GetByIdAsync(id);
+
             if (review == null)
-                return false;
+                throw new NotFoundException($"Review with ID {id} was not found.");
+
+            if (review.IsDeleted)
+                throw new BadRequestException("Review is already deleted.");
 
             review.IsDeleted = true;
             review.DeletedAt = DateTime.UtcNow;
+
             _reviewRepository.Update(review);
+
             await _reviewRepository.SaveChangesAsync();
+
             return true;
         }
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.DTO.UserBadgeDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
@@ -11,7 +12,9 @@ namespace GivingChampion.API.Services
         private readonly IUserBadgeRepository _userBadgeRepository;
         private readonly IMapper _mapper;
 
-        public UserBadgeService(IUserBadgeRepository userBadgeRepository, IMapper mapper)
+        public UserBadgeService(
+            IUserBadgeRepository userBadgeRepository,
+            IMapper mapper)
         {
             _userBadgeRepository = userBadgeRepository;
             _mapper = mapper;
@@ -19,47 +22,89 @@ namespace GivingChampion.API.Services
 
         public async Task<List<UserBadgeDto>> GetAllByProfileIdAsync(Guid profileId)
         {
+            if (profileId == Guid.Empty)
+                throw new BadRequestException("Profile ID is required.");
+
             var userBadges = await _userBadgeRepository.GetAllByProfileIdAsync(profileId);
-            return _mapper.Map<List<UserBadgeDto>>(userBadges); // AutoMapper
+
+            return _mapper.Map<List<UserBadgeDto>>(userBadges);
         }
 
         public async Task<UserBadgeDto?> GetByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserBadge ID is required.");
+
             var userBadge = await _userBadgeRepository.GetByIdAsync(id);
-            return userBadge == null ? null : _mapper.Map<UserBadgeDto>(userBadge); // AutoMapper
+
+            if (userBadge == null)
+                throw new NotFoundException($"UserBadge with ID {id} was not found.");
+
+            if (userBadge.IsDeleted)
+                throw new NotFoundException($"UserBadge with ID {id} was not found.");
+
+            return _mapper.Map<UserBadgeDto>(userBadge);
         }
 
         public async Task<UserBadgeDto> CreateAsync(CreateUserBadgeDto dto)
         {
+            if (dto == null)
+                throw new BadRequestException("UserBadge create data is required.");
+
             var userBadge = _mapper.Map<UserBadge>(dto);
+
             await _userBadgeRepository.AddAsync(userBadge);
+
             await _userBadgeRepository.SaveChangesAsync();
 
-            return _mapper.Map<UserBadgeDto>(userBadge); // AutoMapper
+            return _mapper.Map<UserBadgeDto>(userBadge);
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateUserBadgeDto dto)
         {
-            var userBadge = await _userBadgeRepository.GetByIdAsync(id);
-            if (userBadge == null)
-                return false;
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserBadge ID is required.");
 
-            _mapper.Map(dto, userBadge); // AutoMapper
+            if (dto == null)
+                throw new BadRequestException("UserBadge update data is required.");
+
+            var userBadge = await _userBadgeRepository.GetByIdAsync(id);
+
+            if (userBadge == null)
+                throw new NotFoundException($"UserBadge with ID {id} was not found.");
+
+            if (userBadge.IsDeleted)
+                throw new BadRequestException("Cannot update a deleted UserBadge.");
+
+            _mapper.Map(dto, userBadge);
+
             _userBadgeRepository.Update(userBadge);
+
             await _userBadgeRepository.SaveChangesAsync();
+
             return true;
         }
 
         public async Task<bool> SoftDeleteAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserBadge ID is required.");
+
             var userBadge = await _userBadgeRepository.GetByIdAsync(id);
+
             if (userBadge == null)
-                return false;
+                throw new NotFoundException($"UserBadge with ID {id} was not found.");
+
+            if (userBadge.IsDeleted)
+                throw new BadRequestException("UserBadge is already deleted.");
 
             userBadge.IsDeleted = true;
             userBadge.DeletedAt = DateTime.UtcNow;
+
             _userBadgeRepository.Update(userBadge);
+
             await _userBadgeRepository.SaveChangesAsync();
+
             return true;
         }
     }
