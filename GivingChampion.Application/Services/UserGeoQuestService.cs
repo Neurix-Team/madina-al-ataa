@@ -1,19 +1,15 @@
 ﻿using AutoMapper;
-using GivingChampion.API.Repositories;
+using GivingChampion.Application.Exceptions;
+using GivingChampion.Application.Helpers;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
 using GivingChampion.Common.DTO.GeoQuestDto;
 using GivingChampion.Common.DTO.UserGeoQuestDto;
-using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
-using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GivingChampion.Application.Helpers;
+
 namespace GivingChampion.Application.Services
 {
     public class UserGeoQuestService : IUserGeoQuestService
@@ -23,16 +19,28 @@ namespace GivingChampion.Application.Services
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
 
-        public UserGeoQuestService(IUserGeoQuestRepository userGeoQuestRepository, IGeoQuestRepository geoQuestRepository, 
-            ILocationRepository locationRepository, IMapper mapper)
+        public UserGeoQuestService(
+            IUserGeoQuestRepository userGeoQuestRepository,
+            IGeoQuestRepository geoQuestRepository,
+            ILocationRepository locationRepository,
+            IMapper mapper)
         {
             _userGeoQuestRepository = userGeoQuestRepository;
             _geoQuestRepository = geoQuestRepository;
             _locationRepository = locationRepository;
             _mapper = mapper;
         }
-        public async Task<Result<PagedList<UserGeoQuestDto>>> GetAllAsync(Guid userId, PageParameters pageParameters)
+
+        public async Task<Result<PagedList<UserGeoQuestDto>>> GetAllAsync(
+            Guid userId,
+            PageParameters pageParameters)
         {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
+
+            if (pageParameters == null)
+                throw new BadRequestException("Page parameters are required.");
+
             var userGeoQuests = await _userGeoQuestRepository
                 .GetAllByUserIdAsync(userId, pageParameters);
 
@@ -47,56 +55,99 @@ namespace GivingChampion.Application.Services
 
             return Result<PagedList<UserGeoQuestDto>>.Success(pagedResult);
         }
+
         public async Task<Result<UserGeoQuestDto?>> GetByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserGeoQuest ID is required.");
+
             var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(id);
-            return userGeoQuest == null ? Result<UserGeoQuestDto?>.Failure("UserGeoQuest not found") : Result<UserGeoQuestDto?>.Success(_mapper.Map<UserGeoQuestDto>(userGeoQuest)); // AutoMapper
+
+            if (userGeoQuest == null)
+                throw new NotFoundException($"UserGeoQuest with ID {id} was not found.");
+
+            if (userGeoQuest.IsDeleted)
+                throw new NotFoundException($"UserGeoQuest with ID {id} was not found.");
+
+            var userGeoQuestDto = _mapper.Map<UserGeoQuestDto>(userGeoQuest);
+
+            return Result<UserGeoQuestDto?>.Success(userGeoQuestDto);
         }
 
-
-        public async Task<Result<bool>> UpdateAsync(Guid id, UpdateUserGeoQuestDto dto , bool isSuccess = false)
+        public async Task<Result<bool>> UpdateAsync(
+            Guid id,
+            UpdateUserGeoQuestDto dto,
+            bool isSuccess = false)
         {
-            var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(id);
-            if (userGeoQuest == null)
-                return Result<bool>.Failure("UserGeoQuest not found");
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserGeoQuest ID is required.");
 
-            _mapper.Map(dto, userGeoQuest); // AutoMapper
+            if (dto == null)
+                throw new BadRequestException("UserGeoQuest update data is required.");
+
+            var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(id);
+
+            if (userGeoQuest == null)
+                throw new NotFoundException($"UserGeoQuest with ID {id} was not found.");
+
+            if (userGeoQuest.IsDeleted)
+                throw new BadRequestException("Cannot update a deleted UserGeoQuest.");
+
+            _mapper.Map(dto, userGeoQuest);
+
             _userGeoQuestRepository.Update(userGeoQuest);
+
             await _userGeoQuestRepository.SaveChangesAsync();
+
             return Result<bool>.Success(true);
         }
 
-        // SOFT DELETE a UserGeoQuest by Id
         public async Task<Result<bool>> SoftDeleteAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserGeoQuest ID is required.");
+
             var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(id);
+
             if (userGeoQuest == null)
-                return Result<bool>.Failure("UserGeoQuest not found");
+                throw new NotFoundException($"UserGeoQuest with ID {id} was not found.");
+
+            if (userGeoQuest.IsDeleted)
+                throw new BadRequestException("UserGeoQuest is already deleted.");
 
             userGeoQuest.IsDeleted = true;
             userGeoQuest.DeletedAt = DateTime.UtcNow;
+
             _userGeoQuestRepository.Update(userGeoQuest);
+
             await _userGeoQuestRepository.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
 
-
-
-        public async Task<Result<UserGeoQuestDto>> StartAsync(Guid geoQuestId, Guid userId)
+        public async Task<Result<UserGeoQuestDto>> StartAsync(
+            Guid geoQuestId,
+            Guid userId)
         {
-            // Check if GeoQuest exists
+            if (geoQuestId == Guid.Empty)
+                throw new BadRequestException("GeoQuest ID is required.");
+
+            if (userId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
+
             var geoQuest = await _geoQuestRepository.GetByIdAsync(geoQuestId);
 
             if (geoQuest == null)
-                return Result<UserGeoQuestDto>.Failure("GeoQuest not found.");
+                throw new NotFoundException($"GeoQuest with ID {geoQuestId} was not found.");
 
-            // Prevent starting the same GeoQuest twice
+            if (geoQuest.IsDeleted)
+                throw new NotFoundException($"GeoQuest with ID {geoQuestId} was not found.");
+
             var existingUserGeoQuest = await _userGeoQuestRepository
                 .GetByUserIdAndGeoQuestIdAsync(userId, geoQuestId);
 
-            if (existingUserGeoQuest != null)
-                return Result<UserGeoQuestDto>.Failure("GeoQuest already started by this user.");
+            if (existingUserGeoQuest != null && !existingUserGeoQuest.IsDeleted)
+                throw new ConflictException("GeoQuest already started by this user.");
 
             var userGeoQuest = new UserGeoQuest
             {
@@ -105,7 +156,6 @@ namespace GivingChampion.Application.Services
                 UserId = userId,
                 GeoQuestId = geoQuestId,
 
-                // Required by database
                 Title = geoQuest.Title,
 
                 StartedAt = DateTime.UtcNow,
@@ -117,67 +167,89 @@ namespace GivingChampion.Application.Services
             };
 
             await _userGeoQuestRepository.AddAsync(userGeoQuest);
+
             await _userGeoQuestRepository.SaveChangesAsync();
 
             var dto = _mapper.Map<UserGeoQuestDto>(userGeoQuest);
 
             return Result<UserGeoQuestDto>.Success(dto);
         }
-        // VERIFY User Location
+
         public async Task<Result<bool>> UpdateAsyncVerification(
-     Guid userGeoQuestId,
-     VerifyLocationDto dto,
-     bool isSuccess = false)
+            Guid userGeoQuestId,
+            VerifyLocationDto dto,
+            bool isSuccess = false)
         {
+            if (userGeoQuestId == Guid.Empty)
+                throw new BadRequestException("UserGeoQuest ID is required.");
+
+            if (dto == null)
+                throw new BadRequestException("Location verification data is required.");
+
             var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(userGeoQuestId);
 
             if (userGeoQuest == null)
-                return Result<bool>.Failure("UserGeoQuest not found.");
+                throw new NotFoundException($"UserGeoQuest with ID {userGeoQuestId} was not found.");
+
+            if (userGeoQuest.IsDeleted)
+                throw new BadRequestException("Cannot verify location for a deleted UserGeoQuest.");
 
             var geoQuest = await _geoQuestRepository.GetByIdAsync(userGeoQuest.GeoQuestId);
 
             if (geoQuest == null)
-                return Result<bool>.Failure("GeoQuest not found.");
+                throw new NotFoundException($"GeoQuest with ID {userGeoQuest.GeoQuestId} was not found.");
+
+            if (geoQuest.IsDeleted)
+                throw new NotFoundException($"GeoQuest with ID {userGeoQuest.GeoQuestId} was not found.");
 
             if (geoQuest.Location == null)
-                return Result<bool>.Failure("GeoQuest location not found.");
+                throw new NotFoundException("GeoQuest location was not found.");
 
             var targetLatitude = geoQuest.Location.Latitude;
             var targetLongitude = geoQuest.Location.Longitude;
 
+            if (!double.TryParse(targetLatitude, out var parsedTargetLatitude))
+                throw new BadRequestException("GeoQuest target latitude is invalid.");
+
+            if (!double.TryParse(targetLongitude, out var parsedTargetLongitude))
+                throw new BadRequestException("GeoQuest target longitude is invalid.");
+
             var isLocationValid = LocationVerifier.IsWithinDistance(
                 userLatitude: dto.Latitude,
                 userLongitude: dto.Longitude,
-                targetLatitude: double.Parse(targetLatitude),
-                targetLongitude: double.Parse(targetLongitude),
+                targetLatitude: parsedTargetLatitude,
+                targetLongitude: parsedTargetLongitude,
                 thresholdMeters: 50
             );
 
             if (!isLocationValid)
-                return Result<bool>.Failure("Location verification failed.");
+                throw new BadRequestException("Location verification failed.");
 
             userGeoQuest.IsLocationVerified = true;
 
             _userGeoQuestRepository.Update(userGeoQuest);
+
             await _userGeoQuestRepository.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
+
         public async Task<Result<UserGeoQuestDto>> CheckGeoQuestStatus(Guid id)
         {
-            // Get the UserGeoQuest by its ID
+            if (id == Guid.Empty)
+                throw new BadRequestException("UserGeoQuest ID is required.");
+
             var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(id);
 
             if (userGeoQuest == null)
-                return Result<UserGeoQuestDto>.Failure("UserGeoQuest not found");
+                throw new NotFoundException($"UserGeoQuest with ID {id} was not found.");
 
-            // Check if the UserGeoQuest has a valid GeoQuest
+            if (userGeoQuest.IsDeleted)
+                throw new NotFoundException($"UserGeoQuest with ID {id} was not found.");
+
             if (userGeoQuest.GeoQuest == null)
-            {
-                return Result<UserGeoQuestDto>.Failure("No GeoQuest associated with this UserGeoQuest");
-            }
+                throw new NotFoundException("No GeoQuest associated with this UserGeoQuest.");
 
-            // Determine the status of the GeoQuest
             string status = "Not Started";
 
             if (userGeoQuest.IsCompleted)
@@ -189,13 +261,11 @@ namespace GivingChampion.Application.Services
                 status = "In Progress";
             }
 
-            // Map the result to a UserGeoQuestDto and return the result with status
             var userGeoQuestDto = _mapper.Map<UserGeoQuestDto>(userGeoQuest);
-            userGeoQuestDto.Status = status; // Add status to the DTO
+
+            userGeoQuestDto.Status = status;
 
             return Result<UserGeoQuestDto>.Success(userGeoQuestDto);
         }
-
-      
     }
 }
