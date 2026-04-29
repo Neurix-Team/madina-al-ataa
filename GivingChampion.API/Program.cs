@@ -34,6 +34,7 @@ using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.API.Handlers;
+using GivingChampion.Application.Interfaces.Admin;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -97,6 +98,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
 builder.Services.AddScoped<IAvatarService, AvatarService>();
+builder.Services.AddScoped<IAdministratorRepository, AdministratorRepository>();
+builder.Services.AddScoped<IAdministratorService, AdministratorService>();
 builder.Services.AddScoped<IAiAvatarRepository, AiAvatarRepository>();
 builder.Services.AddScoped<IAiAvatarService, AiAvatarService>();
 builder.Services.AddScoped<ILevelRepository, LevelRepository>();
