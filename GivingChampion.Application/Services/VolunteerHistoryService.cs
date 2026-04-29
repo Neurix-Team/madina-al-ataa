@@ -61,10 +61,6 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<List<VolunteerHistoryDto>>(data);
         }
 
-        #endregion
-
-        #region Add Volunteer History
-
         public async Task AddAsync(
             Guid userId,
             Guid requestId,
@@ -80,6 +76,12 @@ namespace GivingChampion.Application.Services
 
             if (orderId == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
+
+            if (!Enum.IsDefined(typeof(VolunteerHistoryAction), action))
+                throw new BadRequestException("Volunteer history action is invalid.");
+
+            if (progress.HasValue && (progress.Value < 0 || progress.Value > 100))
+                throw new BadRequestException("Progress value must be between 0 and 100.");
 
             var history = new VolunteerHistories
             {
