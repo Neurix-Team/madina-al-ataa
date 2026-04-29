@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
@@ -6,16 +7,21 @@ using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.Application.Services
 {
     public class VolunteerOrderService : IVolunteerOrderService
     {
+        #region Fields
+
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly IVolunteerHistoryService _historyService;
         private readonly IMapper _mapper;
+
+        #endregion
+
+        #region Constructor
 
         public VolunteerOrderService(
             IVolunteerOrderRepository volunteerOrderRepository,
@@ -29,37 +35,66 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
+        #endregion
+
+        #region Get All Volunteer Orders
+
         public async Task<List<VolunteerOrderDto>> GetAllAsync()
         {
             var volunteerOrders = await _volunteerOrderRepository.GetAllAsync();
+
             return _mapper.Map<List<VolunteerOrderDto>>(volunteerOrders);
         }
 
+        #endregion
+
+        #region Get Volunteer Order By Id
+
         public async Task<VolunteerOrderDto?> GetByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Volunteer order ID is required.");
+
             var volunteerOrder = await _volunteerOrderRepository.GetByIdAsync(id);
 
             if (volunteerOrder == null)
-                return null;
+                throw new NotFoundException("Volunteer order not found.");
 
             return _mapper.Map<VolunteerOrderDto>(volunteerOrder);
         }
 
+        #endregion
+
+        #region Create Volunteer Order
+
         public async Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId)
         {
+            if (dto == null)
+                throw new BadRequestException("Volunteer order data is required.");
+
+            if (volunteerId == Guid.Empty)
+                throw new BadRequestException("Volunteer ID is required.");
+
+            if (dto.ServiceRequestId == Guid.Empty)
+                throw new BadRequestException("Service request ID is required.");
+
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(dto.ServiceRequestId);
 
             if (serviceRequest == null)
-                throw new ApplicationException("Service request not found.");
+                throw new NotFoundException("Service request not found.");
 
             if (serviceRequest.Status != RequestStatus.Approved)
-                throw new ApplicationException("Volunteer cannot create an order for this request because its status is not Approved.");
+            {
+                throw new ConflictException(
+                    $"Volunteer cannot create an order for this request because its current status is {serviceRequest.Status}."
+                );
+            }
 
             var alreadyHasActiveOrder = await _volunteerOrderRepository
                 .ExistsActiveByUserAndServiceRequestAsync(volunteerId, dto.ServiceRequestId);
 
             if (alreadyHasActiveOrder)
-                throw new ApplicationException("You already have an active order for this service request.");
+                throw new ConflictException("You already have an active order for this service request.");
 
             var volunteerOrder = _mapper.Map<VolunteerOrder>(dto);
 
@@ -72,14 +107,25 @@ namespace GivingChampion.Application.Services
 
             var createdOrder = await _volunteerOrderRepository.GetByIdAsync(volunteerOrder.Id);
 
-            return _mapper.Map<VolunteerOrderDto>(createdOrder ?? volunteerOrder);
+            if (createdOrder == null)
+                throw new InvalidOperationException("Volunteer order was created but could not be retrieved.");
+
+            return _mapper.Map<VolunteerOrderDto>(createdOrder);
         }
+
+        #endregion
+
+        #region Change Volunteer Order Status
+
         public async Task ChangeOrderStatusAsync(Guid orderId, OrderStatus newStatus)
         {
+            if (orderId == Guid.Empty)
+                throw new BadRequestException("Volunteer order ID is required.");
+
             var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
 
             if (order == null)
-                throw new KeyNotFoundException("Volunteer order not found.");
+                throw new NotFoundException("Volunteer order not found.");
 
             order.Status = newStatus;
             order.UpdatedAt = DateTime.UtcNow;
@@ -88,15 +134,25 @@ namespace GivingChampion.Application.Services
             await _volunteerOrderRepository.SaveChangesAsync();
         }
 
+        #endregion
+
+        #region Delete Volunteer Order
+
         public async Task<bool> DeleteAsync(Guid id, Guid volunteerId)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Volunteer order ID is required.");
+
+            if (volunteerId == Guid.Empty)
+                throw new BadRequestException("Volunteer ID is required.");
+
             var existingVolunteerOrder = await _volunteerOrderRepository.GetByIdAsync(id);
 
             if (existingVolunteerOrder == null)
-                return false;
+                throw new NotFoundException("Volunteer order not found.");
 
             if (existingVolunteerOrder.UserId != volunteerId)
-                throw new ApplicationException("You are not allowed to delete this order.");
+                throw new UnauthorizedAccessException("You are not allowed to delete this order.");
 
             existingVolunteerOrder.IsDeleted = true;
             existingVolunteerOrder.DeletedAt = DateTime.UtcNow;
@@ -108,32 +164,49 @@ namespace GivingChampion.Application.Services
             return true;
         }
 
+        #endregion
+
+        #region Update Volunteer Order Progress
+
         public async Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, Guid volunteerId, int progress)
         {
+            if (orderId == Guid.Empty)
+                throw new BadRequestException("Volunteer order ID is required.");
+
+            if (volunteerId == Guid.Empty)
+                throw new BadRequestException("Volunteer ID is required.");
+
             var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
 
             if (order == null)
-                return null;
+                throw new NotFoundException("Volunteer order not found.");
 
             if (order.UserId != volunteerId)
-                throw new ApplicationException("You are not allowed to update progress for this order.");
+                throw new UnauthorizedAccessException("You are not allowed to update progress for this order.");
 
             if (progress <= 0)
-                throw new ApplicationException("Progress value must be a positive integer.");
+                throw new BadRequestException("Progress value must be a positive integer.");
+
+            if (progress > 100)
+                throw new BadRequestException("Progress value cannot exceed 100.");
 
             if (order.Status != OrderStatus.Approved && order.Status != OrderStatus.InProgress)
-                throw new ApplicationException($"Only approved or in-progress orders can update progress. Current status is {order.Status}.");
+            {
+                throw new ConflictException(
+                    $"Only approved or in-progress orders can update progress. Current status is {order.Status}."
+                );
+            }
 
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId);
 
             if (serviceRequest == null)
-                throw new ApplicationException("Service request not found.");
+                throw new NotFoundException("Service request not found.");
 
             if (serviceRequest.Status == RequestStatus.Completed)
-                throw new ApplicationException("Cannot update progress for a completed service request.");
+                throw new ConflictException("Cannot update progress for a completed service request.");
 
             if (progress < serviceRequest.Progress)
-                throw new ApplicationException("Progress cannot be decreased.");
+                throw new BadRequestException("Progress cannot be decreased.");
 
             if (order.Status == OrderStatus.Approved)
             {
@@ -183,20 +256,31 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<VolunteerOrderDto>(order);
         }
 
+        #endregion
+
+        #region Approve Volunteer Order
+
         public async Task<VolunteerOrderDto?> ApproveOrderAsync(Guid orderId)
         {
+            if (orderId == Guid.Empty)
+                throw new BadRequestException("Volunteer order ID is required.");
+
             var order = await _volunteerOrderRepository.GetByIdAsync(orderId);
 
             if (order == null)
-                return null;
+                throw new NotFoundException("Volunteer order not found.");
 
             if (order.Status != OrderStatus.Pending)
-                throw new ApplicationException($"Only pending orders can be approved. Current status is {order.Status}.");
+            {
+                throw new ConflictException(
+                    $"Only pending orders can be approved. Current status is {order.Status}."
+                );
+            }
 
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId);
 
             if (serviceRequest == null)
-                throw new ApplicationException("Service request not found.");
+                throw new NotFoundException("Service request not found.");
 
             serviceRequest.VolunteerUserId = order.UserId;
             serviceRequest.Status = RequestStatus.Assigned;
@@ -229,15 +313,29 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<VolunteerOrderDto>(order);
         }
 
+        #endregion
+
+        #region Reject Volunteer Order
+
         public async Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason)
         {
+            if (id == Guid.Empty)
+                throw new BadRequestException("Volunteer order ID is required.");
+
+            if (string.IsNullOrWhiteSpace(rejectionReason))
+                throw new BadRequestException("Rejection reason is required.");
+
             var order = await _volunteerOrderRepository.GetByIdAsync(id);
 
             if (order == null)
-                return null;
+                throw new NotFoundException("Volunteer order not found.");
 
             if (order.Status == OrderStatus.Approved || order.Status == OrderStatus.Completed)
-                throw new ApplicationException("Approved or completed orders cannot be rejected.");
+            {
+                throw new ConflictException(
+                    $"Cannot reject this order because its current status is {order.Status}."
+                );
+            }
 
             order.Status = OrderStatus.Rejected;
             order.RejectionReason = rejectionReason;
@@ -255,5 +353,7 @@ namespace GivingChampion.Application.Services
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }
+
+        #endregion
     }
 }

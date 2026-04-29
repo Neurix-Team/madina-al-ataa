@@ -8,285 +8,89 @@ namespace GivingChampion.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
+    [Authorize]
     public class ServiceRequestsController : ControllerBase
     {
-        #region Fields
-
-        // Service layer used to handle business logic for service requests
         private readonly IServiceRequestService _serviceRequestService;
 
-        // Logger used to log unexpected errors
-        private readonly ILogger<ServiceRequestsController> _logger;
-
-        #endregion
-
-        #region Constructor
-
-        public ServiceRequestsController(
-            IServiceRequestService serviceRequestService,
-            ILogger<ServiceRequestsController> logger)
+        public ServiceRequestsController(IServiceRequestService serviceRequestService)
         {
             _serviceRequestService = serviceRequestService;
-            _logger = logger;
         }
 
-        #endregion
-
-
-
-
-        #region Get Endpoints
-        [Authorize(Roles = "Volunteer")]
         // GET: api/ServiceRequests
-        // Returns all service requests that are not soft deleted
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] RequestStatus? status)
         {
-            try
+            if (status.HasValue)
             {
-                if (status.HasValue)
-                {
-                    var filtered = await _serviceRequestService.GetByStatusAsync(status.Value);
-                    return Ok(filtered);
-                }
-
-                var serviceRequests = await _serviceRequestService.GetAllAsync();
-
-                return Ok(serviceRequests);
+                var filtered = await _serviceRequestService.GetByStatusAsync(status.Value);
+                return Ok(filtered);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while getting all service requests.");
 
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred while retrieving service requests."
-                });
-            }
+            var serviceRequests = await _serviceRequestService.GetAllAsync();
+
+            return Ok(serviceRequests);
         }
 
         // GET: api/ServiceRequests/{id}
-        // Returns a single service request by id
-        [Authorize(Roles = "Volunteer")]
-
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            try
-            {
-                if (id == Guid.Empty)
-                {
-                    return BadRequest(new
-                    {
-                        Message = "Invalid service request id."
-                    });
-                }
+            var serviceRequest = await _serviceRequestService.GetByIdAsync(id);
 
-                var serviceRequest = await _serviceRequestService.GetByIdAsync(id);
-
-                if (serviceRequest == null)
-                {
-                    return NotFound(new
-                    {
-                        Message = "Service request not found."
-                    });
-                }
-
-                return Ok(serviceRequest);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Error occurred while getting service request with id {ServiceRequestId}.",
-                    id
-                );
-
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred while retrieving the service request."
-                });
-            }
+            return Ok(serviceRequest);
         }
-        //// GET: api/ServiceRequests/upcoming or available
-        //// GET: api/ServiceRequests/pending
-        //// Returns all pending service requests
-        //[HttpGet("pending")]
-        //[Authorize(Roles = "Volunteer")]
-        //public async Task<IActionResult> GetPending()
-        //{
-        //    try
-        //    {
-        //        var serviceRequests = await _serviceRequestService.GetByStatusAsync(RequestStatus.Pending);
-
-        //        return Ok(serviceRequests);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error occurred while getting pending service requests.");
-
-        //        return StatusCode(500, new
-        //        {
-        //            Message = "An unexpected error occurred while retrieving pending service requests."
-        //        });
-        //    }
-        //}
-
-        //// GET: api/ServiceRequests/partner/{partnerId}
-        //// Returns all service requests related to a specific partner
-        //[HttpGet("partner/{partnerId:guid}")]
-        //[Authorize(Roles = "Volunteer")]
-        //public async Task<IActionResult> GetByPartnerId(Guid partnerId)
-        //{
-        //    try
-        //    {
-        //        if (partnerId == Guid.Empty)
-        //        {
-        //            return BadRequest(new
-        //            {
-        //                Message = "Invalid partner id."
-        //            });
-        //        }
-
-        //        var serviceRequests = await _serviceRequestService.GetByPartnerIdAsync(partnerId);
-
-        //        return Ok(serviceRequests);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(
-        //            ex,
-        //            "Error occurred while getting service requests for partner {PartnerId}.",
-        //            partnerId
-        //        );
-
-        //        return StatusCode(500, new
-        //        {
-        //            Message = "An unexpected error occurred while retrieving partner service requests."
-        //        });
-        //    }
-        //}
-
-        #endregion
-
-        #region Create Endpoint
 
         // POST: api/ServiceRequests
-        // Creates a new service request
-        // Only Admin users are allowed to create service requests
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateServiceRequestDto dto)
         {
-            try
-            {
-                var createdServiceRequest = await _serviceRequestService.CreateAsync(dto);
+            var createdServiceRequest = await _serviceRequestService.CreateAsync(dto);
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = createdServiceRequest.Id },
-                    createdServiceRequest
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while creating service request.");
-
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred while creating the service request."
-                });
-            }
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = createdServiceRequest.Id },
+                createdServiceRequest
+            );
         }
 
-        #endregion
-
-
-        #region Update 
         // PUT: api/ServiceRequests/{id}
-        // Updates an existing service request
-        // Only Admin users are allowed to update service requests
-
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateServiceRequestDto dto)
         {
-            try
-            {
+            await _serviceRequestService.UpdateAsync(id, dto);
 
-                var isUpdated = await _serviceRequestService.UpdateAsync(id, dto);
-
-                if (!isUpdated)
-                {
-                    return NotFound(new { Message = "Service request not found." });
-                }
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while updating service request {Id}", id);
-
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred. Please try again later."
-                });
-            }
+            return NoContent();
         }
-
-
-        #endregion
 
         // GET: api/ServiceRequests/filter?status=Approved
         [HttpGet("filter")]
-        [Authorize(Roles = "Volunteer, Admin")] 
         public async Task<IActionResult> GetByStatus([FromQuery] RequestStatus status)
         {
-            try
-            {
-                var filteredRequests = await _serviceRequestService.GetByStatusAsync(status);
+            var filteredRequests = await _serviceRequestService.GetByStatusAsync(status);
 
-                if (filteredRequests == null || !filteredRequests.Any())
+            if (!filteredRequests.Any())
+            {
+                return NotFound(new
                 {
-                    return NotFound(new { Message = $"No service requests found with status: {status}" });
-                }
+                    Message = $"No service requests found with status: {status}"
+                });
+            }
 
-                return Ok(filteredRequests);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while filtering service requests by status {Status}.", status);
-                return StatusCode(500, new { Message = "Internal server error while filtering requests." });
-            }
+            return Ok(filteredRequests);
         }
+
         // DELETE: api/ServiceRequests/{id}
-        // Soft deletes an existing service request
-        // Only Admin users are allowed to delete service requests
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            try
-            {
-                var isDeleted = await _serviceRequestService.DeleteAsync(id);
+            await _serviceRequestService.DeleteAsync(id);
 
-                if (!isDeleted)
-                {
-                    return NotFound(new { Message = "Service request not found." });
-                }
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while deleting service request with id {Id}.", id);
-
-                return StatusCode(500, new
-                {
-                    Message = "An unexpected error occurred while deleting the service request."
-                });
-            }
+            return NoContent();
         }
     }
 }
