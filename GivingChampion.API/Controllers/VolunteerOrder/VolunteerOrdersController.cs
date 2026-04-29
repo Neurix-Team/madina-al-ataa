@@ -123,11 +123,14 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpPatch("{id:guid}/reject")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RejectOrder(Guid id, [FromBody] string rejectionReason)
+        public async Task<IActionResult> RejectOrder(Guid id, [FromBody] RejectVolunteerOrderDto dto)
         {
             try
             {
-                var result = await _volunteerOrderService.RejectOrderAsync(id, rejectionReason);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var result = await _volunteerOrderService.RejectOrderAsync(id, dto.RejectionReason);
 
                 if (result == null)
                     return NotFound(new { message = "Volunteer order not found." });
@@ -145,7 +148,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
                 });
             }
         }
-
+        
         #endregion
 
         #region Command Endpoints
@@ -191,16 +194,27 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         #region Update Progress
 
-        [HttpPatch("{id:guid}/progress")]
-        [Authorize(Roles = "Volunteer")]
-        public async Task<IActionResult> UpdateProgress(Guid id, [FromBody] int progress)
+        [Authorize(Roles = "Volunteer, Admin")]
+        [HttpPut("{id}/progress")]
+        public async Task<IActionResult> UpdateProgress(Guid id, [FromBody] UpdateVolunteerOrderProgressDto dto)
         {
             try
             {
-                if (!User.TryGetCurrentUserId(out var volunteerId))
-                    return Unauthorized(new { message = "Invalid or missing volunteer ID in token." });
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-                var result = await _volunteerOrderService.UpdateProgressAsync(id, volunteerId, progress);
+                var volunteerIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(volunteerIdClaim))
+                    return Unauthorized(new { message = "User id not found in token." });
+
+                var volunteerId = Guid.Parse(volunteerIdClaim);
+
+                var result = await _volunteerOrderService.UpdateProgressAsync(
+                    id,
+                    volunteerId,
+                    dto.Progress
+                );
 
                 if (result == null)
                     return NotFound(new { message = "Volunteer order not found." });
@@ -209,16 +223,12 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while updating progress for order {Id}", id);
-
-                return StatusCode(500, new
+                return BadRequest(new
                 {
-                    message = "Error while updating progress",
-                    error = ex.Message
+                    message = ex.Message
                 });
             }
         }
-
         #endregion
 
         #region Delete

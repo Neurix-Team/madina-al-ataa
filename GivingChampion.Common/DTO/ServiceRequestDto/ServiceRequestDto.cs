@@ -22,7 +22,7 @@ namespace GivingChampion.Common.DTO.ServiceRequestDto
             public int Duration { get; set; }
 
             public string BriefDescription { get; set; } = string.Empty;
-
+        public string ServiceType { get; set; } = string.Empty;
             public Guid PartnerId { get; set; }
         public Guid LocationId { get; set; }
         public string FullName { get; set; } = string.Empty;

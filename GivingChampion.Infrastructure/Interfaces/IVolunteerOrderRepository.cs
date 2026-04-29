@@ -8,11 +8,9 @@ namespace GivingChampion.Persistance.Interfaces
         Task<VolunteerOrder?> GetByIdAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
 
-        Task<VolunteerOrder> CreateAsync(VolunteerOrder volunteerOrder);
-
-        Task UpdateAsync(VolunteerOrder volunteerOrder);
-        Task SoftDeleteAsync(VolunteerOrder volunteerOrder);
-
+        Task AddAsync(VolunteerOrder volunteerOrder);
+        void Update(VolunteerOrder volunteerOrder);
+        Task<bool> ExistsActiveByUserAndServiceRequestAsync(Guid userId, Guid serviceRequestId);
         Task SaveChangesAsync();
     }
 }
