@@ -19,7 +19,7 @@ namespace GivingChampion.API.Repositories
             _context = context;
         }
 
-        // Get all UserGeoQuests with paginationTask<PagedList<UserGeoQuest>>
+        // Get all UserGeoQuests with pagination
         public async Task<PagedList<UserGeoQuest>> GetAllByUserIdAsync(Guid userId,PageParameters pageParameters)
         {
             var query = _context.UserGeoQuests

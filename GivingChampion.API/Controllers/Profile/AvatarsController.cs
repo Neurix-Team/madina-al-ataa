@@ -30,13 +30,6 @@ namespace GivingChampion.API.Controllers
             return Ok(avatar);
         }
 
-        // POST api/avatars
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromBody] CreateAvatarDto dto)
-        //{
-        //    var createdAvatar = await _avatarService.CreateAsync(dto);
-        //    return CreatedAtAction(nameof(GetById), new { id = createdAvatar.Id }, createdAvatar);
-        //}
         // PUT api/avatars/{id}
         [Authorize]
         [HttpPut("{id}")]

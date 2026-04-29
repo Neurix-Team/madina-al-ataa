@@ -28,6 +28,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/activities/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
