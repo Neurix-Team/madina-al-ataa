@@ -30,7 +30,7 @@ namespace GivingChampion.API.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var userGeoQuest = await _userGeoQuestService.GetByIdAsync(id);
-            if (userGeoQuest == null || !userGeoQuest.IsSuccess)
+            if (userGeoQuest == null || !userGeoQuest.Succeeded)
                 return NotFound("UserGeoQuest not found");
 
             return Ok(userGeoQuest);
