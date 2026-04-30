@@ -6,7 +6,8 @@ namespace GivingChampion.Persistance.Interfaces
     {
         Task<List<Profile>> GetAllAsync();
         Task<Profile?> GetByIdAsync(Guid id);
-        Task<Profile> AddAsync(Guid userId);
+        Task<Profile?> GetByUserIdAsync(Guid id);
+        Task<Profile> AddAsync(Guid userId, Guid levelId);
         Task Update(Profile profile);
         Task SaveChangesAsync();
     }

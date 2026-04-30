@@ -175,21 +175,23 @@ namespace GivingChampion.Application.Services
             return Result<UserGeoQuestDto>.Success(dto);
         }
 
-        public async Task<Result<bool>> UpdateAsyncVerification(
-            Guid userGeoQuestId,
-            VerifyLocationDto dto,
-            bool isSuccess = false)
+        public async Task<Result<string>> UpdateAsyncVerification(
+            Guid userId,
+            VerifyLocationDto dto)
         {
-            if (userGeoQuestId == Guid.Empty)
+            if (dto.UserGeoQuestId == Guid.Empty)
                 throw new BadRequestException("UserGeoQuest ID is required.");
 
             if (dto == null)
                 throw new BadRequestException("Location verification data is required.");
 
-            var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(userGeoQuestId);
+            var userGeoQuest = await _userGeoQuestRepository.GetByIdAsync(dto.UserGeoQuestId);
 
             if (userGeoQuest == null)
-                throw new NotFoundException($"UserGeoQuest with ID {userGeoQuestId} was not found.");
+                throw new NotFoundException($"UserGeoQuest with ID {dto.UserGeoQuestId} was not found.");
+
+            if (userGeoQuest.UserId != userId)
+                throw new NotFoundException($"You Don`t Have Access to UserGeoQuest {dto.UserGeoQuestId}");
 
             if (userGeoQuest.IsDeleted)
                 throw new BadRequestException("Cannot verify location for a deleted UserGeoQuest.");
@@ -231,7 +233,7 @@ namespace GivingChampion.Application.Services
 
             await _userGeoQuestRepository.SaveChangesAsync();
 
-            return Result<bool>.Success(true);
+            return Result<string>.Success("Location verification Successful.");
         }
 
         public async Task<Result<UserGeoQuestDto>> CheckGeoQuestStatus(Guid id)

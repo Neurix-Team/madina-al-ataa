@@ -1,8 +1,10 @@
 ﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.DTO;
+using GivingChampion.Common.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers
 {
@@ -65,6 +67,23 @@ namespace GivingChampion.API.Controllers
             }
 
             return Ok(result.Value);
+        }
+        [HttpPost("/verify-location")]
+        public async Task<IActionResult> VerifyLocation([FromBody] VerifyLocationDto dto)
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            //if (userGeoQuest.GeoQuestId != geoQuestId)
+            //    return BadRequest("This UserGeoQuest does not belong to the provided GeoQuest.");
+
+            var result = await _userGeoQuestService.UpdateAsyncVerification(
+                userId,
+                dto);
+
+            //if (!result.Succeeded)
+            //    return BadRequest(result.Error);
+
+            return Ok(result);
         }
     }
   }

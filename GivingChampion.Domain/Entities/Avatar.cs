@@ -17,28 +17,27 @@ namespace GivingChampion.Domain.Entities
 
         [Required]
         [StringLength(50)]
-        public string SkinColor { get; set; } 
+        public string SkinColor { get; set; } =string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string HairColor { get; set; } 
+        public string HairColor { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string HairStyle { get; set; } 
+        public string HairStyle { get; set; } = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string ClothesColor { get; set; } 
+        public string ClothesColor { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string CharacterName { get; set; }
+        public string CharacterName { get; set; } = string.Empty;
 
         [ForeignKey("Profile")]
         public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }
-        //public bool IsDeleted { get; set; }
-        //public DateTime? DeletedAt { get; set; }
+
     }
 }

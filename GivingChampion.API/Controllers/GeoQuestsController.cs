@@ -92,36 +92,6 @@ namespace GivingChampion.API.Controllers
             });
         }
 
-        [HttpPost("{geoQuestId:guid}/verify-location")]
-        public async Task<IActionResult> VerifyLocation(Guid geoQuestId, [FromBody] VerifyLocationDto dto)
-        {
-            if (dto is null)
-                return BadRequest("Request body is required.");
-
-            if (dto.UserGeoQuestId == Guid.Empty)
-                return BadRequest("UserGeoQuestId is required.");
-
-            var userGeoQuestResult = await _userGeoQuestService.GetByIdAsync(dto.UserGeoQuestId);
-            if (!userGeoQuestResult.Succeeded || userGeoQuestResult.Value is null)
-                return NotFound(userGeoQuestResult.Error ?? "UserGeoQuest not found");
-
-            var userGeoQuest = userGeoQuestResult.Value;
-            if (userGeoQuest.GeoQuestId != geoQuestId)
-                return BadRequest("This UserGeoQuest does not belong to the provided GeoQuest.");
-
-            var result = await _userGeoQuestService.UpdateAsyncVerification(
-                dto.UserGeoQuestId,
-                dto,
-                isSuccess: true);
-
-            if (!result.Succeeded)
-                return BadRequest(result.Error);
-
-            return Ok(new
-            {
-                message = "Location verified successfully.",
-                data = result.Value
-            });
-        }
+       
     }
 }

@@ -46,5 +46,11 @@ namespace GivingChampion.API.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Avatar?> GetByProfileIdAsync(Guid id)
+        {
+            return await _context.Avatars
+                .FirstOrDefaultAsync(a => a.ProfileId == id);
+        }
     }
 }

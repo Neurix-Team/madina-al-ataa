@@ -15,6 +15,7 @@ namespace GivingChampion.Persistance.Repositories
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IAvatarRepository _avatarRepository;
+        private readonly ILevelRepository _levelRepository;
 
         public IdentityRepository(
             UserManager<ApplicationUser> userManager,
@@ -22,7 +23,8 @@ namespace GivingChampion.Persistance.Repositories
             IDonorRepository donorRepository,
             IVolunteerRepository volunteerRepository,
             IProfileRepository profileRepository,
-            IAvatarRepository avatarRepository)
+            IAvatarRepository avatarRepository,
+            ILevelRepository levelRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -30,6 +32,7 @@ namespace GivingChampion.Persistance.Repositories
             _volunteerRepository = volunteerRepository;
             _profileRepository = profileRepository;
             _avatarRepository = avatarRepository;
+            _levelRepository = levelRepository;
         }
 
         public Task<ApplicationUser?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -58,13 +61,14 @@ namespace GivingChampion.Persistance.Repositories
 
             if (result.Succeeded)
             {
+                var level1 = await _levelRepository.GetFirstLevelAsync();
 
                 await _donorRepository.CreateAsync(user.Id);
 
                 await _volunteerRepository.AddAsync(user.Id);
 
-                var profile = await _profileRepository.AddAsync(user.Id);
-                var avatar = await _avatarRepository.AddAsync(user.Id);
+                var profile = await _profileRepository.AddAsync(user.Id, level1.Id);
+                var avatar = await _avatarRepository.AddAsync(profile.Id);
             }
 
             return result.Succeeded
@@ -96,8 +100,9 @@ namespace GivingChampion.Persistance.Repositories
 
                 await _volunteerRepository.AddAsync(user.Id);
 
-                var profile = await _profileRepository.AddAsync(user.Id);
-                var avatar = await _avatarRepository.AddAsync(user.Id);
+                var level1 = await _levelRepository.GetFirstLevelAsync();
+                var profile = await _profileRepository.AddAsync(user.Id, level1.Id);
+                var avatar = await _avatarRepository.AddAsync(profile.Id);
             }
 
             return result.Succeeded

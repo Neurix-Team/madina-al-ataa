@@ -7,6 +7,7 @@ namespace GivingChampion.Persistance.Interfaces
     {
         Task<PagedList<Level>> GetAllAsync(PageParameters pageParameters);
         Task<Level?> GetByIdAsync(Guid id);
+        Task<Level?> GetFirstLevelAsync();
         Task AddAsync(Level level);
         void Update(Level level);
         Task SaveChangesAsync();

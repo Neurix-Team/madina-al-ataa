@@ -27,11 +27,12 @@ namespace GivingChampion.API.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<Profile?> AddAsync(Guid userId)
+        public async Task<Profile?> AddAsync(Guid userId, Guid levelId)
         {
             var profile = new Profile()
             {
-                UserId = userId
+                UserId = userId,
+                LevelId = levelId
             };
             await _context.Profiles.AddAsync(profile);
             await _context.SaveChangesAsync();
@@ -46,6 +47,13 @@ namespace GivingChampion.API.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Profile?> GetByUserIdAsync(Guid id)
+        {
+            return await _context.Profiles
+                .Include(p => p.Level)
+                 .FirstOrDefaultAsync(p => p.UserId == id);
         }
     }
 }

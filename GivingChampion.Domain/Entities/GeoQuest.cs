@@ -14,8 +14,6 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Location")]
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
-        public double LocationLatitude { get; set; }
-        public double LocationLongitude { get; set; }
 
 
     }

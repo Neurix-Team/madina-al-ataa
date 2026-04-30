@@ -13,7 +13,7 @@ namespace GivingChampion.Application.Interfaces
         Task<Result<bool>> UpdateAsync(Guid id, UpdateUserGeoQuestDto dto , bool isSuccess = false);
         Task<Result<bool>> SoftDeleteAsync(Guid id);
         Task<Result<UserGeoQuestDto>> StartAsync(Guid geoQuestId, Guid userId);
-        Task<Result<bool>> UpdateAsyncVerification(Guid id, VerifyLocationDto dto, bool isSuccess = false);
+        Task<Result<string>> UpdateAsyncVerification(Guid UserId, VerifyLocationDto dto);
         Task<Result<UserGeoQuestDto>> CheckGeoQuestStatus(Guid id);
 
     }

@@ -190,6 +190,7 @@ namespace GivingChampion.Application.Mapper
 
             #region Certificate Mappings
             CreateMap<CreateGeoQuestDto, GeoQuest>().ReverseMap();
+            CreateMap<GeoQuestDto, GeoQuest>().ReverseMap();
 
             CreateMap<Certificate, CertificateReadAllDto>();
             CreateMap<UpdateGeoQuestDto, GeoQuest>().ReverseMap();
@@ -216,10 +217,9 @@ namespace GivingChampion.Application.Mapper
                         src.GeoQuest != null ? src.GeoQuest.Title : src.Title))
                 .ForMember(dest => dest.LocationLatitude,
                     opt => opt.MapFrom(src =>
-                        src.GeoQuest != null ? src.GeoQuest.LocationLatitude : 0))
+                        src.GeoQuest.Location.Latitude ?? "0"))
                 .ForMember(dest => dest.LocationLongitude,
-                    opt => opt.MapFrom(src =>
-                        src.GeoQuest != null ? src.GeoQuest.LocationLongitude : 0))
+                    opt => opt.MapFrom(src => src.GeoQuest.Location.Longitude ?? "0"))
                 .ReverseMap();
 
             CreateMap<UpdateDonationRequestDto, DonationRequest>()
@@ -316,7 +316,8 @@ namespace GivingChampion.Application.Mapper
 
             #region Profile Mappings
 
-            CreateMap<Domain.Entities.Profile, ProfileDto>().ReverseMap();
+            CreateMap<Domain.Entities.Profile, ProfileDto>()
+                .ForMember(dest => dest.LevelNumber, opt => opt.MapFrom(src => src.Level.Number)).ReverseMap();
             CreateMap<CreateProfileDto, Domain.Entities.Profile>().ReverseMap();
             CreateMap<UpdateProfileDto, Domain.Entities.Profile>().ReverseMap();
 

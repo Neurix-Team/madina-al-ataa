@@ -47,5 +47,12 @@ namespace GivingChampion.API.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Level?> GetFirstLevelAsync()
+        {
+            return await _context.Levels
+                .OrderBy(l => l.Number)
+                .FirstOrDefaultAsync();
+        }
     }
 }

@@ -2,6 +2,7 @@
 using GivingChampion.Common.DTO.ProfileDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers
 {
@@ -29,6 +30,20 @@ namespace GivingChampion.API.Controllers
             return Ok(profile);
         }
 
+        [Authorize]
+        [HttpGet("my")]
+        public async Task<IActionResult> GetByUserId()
+        {
+            var userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            if (userId == Guid.Empty)
+                return Unauthorized("User ID not found in claims.");
+
+            var profile = await _profileService.GetByUserIdAsync(userId);
+            //if (profile == null)
+            //    return NotFound("Profile not found");
+
+            return Ok(profile);
+        }
         // PUT api/profiles/{id}
         [Authorize]
         [HttpPut("{id}")]

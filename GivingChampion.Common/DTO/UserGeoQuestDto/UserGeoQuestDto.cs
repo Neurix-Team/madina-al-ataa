@@ -14,8 +14,8 @@ namespace GivingChampion.Common.DTO.UserGeoQuestDto
         public string? Title { get; set; }
         public Guid GeoQuestId { get; set; }
         public DateTime? StartedAt { get; set; } = DateTime.Now;
-        public double LocationLatitude { get; set; }
-        public double LocationLongitude { get; set; }
+        public string LocationLatitude { get; set; }
+        public string LocationLongitude { get; set; }
         public bool IsLocationVerified { get; set; }
         [Required]
         public string Status { get; set; }
