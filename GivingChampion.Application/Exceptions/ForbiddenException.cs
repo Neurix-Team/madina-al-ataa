@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GivingChampion.Application.Exceptions
+﻿namespace GivingChampion.Application.Exceptions
 {
     public class ForbiddenException : Exception
     {

@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Common.DTO.Partner;
 using GivingChampion.Common.DTO.PartnerDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {

@@ -9,9 +9,6 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services.DonationOrderService
 {

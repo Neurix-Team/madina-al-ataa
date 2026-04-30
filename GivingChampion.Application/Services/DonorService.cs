@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.Donor;
-using GivingChampion.Common.Results;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {

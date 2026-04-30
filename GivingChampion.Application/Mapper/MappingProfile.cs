@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using GivingChampion.Common.DTO.AiAvatarDto;
+﻿using GivingChampion.Common.DTO.AiAvatarDto;
 using GivingChampion.Common.DTO.AvatarDto;
 using GivingChampion.Common.DTO.BadgeDto;
 using GivingChampion.Common.DTO.CertificateDto;
@@ -24,42 +23,9 @@ using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.AiAvatarDto;
-using GivingChampion.Common.DTO.AvatarDto;
-using GivingChampion.Common.DTO.BadgeDto;
-using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Common.DTO.Child;
-using GivingChampion.Common.DTO.DonationOrder;
-using GivingChampion.Common.DTO.DonationRequest;
-using GivingChampion.Common.DTO.Donor;
 using GivingChampion.Common.DTO.GeoQuestDto;
-using GivingChampion.Common.DTO.LevelDto;
-using GivingChampion.Common.DTO.Location;
-using GivingChampion.Common.DTO.Mission;
-using GivingChampion.Common.DTO.Notification;
-using GivingChampion.Common.DTO.Partner;
-using GivingChampion.Common.DTO.PartnerDto;
-using GivingChampion.Common.DTO.ProfileDto;
-using GivingChampion.Common.DTO.ReviewDto;
-using GivingChampion.Common.DTO.ServiceRequestDto;
-using GivingChampion.Common.DTO.User;
-using GivingChampion.Common.DTO.UserBadgeDto;
-using GivingChampion.Common.DTO.UserLevelDto;
-using GivingChampion.Common.DTO.VolunteerDto;
-using GivingChampion.Common.DTO.VolunteerOrder;
-using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
-using System;
-using System.Collections.Generic;
 using GivingChampion.Common.DTO.UserGeoQuestDto;
-using GivingChampion.Common.Enums;
-
-using GivingChampion.Common.DTO.ServiceRequestDto;
-using GivingChampion.Common.DTO.VolunteerOrder;
-using GivingChampion.Common.Enums;
-using GivingChampion.Domain.Entities;
-using GivingChampion.Domain.Enums;
 
 namespace GivingChampion.Application.Mapper
 {

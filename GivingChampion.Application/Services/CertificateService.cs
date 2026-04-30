@@ -1,13 +1,7 @@
 ﻿using AutoMapper;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 namespace GivingChampion.Application.Services.Certificate;
 
 public class CertificateService : ICertificateService

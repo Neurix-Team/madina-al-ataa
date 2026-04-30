@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GivingChampion.Application.Auth.Interfaces;
+﻿using System.Text;
 using GivingChampion.Application.Interfaces.Auth;
 using GivingChampion.Domain.Entities;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;

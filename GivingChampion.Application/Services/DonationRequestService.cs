@@ -7,9 +7,6 @@ using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GivingChampion.Application.Services
 {

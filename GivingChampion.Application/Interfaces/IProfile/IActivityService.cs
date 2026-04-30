@@ -1,8 +1,5 @@
 ﻿using GivingChampion.Common.DTO.ActivityDto;
 using GivingChampion.Common.DTO.GivingChampion.Common.DTO.ActivityDto;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GivingChampion.API.Interfaces
 {
