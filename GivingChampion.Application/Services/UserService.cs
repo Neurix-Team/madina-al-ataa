@@ -18,6 +18,10 @@ namespace GivingChampion.Application.Services
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IUserRepository _userRepository;
         private readonly IDonorRepository _donorRepository;
+        private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IAvatarRepository _avatarRepository;
+        private readonly ILevelRepository _levelRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<UserService> _logger;
 
@@ -26,6 +30,10 @@ namespace GivingChampion.Application.Services
             RoleManager<ApplicationRole> roleManager,
             IUserRepository userRepository,
             IDonorRepository donorRepository,
+            IVolunteerRepository volunteerRepository,
+            IProfileRepository profileRepository,
+            IAvatarRepository avatarRepository,
+            ILevelRepository levelRepository,
             IMapper mapper,
             ILogger<UserService> logger)
         {
@@ -33,6 +41,10 @@ namespace GivingChampion.Application.Services
             _roleManager = roleManager;
             _userRepository = userRepository;
             _donorRepository = donorRepository;
+            _volunteerRepository = volunteerRepository;
+            _profileRepository = profileRepository;
+            _avatarRepository = avatarRepository;
+            _levelRepository = levelRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -119,6 +131,80 @@ namespace GivingChampion.Application.Services
         public async Task<Result<GetUserDto>> CreateUserByAdminAsync(CreateUserDto dto)
         {
             return await CreateUserAsync(dto);
+        }
+
+        public async Task<Result<GetUserDto>> CreateChildUserAsync(CreateUserDto dto)
+        {
+            ValidateCreateUserDto(dto);
+
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (existingUser != null)
+            {
+                if (!existingUser.IsDeleted)
+                    throw new ConflictException("User with this email already exists.");
+
+                throw new ConflictException("A deleted user with this email already exists.");
+            }
+
+            var user = _mapper.Map<ApplicationUser>(dto);
+
+            user.EmailConfirmed = false;
+            user.UserName = dto.Email;
+            user.BirthDay = DateTime.SpecifyKind(dto.BirthDay.Date, DateTimeKind.Utc);
+
+            var createResult = await _userManager.CreateAsync(user, dto.Password);
+
+            if (!createResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(createResult));
+
+            try
+            {
+                await AddRolesOrThrowAsync(user, new[] { "Child" });
+            }
+            catch
+            {
+                await _userManager.DeleteAsync(user);
+                throw;
+            }
+
+            _logger.LogInformation("Child user created: {Email}", dto.Email);
+
+            var createdUser = await GetUserByIdAsync(user.Id);
+
+            if (createdUser == null)
+                throw new NotFoundException("Failed to retrieve created child user.");
+
+            return Result<GetUserDto>.Success(createdUser);
+        }
+
+        public async Task<Result> ApproveChildUserAsync(Guid userId)
+        {
+            if (userId == Guid.Empty)
+                throw new BadRequestException("Invalid user ID.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+                throw new NotFoundException($"User with ID {userId} was not found.");
+
+            if (user.IsDeleted)
+                throw new BadRequestException("Cannot approve a deleted child user.");
+
+            user.EmailConfirmed = true;
+            user.LockoutEnabled = false;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+                throw new BadRequestException(BuildIdentityErrorMessage(updateResult));
+
+            await AddMissingRolesOrThrowAsync(user, new[] { "User", "Donor", "Volunteer" });
+            await EnsureApprovedUserProfileAsync(user.Id);
+
+            _logger.LogInformation("Child user approved and profile setup completed: {UserId}", user.Id);
+
+            return Result.Success();
         }
 
         public async Task<Result<GetUserDto>> CreateAdminUserAsync(CreateUserDto dto)
@@ -383,6 +469,37 @@ namespace GivingChampion.Application.Services
         private async Task CreateDonorProfileAsync(Guid userId)
         {
             
+        }
+
+        private async Task EnsureApprovedUserProfileAsync(Guid userId)
+        {
+            if (!await _donorRepository.ExistsByUserIdAsync(userId))
+                await _donorRepository.CreateAsync(userId);
+
+            var volunteer = await _volunteerRepository.GetByUserIdAsync(userId);
+
+            if (volunteer == null)
+            {
+                await _volunteerRepository.AddAsync(userId);
+                await _volunteerRepository.SaveChangesAsync();
+            }
+
+            var profile = await _profileRepository.GetByUserIdAsync(userId);
+
+            if (profile == null)
+            {
+                var level = await _levelRepository.GetFirstLevelAsync();
+
+                if (level == null)
+                    throw new NotFoundException("Default level was not found.");
+
+                profile = await _profileRepository.AddAsync(userId, level.Id);
+            }
+
+            var avatar = await _avatarRepository.GetByProfileIdAsync(profile.Id);
+
+            if (avatar == null)
+                await _avatarRepository.AddAsync(profile.Id);
         }
 
         private async Task AddRolesOrThrowAsync(

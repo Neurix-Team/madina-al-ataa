@@ -8,6 +8,7 @@ namespace GivingChampion.Persistance.Interfaces
     public interface IChildRepository
     {
         Task<Child?> GetByIdAsync(Guid id);
+        Task<Child?> GetByUserIdAsync(Guid userId);
         Task<List<Child>> GetByParentIdAsync(Guid parentId);
         Task<List<Child>> GetPendingApprovalsAsync();
         Task CreateAsync(Child child);

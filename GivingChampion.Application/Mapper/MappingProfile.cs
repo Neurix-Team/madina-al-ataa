@@ -349,8 +349,26 @@ namespace GivingChampion.Application.Mapper
 
             #region Child Mappings
 
-            CreateMap<Child, ChildDto>().ReverseMap();
-            CreateMap<CreateChildDto, Child>().ReverseMap();
+            CreateMap<Child, ChildDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User != null ? src.User.FullName : string.Empty))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty))
+                .ForMember(dest => dest.BirthDay, opt => opt.MapFrom(src => src.User != null ? src.User.BirthDay : default));
+
+            CreateMap<CreateChildDto, Child>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.ParentId, opt => opt.Ignore())
+                .ForMember(dest => dest.Parent, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.ApprovedById, opt => opt.Ignore())
+                .ForMember(dest => dest.Approver, opt => opt.Ignore())
+                .ForMember(dest => dest.ApprovedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.RejectionReason, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
             CreateMap<ApproveChildDto, Child>().ReverseMap();
 
             #endregion

@@ -1,4 +1,5 @@
 ﻿using GivingChampion.Common.DTO.Auth;
+using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using global::GivingChampion.Application.Auth.Interfaces;
 using global::GivingChampion.Application.Interfaces.Auth;
@@ -16,6 +17,7 @@ namespace GivingChampion.Application.Services
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IAvatarRepository _avatarRepository;
+        private readonly IChildRepository _childRepository;
 
         public AuthService(
             IIdentityRepository identityRepository,
@@ -24,7 +26,8 @@ namespace GivingChampion.Application.Services
             IDonorRepository donorRepository,
             IVolunteerRepository volunteerRepository,
             IProfileRepository profileRepository,
-            IAvatarRepository avatarRepository)
+            IAvatarRepository avatarRepository,
+            IChildRepository childRepository)
         {
             _identityRepository = identityRepository;
             _jwtTokenFactory = jwtTokenFactory;
@@ -33,6 +36,7 @@ namespace GivingChampion.Application.Services
             _volunteerRepository = volunteerRepository;
             _profileRepository = profileRepository;
             _avatarRepository = avatarRepository;
+            _childRepository = childRepository;
         }
 
         public async Task<AuthServiceResult<TokenResponse>> RegisterAsync(
@@ -112,8 +116,20 @@ namespace GivingChampion.Application.Services
                     new ServiceError("InvalidCredentials", "Invalid email or password."));
             }
 
-            // 4. Generate Token
             var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
+
+            if (roles.Contains("Child"))
+            {
+                var child = await _childRepository.GetByUserIdAsync(user.Id);
+
+                if (child == null || child.Status != ObjectStatus.Approved)
+                {
+                    return AuthServiceResult<TokenResponse>.Failure(
+                        new ServiceError("ChildNotApproved", "Child account is pending approval."));
+                }
+            }
+
+            // 4. Generate Token
             var token = _jwtTokenFactory.Create(user, roles);
 
             return AuthServiceResult<TokenResponse>.Success(token);

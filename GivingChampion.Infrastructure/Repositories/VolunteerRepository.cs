@@ -62,6 +62,15 @@ namespace GivingChampion.Persistance.Repositories
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false); // Avoid blocking UI thread in production
         }
+
+        public async Task<Volunteer?> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.Volunteers
+                .Where(v => v.UserId == userId && !v.IsDeleted)
+                .AsNoTracking()
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+        }
         #endregion
 
         #endregion

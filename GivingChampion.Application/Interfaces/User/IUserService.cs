@@ -17,6 +17,8 @@ namespace GivingChampion.Application.Interfaces.User
 
         // Self-service operations (usually for current user)
         Task<Result<GetUserDto>> CreateUserAsync(CreateUserDto dto);
+        Task<Result<GetUserDto>> CreateChildUserAsync(CreateUserDto dto);
+        Task<Result> ApproveChildUserAsync(Guid userId);
 
         Task<Result<bool>> DeleteMyAccountAsync(Guid userId, string? reason = null);
 

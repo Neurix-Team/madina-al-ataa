@@ -11,6 +11,7 @@ namespace GivingChampion.Persistance.Interfaces
 
         //Task<List<Volunteer>> GetAllAsync(); // Return List<Volunteer> (Entities)
         Task<Volunteer?> GetByIdAsync(Guid id); // Return Volunteer (Entity)
+        Task<Volunteer?> GetByUserIdAsync(Guid userId);
 
         #endregion
 

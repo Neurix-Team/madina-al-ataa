@@ -2,11 +2,11 @@
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Common.DTO.Child;
+using GivingChampion.Common.DTO.User;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace GivingChampion.Application.Services
@@ -15,20 +15,20 @@ namespace GivingChampion.Application.Services
     {
         private readonly IChildRepository _childRepository;
         private readonly IUserRepository _userRepository;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ILogger<ChildService> _logger;
 
         public ChildService(
             IChildRepository childRepository,
             IUserRepository userRepository,
-            UserManager<ApplicationUser> userManager,
+            IUserService userService,
             IMapper mapper,
             ILogger<ChildService> logger)
         {
             _childRepository = childRepository;
             _userRepository = userRepository;
-            _userManager = userManager;
+            _userService = userService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -49,12 +49,49 @@ namespace GivingChampion.Application.Services
             if (parent.IsDeleted)
                 throw new BadRequestException("Cannot create child for a deleted parent account.");
 
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                throw new BadRequestException("Child email is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                throw new BadRequestException("Child password is required.");
+
+            if (dto.BirthDay == default)
+                throw new BadRequestException("Child birthday is required.");
+
+            var childUserResult = await _userService.CreateChildUserAsync(new CreateUserDto
+            {
+                FullName = dto.FullName.Trim(),
+                Email = dto.Email.Trim(),
+                BirthDay = dto.BirthDay,
+                Password = dto.Password
+            });
+
+            if (!childUserResult.Succeeded || childUserResult.Value == null)
+                throw new BadRequestException(childUserResult.Error ?? "Failed to create child user.");
+
+            var childUserDto = childUserResult.Value;
+            var childUser = await _userRepository.GetByIdAsync(childUserDto.Id);
+
+            if (childUser == null)
+                throw new NotFoundException("Failed to retrieve created child user.");
+
             var child = _mapper.Map<Child>(dto);
 
             child.ParentId = parentId;
+            child.UserId = childUserDto.Id;
             child.Status = ObjectStatus.Pending;
 
-            await _childRepository.CreateAsync(child);
+            try
+            {
+                await _childRepository.CreateAsync(child);
+            }
+            catch
+            {
+                await _userService.DeleteUserByAdminAsync(childUserDto.Id);
+                throw;
+            }
+
+            child.User = childUser;
 
             var childDto = _mapper.Map<ChildDto>(child);
 
@@ -103,19 +140,7 @@ namespace GivingChampion.Application.Services
             if (child.Status != ObjectStatus.Pending)
                 throw new BadRequestException("Child is not in pending status.");
 
-            if (child.User != null)
-            {
-                child.User.EmailConfirmed = true;
-                child.User.LockoutEnabled = false;
-
-                var updateResult = await _userManager.UpdateAsync(child.User);
-
-                if (!updateResult.Succeeded)
-                {
-                    var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
-                    throw new BadRequestException(errors);
-                }
-            }
+            await _userService.ApproveChildUserAsync(child.UserId);
 
             await _childRepository.ApproveAsync(childId, approvedById);
 
