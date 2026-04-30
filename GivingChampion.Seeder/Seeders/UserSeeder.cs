@@ -72,9 +72,13 @@ namespace GivingChampion.Seeder.Seeders
             }
 
             // Check if user already exists
-            if (await context.Users.AnyAsync(u => u.Email == adminConfig.Email))
+            var existingAdmin = await userManager.FindByEmailAsync(adminConfig.Email);
+            if (existingAdmin != null)
             {
-                _logger.LogInformation("Admin user '{Email}' already exists. Skipping creation.", adminConfig.Email);
+                await EnsureAdminRolesAsync(userManager, existingAdmin, adminConfig.Roles);
+                await EnsureAdminProfileDataAsync(context, existingAdmin.Id);
+
+                _logger.LogInformation("Admin user '{Email}' already exists. Ensured roles and profile data.", adminConfig.Email);
                 return;
             }
 
@@ -102,6 +106,8 @@ namespace GivingChampion.Seeder.Seeders
                     {
                         _logger.LogInformation("Successfully seeded admin user '{Email}' with roles: {Roles}",
                             adminConfig.Email, string.Join(", ", adminConfig.Roles));
+
+                        await EnsureAdminProfileDataAsync(context, adminUser.Id);
                     }
                     else
                     {
@@ -111,6 +117,7 @@ namespace GivingChampion.Seeder.Seeders
                 }
                 else
                 {
+                    await EnsureAdminProfileDataAsync(context, adminUser.Id);
                     _logger.LogInformation("Admin user '{Email}' created successfully (no roles assigned).", adminConfig.Email);
                 }
             }
@@ -120,6 +127,80 @@ namespace GivingChampion.Seeder.Seeders
                     adminConfig.Email,
                     string.Join(", ", createResult.Errors.Select(e => e.Description)));
             }
+        }
+
+        private async Task EnsureAdminRolesAsync(
+            UserManager<ApplicationUser> userManager,
+            ApplicationUser adminUser,
+            List<string> roles)
+        {
+            if (roles.Count == 0)
+                return;
+
+            var currentRoles = await userManager.GetRolesAsync(adminUser);
+            var missingRoles = roles
+                .Where(role => !string.IsNullOrWhiteSpace(role))
+                .Select(role => role.Trim())
+                .Distinct()
+                .Where(role => !currentRoles.Contains(role))
+                .ToList();
+
+            if (missingRoles.Count == 0)
+                return;
+
+            var addRolesResult = await userManager.AddToRolesAsync(adminUser, missingRoles);
+
+            if (!addRolesResult.Succeeded)
+            {
+                _logger.LogWarning("Failed to assign missing roles to admin user: {Errors}",
+                    string.Join(", ", addRolesResult.Errors.Select(e => e.Description)));
+            }
+        }
+
+        private async Task EnsureAdminProfileDataAsync(AppDbContext context, Guid adminUserId)
+        {
+            if (!await context.Donors.AnyAsync(d => d.UserId == adminUserId && !d.IsDeleted))
+            {
+                await context.Donors.AddAsync(new Donor { UserId = adminUserId });
+            }
+
+            if (!await context.Volunteers.AnyAsync(v => v.UserId == adminUserId && !v.IsDeleted))
+            {
+                await context.Volunteers.AddAsync(new Volunteer { UserId = adminUserId });
+            }
+
+            var profile = await context.Profiles
+                .FirstOrDefaultAsync(p => p.UserId == adminUserId && !p.IsDeleted);
+
+            if (profile == null)
+            {
+                var firstLevel = await context.Levels
+                    .OrderBy(level => level.Number)
+                    .FirstOrDefaultAsync();
+
+                if (firstLevel == null)
+                {
+                    _logger.LogWarning("No levels found. Skipping admin profile/avatar seeding.");
+                    await context.SaveChangesAsync();
+                    return;
+                }
+
+                profile = new Profile
+                {
+                    UserId = adminUserId,
+                    LevelId = firstLevel.Id
+                };
+
+                await context.Profiles.AddAsync(profile);
+                await context.SaveChangesAsync();
+            }
+
+            if (!await context.Avatars.AnyAsync(a => a.ProfileId == profile.Id && !a.IsDeleted))
+            {
+                await context.Avatars.AddAsync(new Avatar { ProfileId = profile.Id });
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 

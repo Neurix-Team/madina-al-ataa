@@ -37,14 +37,14 @@ public class SeedingWorker : BackgroundService
                 allSuccessfull = false;
             }
 
-            var userSeedingResult = await _userSeeder.Seed();
-            if (!userSeedingResult)
+            var levelSeedingResult = await _levelSeeder.Seed();
+            if (!levelSeedingResult)
             {
                 allSuccessfull = false;
             }
 
-            var levelSeedingResult = await _levelSeeder.Seed();
-            if (!levelSeedingResult)
+            var userSeedingResult = await _userSeeder.Seed();
+            if (!userSeedingResult)
             {
                 allSuccessfull = false;
             }
