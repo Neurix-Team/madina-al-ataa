@@ -31,7 +31,7 @@ namespace GivingChampion.Application.Services
         // Gets all service requests and maps them from Entity list to DTO list.
         public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
         {
-            var serviceRequests = await _serviceRequestRepository.ListAsync();
+            var serviceRequests = await _serviceRequestRepository.GetAllAsync(pageParameters);
 
             var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(serviceRequests);
 
@@ -63,10 +63,14 @@ namespace GivingChampion.Application.Services
         RequestStatus status,
         PageParameters pageParameters)
         {
-            var filtered = await _serviceRequestRepository.ListAsync(
-                serviceRequest => serviceRequest.Status == status);
+            var filtered = await PagedList<ServiceRequest>.CreateAsync(
+                _serviceRequestRepository.Query().Where(serviceRequest => serviceRequest.Status == status),
+                pageParameters.PageNumber,
+                pageParameters.PageSize);
 
-            return _mapper.Map<List<ServiceRequestDto>>(filtered);
+            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(filtered);
+
+            return Result<PagedList<ServiceRequestDto>>.Success(dtos);
         }
 
         public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)

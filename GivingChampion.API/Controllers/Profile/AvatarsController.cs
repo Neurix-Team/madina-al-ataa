@@ -43,16 +43,16 @@ namespace GivingChampion.API.Controllers
             return Ok(new { message = "Avatar updated successfully" });
         }
         // DELETE api/avatars/{id}
-        [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var deleted = await _avatarService.SoftDeleteAsync(id);
+        //[Authorize]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(Guid id)
+        //{
+        //    var deleted = await _avatarService.SoftDeleteAsync(id);
 
-            if (!deleted)
-                return NotFound("Avatar not found");
+        //    if (!deleted)
+        //        return NotFound("Avatar not found");
 
-            return Ok(new { message = "Avatar deleted successfully" });
-        }
+        //    return Ok(new { message = "Avatar deleted successfully" });
+        //}
     }
 }

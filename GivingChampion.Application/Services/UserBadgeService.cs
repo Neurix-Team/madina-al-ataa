@@ -10,15 +10,16 @@ namespace GivingChampion.API.Services
     public class UserBadgeService : IUserBadgeService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IGenericRepository<UserBadge> _userBadgeRepository;
+        private readonly IUserBadgeRepository _userBadgeRepository;
         private readonly IMapper _mapper;
 
         public UserBadgeService(
             IUnitOfWork unitOfWork,
+            IUserBadgeRepository userBadgeRepository,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _userBadgeRepository = unitOfWork.Repository<UserBadge>();
+            _userBadgeRepository = userBadgeRepository;
             _mapper = mapper;
         }
 
@@ -27,7 +28,7 @@ namespace GivingChampion.API.Services
             if (profileId == Guid.Empty)
                 throw new BadRequestException("Profile ID is required.");
 
-            var userBadges = await _userBadgeRepository.ListAsync(userBadge => userBadge.ProfileId == profileId);
+            var userBadges = await _userBadgeRepository.GetAllByProfileIdAsync(profileId);
 
             return _mapper.Map<List<UserBadgeDto>>(userBadges);
         }
@@ -67,7 +68,7 @@ namespace GivingChampion.API.Services
                 existingUserBadge.DeletedAt = null;
 
                 _userBadgeRepository.Update(existingUserBadge);
-                await _userBadgeRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return _mapper.Map<UserBadgeDto>(existingUserBadge);
             }
@@ -122,7 +123,7 @@ namespace GivingChampion.API.Services
             userBadge.IsDeleted = true;
             userBadge.DeletedAt = DateTime.UtcNow;
 
-            await _userBadgeRepository.DeleteAsync(userBadge);
+            _userBadgeRepository.Update(userBadge);
 
             await _unitOfWork.SaveChangesAsync();
 

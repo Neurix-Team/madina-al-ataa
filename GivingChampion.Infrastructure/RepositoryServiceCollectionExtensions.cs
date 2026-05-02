@@ -16,6 +16,7 @@ public static class RepositoryServiceCollectionExtensions
     public static IServiceCollection AddGivingChampionRepositories(
         this IServiceCollection services)
     {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IDonorRepository, DonorRepository>();
         services.AddScoped<IChildRepository, EfChildRepository>();

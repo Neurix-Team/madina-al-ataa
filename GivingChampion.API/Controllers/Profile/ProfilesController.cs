@@ -19,7 +19,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/profiles/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -55,15 +55,15 @@ namespace GivingChampion.API.Controllers
             return NoContent();
         }
 
-        // DELETE api/profiles/{id}
-        [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var deleted = await _profileService.SoftDeleteAsync(id);
-            if (!deleted) return NotFound("Profile not found");
+        //// DELETE api/profiles/{id}
+        //[Authorize]
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(Guid id)
+        //{
+        //    var deleted = await _profileService.SoftDeleteAsync(id);
+        //    if (!deleted) return NotFound("Profile not found");
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
     }
 }

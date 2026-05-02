@@ -30,7 +30,7 @@ namespace GivingChampion.Application.Services
         public async Task<Result<PagedList<PartnerDto>>> GetAllAsync(PageParameters pageParameters)
         {
             // Fetching all partners from the repository
-            var partners = await _partnerRepository.ListAsync();
+            var partners = await _partnerRepository.GetAllAsync(pageParameters);
 
             var dtos = _mapper.MapPagedList<Partner, PartnerDto>(partners);
 
