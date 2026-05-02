@@ -16,4 +16,7 @@
   <Folder Name="/Presentation/">
     <Project Path="GivingChampion.API/GivingChampion.API.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="GivingChampion.API.Tests/GivingChampion.API.Tests.csproj" />
+  </Folder>
 </Solution>
