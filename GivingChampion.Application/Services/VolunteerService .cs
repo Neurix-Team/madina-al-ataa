@@ -27,7 +27,6 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
-        #endregion
 
         #region Query Methods
 
