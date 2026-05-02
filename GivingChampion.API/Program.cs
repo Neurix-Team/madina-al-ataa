@@ -50,7 +50,7 @@ if (_env.IsDevelopment())
         configureDbContextOptions: options =>
         {
             options.UseNpgsql(npgsql =>
-                npgsql.MigrationsAssembly("GivingChampion.Domain"));
+                npgsql.MigrationsAssembly("GivingChampion.Persistance"));
         });
 }
 else
@@ -60,7 +60,7 @@ else
 
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(connectionString, npgsql =>
-            npgsql.MigrationsAssembly("GivingChampion.Domain")));
+            npgsql.MigrationsAssembly("GivingChampion.Persistance")));
 }
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
