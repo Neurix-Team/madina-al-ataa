@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.User;
+﻿using GivingChampion.Application.DTO.User;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using System;

@@ -2,7 +2,7 @@
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 

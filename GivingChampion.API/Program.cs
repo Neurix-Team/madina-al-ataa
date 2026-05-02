@@ -22,8 +22,7 @@ using GivingChampion.Application.Services;
 using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.Application.Transformers;
-using GivingChampion.Common.DTO.Auth;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Infrastructure.Persistence.Repositories;
 using GivingChampion.Persistance.Interfaces;
@@ -160,6 +159,8 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi("v1", options =>
 {

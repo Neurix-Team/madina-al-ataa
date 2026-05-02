@@ -2,7 +2,7 @@
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Mission;
-using GivingChampion.Common.DTO.Mission;
+using GivingChampion.Application.DTO.Mission;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;

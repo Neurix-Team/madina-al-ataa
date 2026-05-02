@@ -1,9 +1,9 @@
-﻿using GivingChampion.Common.DTO.ServiceRequestDto;
-using GivingChampion.Common.Enums;
+﻿using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using System;
 using System.Collections.Generic;
+using GivingChampion.Application.DTO.ServiceRequestDto;
 using System.Threading.Tasks;
 namespace GivingChampion.Application.Interfaces.ServiceRequestService
 {

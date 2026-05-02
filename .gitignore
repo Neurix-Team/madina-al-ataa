@@ -57,3 +57,4 @@ nunit-*.xml
 *.Production.ps1
 /.dotnet-home/.dotnet
 /.nuget-packages
+/.dotnet/.nuget/packages

@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.Auth;
+﻿using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using global::GivingChampion.Application.Auth.Interfaces;

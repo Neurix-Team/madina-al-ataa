@@ -1,6 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Common.DTO.VolunteerDto;
-using GivingChampion.Common.Pagination;
+using GivingChampion.Application.DTO.VolunteerDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

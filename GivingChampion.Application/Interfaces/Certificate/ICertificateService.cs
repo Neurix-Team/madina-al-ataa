@@ -1,7 +1,10 @@
-﻿using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Common.Pagination;
-using GivingChampion.Common.Results;
-
+﻿using GivingChampion.Application.DTO.CertificateDto;
+using GivingChampion.Persistence.Contexts;
+using GivingChampion.Persistance.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using GivingChampion.Domain.Entities;
 namespace GivingChampion.Application.Interfaces.Certificate
 {
     public interface ICertificateService

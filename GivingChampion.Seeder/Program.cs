@@ -1,4 +1,4 @@
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Seeder;
 using GivingChampion.Seeder.Seeders;

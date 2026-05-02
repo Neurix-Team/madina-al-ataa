@@ -28,7 +28,7 @@ public class VolunteerControllerTests
             var result = await controller.GetById(volunteerId);
 
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var volunteer = Assert.IsType<Common.DTO.VolunteerDto.VolunteerDto>(okResult.Value);
+            var volunteer = Assert.IsType<Application.DTO.VolunteerDto.VolunteerDto>(okResult.Value);
             Assert.Equal(volunteerId, volunteer.Id);
             Assert.Equal(userId, volunteer.UserId);
             Assert.Equal("Teaching", volunteer.Skills);

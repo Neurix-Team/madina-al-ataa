@@ -1,6 +1,6 @@
 using GivingChampion.API.Controllers;
 using GivingChampion.API.Tests.Infrastructure;
-using GivingChampion.Common.DTO.DonationRequest;
+using GivingChampion.Application.DTO.DonationRequest;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;

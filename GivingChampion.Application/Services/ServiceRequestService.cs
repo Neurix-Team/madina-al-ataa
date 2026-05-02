@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.ServiceRequestService;
-using GivingChampion.Common.DTO.ServiceRequestDto;
+using GivingChampion.Application.DTO.ServiceRequestDto;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;

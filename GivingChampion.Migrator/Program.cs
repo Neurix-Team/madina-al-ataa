@@ -1,4 +1,4 @@
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Migrator;
 using Microsoft.EntityFrameworkCore;
 

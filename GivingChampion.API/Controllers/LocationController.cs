@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.Location;
-using GivingChampion.Common.DTO.Location;
+using GivingChampion.Application.DTO.Location;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Persistance.Interfaces;
 

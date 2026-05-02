@@ -1,31 +1,31 @@
-﻿using GivingChampion.Common.DTO.AiAvatarDto;
-using GivingChampion.Common.DTO.AvatarDto;
-using GivingChampion.Common.DTO.BadgeDto;
-using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Common.DTO.Child;
-using GivingChampion.Common.DTO.DonationOrder;
-using GivingChampion.Common.DTO.DonationRequest;
-using GivingChampion.Common.DTO.Donor;
-using GivingChampion.Common.DTO.LevelDto;
-using GivingChampion.Common.DTO.Location;
-using GivingChampion.Common.DTO.Mission;
-using GivingChampion.Common.DTO.Notification;
-using GivingChampion.Common.DTO.Partner;
-using GivingChampion.Common.DTO.PartnerDto;
-using GivingChampion.Common.DTO.ProfileDto;
-using GivingChampion.Common.DTO.ReviewDto;
-using GivingChampion.Common.DTO.ServiceRequestDto;
-using GivingChampion.Common.DTO.User;
-using GivingChampion.Common.DTO.UserBadgeDto;
-using GivingChampion.Common.DTO.UserLevelDto;
-using GivingChampion.Common.DTO.VolunteerDto;
-using GivingChampion.Common.DTO.VolunteerOrder;
+﻿using GivingChampion.Application.DTO.AiAvatarDto;
+using GivingChampion.Application.DTO.AvatarDto;
+using GivingChampion.Application.DTO.BadgeDto;
+using GivingChampion.Application.DTO.CertificateDto;
+using GivingChampion.Application.DTO.Child;
+using GivingChampion.Application.DTO.DonationOrder;
+using GivingChampion.Application.DTO.DonationRequest;
+using GivingChampion.Application.DTO.Donor;
+using GivingChampion.Application.DTO.LevelDto;
+using GivingChampion.Application.DTO.Location;
+using GivingChampion.Application.DTO.Mission;
+using GivingChampion.Application.DTO.Notification;
+using GivingChampion.Application.DTO.Partner;
+using GivingChampion.Application.DTO.PartnerDto;
+using GivingChampion.Application.DTO.ProfileDto;
+using GivingChampion.Application.DTO.ReviewDto;
+using GivingChampion.Application.DTO.ServiceRequestDto;
+using GivingChampion.Application.DTO.User;
+using GivingChampion.Application.DTO.UserBadgeDto;
+using GivingChampion.Application.DTO.UserLevelDto;
+using GivingChampion.Application.DTO.VolunteerDto;
+using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
-using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.GeoQuestDto;
+using GivingChampion.Application.DTO;
+using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Domain.Enums;
-using GivingChampion.Common.DTO.UserGeoQuestDto;
+using GivingChampion.Application.DTO.UserGeoQuestDto;
 
 namespace GivingChampion.Application.Mapper
 {
@@ -355,7 +355,7 @@ namespace GivingChampion.Application.Mapper
 
             CreateMap<UserMission, UserMissionDto>().ReverseMap();
             CreateMap<StartMissionDto, Mission>().ReverseMap();
-            CreateMap<Common.DTO.Mission.UpdateProgressDto, Mission>().ReverseMap();
+            CreateMap<Application.DTO.Mission.UpdateProgressDto, Mission>().ReverseMap();
 
             #endregion
 

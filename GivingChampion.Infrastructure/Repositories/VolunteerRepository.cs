@@ -1,4 +1,9 @@
-﻿using GivingChampion.Common.Extensions.Pagination;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+using GivingChampion.Persistence.Contexts;
+using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;

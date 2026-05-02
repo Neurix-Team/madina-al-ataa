@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.Certificate;
-using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Application.DTO.CertificateDto;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;

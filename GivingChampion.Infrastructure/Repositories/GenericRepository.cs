@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities.Base;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;

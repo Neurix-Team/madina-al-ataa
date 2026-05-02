@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.GeoQuestDto;
+using GivingChampion.Application.DTO;
+using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;

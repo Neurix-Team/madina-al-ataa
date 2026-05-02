@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO.Mission;
+using GivingChampion.Application.DTO.Mission;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;

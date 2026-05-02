@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.Partner;
-using GivingChampion.Common.DTO.Partner;
-using GivingChampion.Common.DTO.PartnerDto;
+using GivingChampion.Application.DTO.Partner;
+using GivingChampion.Application.DTO.PartnerDto;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;

@@ -1,4 +1,4 @@
-using GivingChampion.Common.DTO.Admin;
+using GivingChampion.Application.DTO.Admin;
 
 namespace GivingChampion.Application.Interfaces.Admin
 {

@@ -1,5 +1,5 @@
 ﻿using GivingChampion.API.Interfaces;
-using GivingChampion.Common.DTO.ProfileDto;
+using GivingChampion.Application.DTO.ProfileDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

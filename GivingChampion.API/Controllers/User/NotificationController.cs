@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO.Notification;
+using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

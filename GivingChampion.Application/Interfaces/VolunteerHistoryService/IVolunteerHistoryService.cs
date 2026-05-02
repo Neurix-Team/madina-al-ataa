@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.VolunteerOrder;
+﻿using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;

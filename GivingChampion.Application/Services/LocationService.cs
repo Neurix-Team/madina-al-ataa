@@ -2,7 +2,7 @@
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Location;
-using GivingChampion.Common.DTO.Location;
+using GivingChampion.Application.DTO.Location;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;

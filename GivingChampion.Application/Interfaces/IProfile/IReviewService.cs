@@ -1,4 +1,4 @@
-using GivingChampion.Common.DTO.ReviewDto;
+using GivingChampion.Application.DTO.ReviewDto;
 
 namespace GivingChampion.API.Interfaces
 {

@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.DonationRequest;
+﻿using GivingChampion.Application.DTO.DonationRequest;
 using GivingChampion.Common.Pagination;
 using System;
 using System.Collections.Generic;

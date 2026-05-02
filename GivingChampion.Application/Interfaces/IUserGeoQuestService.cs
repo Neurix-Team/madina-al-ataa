@@ -1,6 +1,6 @@
-﻿using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.GeoQuestDto;
-using GivingChampion.Common.DTO.UserGeoQuestDto;
+﻿using GivingChampion.Application.DTO;
+using GivingChampion.Application.DTO.GeoQuestDto;
+using GivingChampion.Application.DTO.UserGeoQuestDto;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 

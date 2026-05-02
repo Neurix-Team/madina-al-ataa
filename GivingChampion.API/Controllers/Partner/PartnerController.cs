@@ -1,6 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.Partner;
-using GivingChampion.Common.DTO.Partner;
-using GivingChampion.Common.Pagination;
+using GivingChampion.Application.DTO.Partner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

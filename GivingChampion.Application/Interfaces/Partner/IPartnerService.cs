@@ -1,7 +1,5 @@
-﻿using GivingChampion.Common.DTO.Partner;
-using GivingChampion.Common.DTO.PartnerDto;
-using GivingChampion.Common.Pagination;
-using GivingChampion.Common.Results;
+﻿using GivingChampion.Application.DTO.Partner;
+using GivingChampion.Application.DTO.PartnerDto;
 using System;
 using System.Collections.Generic;
 using System.Text;

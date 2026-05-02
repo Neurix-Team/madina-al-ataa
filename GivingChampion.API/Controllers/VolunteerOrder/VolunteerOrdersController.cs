@@ -1,7 +1,6 @@
 ﻿using GivingChampion.API.Extensions;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
-using GivingChampion.Common.DTO.VolunteerOrder;
-using GivingChampion.Common.Pagination;
+using GivingChampion.Application.DTO.VolunteerOrder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
