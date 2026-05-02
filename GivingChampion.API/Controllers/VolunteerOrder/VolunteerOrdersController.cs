@@ -2,7 +2,6 @@
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,19 +15,21 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         #region Fields
 
         private readonly IVolunteerOrderService _volunteerOrderService;
+        private readonly ILogger<VolunteerOrdersController> _logger;
 
         #endregion
 
         #region Constructor
 
-        public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService)
+        public VolunteerOrdersController(
+            IVolunteerOrderService volunteerOrderService,
+            ILogger<VolunteerOrdersController> logger)
         {
             _volunteerOrderService = volunteerOrderService;
+            _logger = logger;
         }
 
         #endregion
-
-        #region Query Endpoints
 
         #region Get All
         [HttpGet]
@@ -38,7 +39,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             {
                 var result = await _volunteerOrderService.GetAllAsync(pageParameters);
 
-                if (!result.IsSuccess)
+                if (!result.Succeeded)
                     return BadRequest(result);
 
                 return Ok(result);

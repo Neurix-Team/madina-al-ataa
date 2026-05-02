@@ -87,7 +87,7 @@ namespace GivingChampion.API.Controllers.Volunteer
             {
                 var result = await _volunteerService.GetAllAsync(pageParameters);
 
-                if (!result.IsSuccess)
+                if (!result.Succeeded)
                     return BadRequest(result);
 
                 return Ok(result);

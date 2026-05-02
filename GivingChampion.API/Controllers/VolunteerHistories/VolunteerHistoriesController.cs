@@ -12,25 +12,26 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
     public class VolunteerHistoriesController : ControllerBase
     {
         private readonly IVolunteerHistoryService _historyService;
+        private readonly ILogger<VolunteerHistoriesController> _logger;
 
         public VolunteerHistoriesController(
             IVolunteerHistoryService historyService,
             ILogger<VolunteerHistoriesController> logger)
         {
             _historyService = historyService;
+            _logger = logger;
         }
 
         [HttpGet("me")]
         [Authorize(Roles = "Volunteer,Admin")]
         public async Task<IActionResult> GetMyHistory([FromQuery] PageParameters pageParameters)
         {
-            if (!User.TryGetCurrentUserId(out var userId))
-                return Unauthorized(new { message = "Invalid or missing user ID in token." });
+            try
+            {
+                if (!User.TryGetCurrentUserId(out var userId))
+                    return Unauthorized(new { message = "Invalid or missing user ID in token." });
 
                 var result = await _historyService.GetUserHistory(userId, pageParameters);
-
-                if (!result.IsSuccess)
-                    return BadRequest(result);
 
                 return Ok(result);
             }
@@ -55,9 +56,6 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
             try
             {
                 var result = await _historyService.GetRequestHistory(requestId, pageParameters);
-
-                if (!result.IsSuccess)
-                    return BadRequest(result);
 
                 return Ok(result);
             }

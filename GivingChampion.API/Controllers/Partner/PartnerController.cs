@@ -73,7 +73,7 @@ namespace GivingChampion.API.Controllers
             {
                 var result = await _partnerService.GetAllAsync(pageParameters);
 
-                if (!result.IsSuccess)
+                if (!result.Succeeded)
                     return BadRequest(result);
 
                 return Ok(result);

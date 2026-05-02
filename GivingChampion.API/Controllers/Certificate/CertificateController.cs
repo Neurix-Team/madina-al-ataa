@@ -36,7 +36,7 @@ namespace GivingChampion.API.Controllers.Certificate
                     pageParameters,
                     cancellationToken);
 
-                if (!result.IsSuccess)
+                if (!result.Succeeded)
                     return BadRequest(result);
 
                 return Ok(result);
@@ -60,7 +60,7 @@ namespace GivingChampion.API.Controllers.Certificate
                     pageParameters,
                     cancellationToken);
 
-                if (!result.IsSuccess)
+                if (!result.Succeeded)
                     return BadRequest(result);
 
                 return Ok(result);
