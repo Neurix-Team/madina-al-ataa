@@ -26,9 +26,7 @@ namespace GivingChampion.Persistance.Repositories
 
         #endregion
 
-        #region CRUD Operations
 
-        #region Create
         /// <summary>
         /// Adds a new Partner to the database asynchronously.
         /// </summary>
@@ -38,9 +36,7 @@ namespace GivingChampion.Persistance.Repositories
             await _context.Partners.AddAsync(partner);
         }
 
-        #endregion
 
-        #region Update
         /// <summary>
         /// Updates an existing Partner in the database.
         /// </summary>
@@ -50,9 +46,7 @@ namespace GivingChampion.Persistance.Repositories
             _context.Partners.Update(partner);
         }
 
-        #endregion
 
-        #region SoftDelete
         /// <summary>
         /// Soft deletes a Partner by marking it as deleted.
         /// </summary>
@@ -63,10 +57,8 @@ namespace GivingChampion.Persistance.Repositories
             partner.DeletedAt = DateTime.UtcNow; // Set the current time for the deletion timestamp
             _context.Partners.Update(partner); // Updating the record after modification
         }
-        #endregion
 
 
-        #region GetById
         /// <summary>
         /// Retrieves a Partner by its unique identifier (ID).
         /// It ensures that the partner is not deleted (soft deleted).
@@ -77,10 +69,8 @@ namespace GivingChampion.Persistance.Repositories
             return await _context.Partners
                 .Where(p => p.Id == id && !p.IsDeleted) // Ensure the partner is not soft-deleted
                 .FirstOrDefaultAsync(); // Retrieve the first matching partner
-        }
-        #endregion
+        } 
 
-        #region GetAll
         /// <summary>
         /// Retrieves all Partners from the database, excluding soft-deleted ones.
         /// </summary>
@@ -92,9 +82,7 @@ namespace GivingChampion.Persistance.Repositories
                 .AsNoTracking()
                 .ToPagedListAsync(pageParameters);
         }
-        #endregion
 
-        #endregion
     }
-    }
+}
 

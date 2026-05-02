@@ -13,11 +13,8 @@ namespace GivingChampion.Persistance.Repositories
     {
 
 
-        #region Field
         private readonly AppDbContext _context;
-        #endregion
 
-        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the VolunteerRepository class.
@@ -28,11 +25,8 @@ namespace GivingChampion.Persistance.Repositories
             _context = context; // Initialize the context to interact with the database
         }
 
-        #endregion
 
-        #region Query Methods
 
-        #region GetAllVolunteer
 
         public async Task<PagedList<Volunteer>> GetAllAsync(PageParameters pageParameters)
         {
@@ -44,7 +38,6 @@ namespace GivingChampion.Persistance.Repositories
 
         #endregion
 
-        #region GetById
         /// <summary>
         /// Retrieves a volunteer by its unique identifier (ID), ensuring it is not soft-deleted.
         /// </summary>
@@ -67,13 +60,9 @@ namespace GivingChampion.Persistance.Repositories
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
         }
-        #endregion
 
-        #endregion
 
-        #region Command Methods
 
-        #region AddVolunteer
         /// <summary>
         /// Adds a new volunteer to the database asynchronously.
         /// </summary>
@@ -86,9 +75,7 @@ namespace GivingChampion.Persistance.Repositories
             };
             await _context.Volunteers.AddAsync(volunteer).ConfigureAwait(false); // Add the volunteer to the database
         } 
-        #endregion
 
-        #region UpdateVolunteer
         ///// <summary>
         ///// Updates an existing volunteer in the database.
         ///// </summary>
@@ -97,8 +84,6 @@ namespace GivingChampion.Persistance.Repositories
         //{
         //    _context.Volunteers.Update(volunteer); // Update the volunteer in the database
         //} 
-        #endregion
 
-        #endregion
     }
 }

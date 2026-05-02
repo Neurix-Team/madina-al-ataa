@@ -74,8 +74,10 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             var mission = await _context.Missions.FindAsync(missionId);
             if (mission == null) return;
 
-            mission.IsDeleted = true;
-            mission.DeletedAt = DateTime.UtcNow;
+            //mission.IsDeleted = true;
+            //mission.DeletedAt = DateTime.UtcNow;
+
+            _context.Missions.Remove(mission);
         }
     }
 }

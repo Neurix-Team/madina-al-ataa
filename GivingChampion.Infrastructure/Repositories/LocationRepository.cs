@@ -54,8 +54,10 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             var location = await _context.Locations.FindAsync(locationId);
             if (location == null) return;
 
-            location.IsDeleted = true;
-            location.DeletedAt = DateTime.UtcNow;
+            //location.IsDeleted = true;
+            //location.DeletedAt = DateTime.UtcNow;
+
+            _context.Locations.Remove(location);
         }
     }
 }
