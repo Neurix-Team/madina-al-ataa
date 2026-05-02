@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using GivingChampion.Application.Interfaces.Partner;
-using GivingChampion.Common.DTO.Partner;
+using GivingChampion.Application.DTO.Partner;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;

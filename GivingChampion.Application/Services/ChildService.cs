@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.User;
-using GivingChampion.Common.DTO.Child;
-using GivingChampion.Common.DTO.User;
+using GivingChampion.Application.DTO.Child;
+using GivingChampion.Application.DTO.User;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;

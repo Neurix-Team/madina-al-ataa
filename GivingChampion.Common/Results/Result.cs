@@ -1,4 +1,4 @@
-﻿// Result.cs (in GivingChampion.Common.DTO.Global or similar)
+﻿// Result.cs (in GivingChampion.Application.DTO.Global or similar)
 namespace GivingChampion.Common.Results
 {
     public class Result

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.DonationOrderService;
-using GivingChampion.Common.DTO.DonationOrder;
+using GivingChampion.Application.DTO.DonationOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;

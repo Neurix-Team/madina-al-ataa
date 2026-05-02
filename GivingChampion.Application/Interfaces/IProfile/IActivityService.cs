@@ -1,5 +1,5 @@
-﻿using GivingChampion.Common.DTO.ActivityDto;
-using GivingChampion.Common.DTO.GivingChampion.Common.DTO.ActivityDto;
+﻿using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.DTO.GivingChampion.Application.DTO.ActivityDto;
 
 namespace GivingChampion.API.Interfaces
 {

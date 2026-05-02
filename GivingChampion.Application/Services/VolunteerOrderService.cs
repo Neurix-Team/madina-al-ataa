@@ -2,7 +2,7 @@
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
-using GivingChampion.Common.DTO.VolunteerOrder;
+using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;

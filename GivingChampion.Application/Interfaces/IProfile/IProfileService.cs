@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.ProfileDto;
+﻿using GivingChampion.Application.DTO.ProfileDto;
 using GivingChampion.Common.Results;
 
 namespace GivingChampion.API.Interfaces

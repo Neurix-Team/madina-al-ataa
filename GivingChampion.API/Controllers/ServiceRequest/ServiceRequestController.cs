@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.ServiceRequestService;
-using GivingChampion.Common.DTO.ServiceRequestDto;
+using GivingChampion.Application.DTO.ServiceRequestDto;
 using GivingChampion.Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.AvatarDto;
+﻿using GivingChampion.Application.DTO.AvatarDto;
 
 namespace GivingChampion.API.Interfaces
 {

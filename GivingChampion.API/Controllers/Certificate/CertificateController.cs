@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.Certificate;
-using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Application.DTO.CertificateDto;
 using GivingChampion.Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.DonationOrderService;
-using GivingChampion.Common.DTO.DonationOrder;
+using GivingChampion.Application.DTO.DonationOrder;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;

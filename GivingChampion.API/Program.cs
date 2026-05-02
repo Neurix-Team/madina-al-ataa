@@ -12,8 +12,7 @@ using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Application.Transformers;
-using GivingChampion.Common.DTO.Auth;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Infrastructure.Persistence.Repositories;
 using GivingChampion.Persistance.Interfaces;
@@ -36,6 +35,10 @@ using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.API.Handlers;
 using GivingChampion.Application.Interfaces.Admin;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
+using GivingChampion.Application.Validators.Auth;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using GivingChampion.Persistence.Contexts;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -215,6 +218,8 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi("v1", options =>
 {

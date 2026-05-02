@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.AvatarDto;
+using GivingChampion.Application.DTO.AvatarDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 

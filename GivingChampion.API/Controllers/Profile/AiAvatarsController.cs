@@ -1,5 +1,5 @@
 ﻿using GivingChampion.API.Interfaces;
-using GivingChampion.Common.DTO.AiAvatarDto;
+using GivingChampion.Application.DTO.AiAvatarDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

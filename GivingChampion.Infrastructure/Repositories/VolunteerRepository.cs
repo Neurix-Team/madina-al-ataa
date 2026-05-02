@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 

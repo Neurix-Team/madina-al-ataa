@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.Certificate;
-using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Application.DTO.CertificateDto;
 using GivingChampion.Persistance.Interfaces;
 namespace GivingChampion.Application.Services.Certificate;
 

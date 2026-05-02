@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 

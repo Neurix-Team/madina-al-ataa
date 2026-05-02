@@ -1,7 +1,7 @@
 ﻿using GivingChampion.Application.Auth;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
-using GivingChampion.Common.DTO.Auth;
+using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;

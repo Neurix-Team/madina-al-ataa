@@ -1,5 +1,5 @@
-﻿using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Application.DTO.CertificateDto;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Persistance.Interfaces;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using GivingChampion.Common.DTO.ServiceRequestDto;
+using GivingChampion.Application.DTO.ServiceRequestDto;
 using System.Threading.Tasks;
 using GivingChampion.Common.Enums;
 namespace GivingChampion.Application.Interfaces.ServiceRequestService

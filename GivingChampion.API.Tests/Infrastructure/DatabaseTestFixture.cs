@@ -5,7 +5,7 @@ using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Persistance.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

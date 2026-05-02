@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.LevelDto;
+using GivingChampion.Application.DTO.LevelDto;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;

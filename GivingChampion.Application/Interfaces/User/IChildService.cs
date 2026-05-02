@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.Child;
+﻿using GivingChampion.Application.DTO.Child;
 using GivingChampion.Common.Results;
 using System;
 using System.Collections.Generic;

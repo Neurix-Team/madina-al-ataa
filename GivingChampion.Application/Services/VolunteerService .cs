@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Common.DTO.VolunteerDto;
+using GivingChampion.Application.DTO.VolunteerDto;
 using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.Application.Services

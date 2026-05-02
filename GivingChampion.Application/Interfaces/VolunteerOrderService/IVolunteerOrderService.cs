@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.VolunteerOrder;
+﻿using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 

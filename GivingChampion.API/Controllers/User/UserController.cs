@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces.User;
-using GivingChampion.Common.DTO.User;
+using GivingChampion.Application.DTO.User;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -165,14 +165,14 @@ namespace GivingChampion.Api.Controllers
         /// Assigns one or more roles to a user (Admin only).
         /// </summary>
         /// <param name="id">User ID</param>
-        /// <param name="roles">List of roles to assign</param>
+        /// <param name="request">List of roles to assign</param>
         [HttpPost("{id:guid}/roles/assign")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<bool>>> AssignRoles(Guid id, [FromBody] IEnumerable<string> roles)
+        public async Task<ActionResult<Result<bool>>> AssignRoles(Guid id, [FromBody] RoleManagementRequest request)
         {
-            var result = await _userService.AssignRolesAsync(id, roles);
+            var result = await _userService.AssignRolesAsync(id, request.Roles);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
@@ -180,14 +180,14 @@ namespace GivingChampion.Api.Controllers
         /// Removes one or more roles from a user (Admin only).
         /// </summary>
         /// <param name="id">User ID</param>
-        /// <param name="roles">List of roles to remove</param>
+        /// <param name="request">List of roles to remove</param>
         [HttpPost("{id:guid}/roles/remove")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Result<bool>>> RemoveRoles(Guid id, [FromBody] IEnumerable<string> roles)
+        public async Task<ActionResult<Result<bool>>> RemoveRoles(Guid id, [FromBody] RoleManagementRequest request)
         {
-            var result = await _userService.RemoveRolesAsync(id, roles);
+            var result = await _userService.RemoveRolesAsync(id, request.Roles);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
