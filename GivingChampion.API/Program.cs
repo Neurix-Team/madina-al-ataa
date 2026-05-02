@@ -40,6 +40,16 @@ using GivingChampion.Persistence.Contexts;
 using FluentValidation.AspNetCore;
 using GivingChampion.Application.Validators.Auth;
 using FluentValidation;
+using GivingChampion.Application.Interfaces.Partner;
+using GivingChampion.Application.Interfaces.Volunteer;
+using GivingChampion.Application.Interfaces.Certificate;
+using GivingChampion.Application.Services.Certificate;
+using GivingChampion.Application.Interfaces.DonationOrderService;
+using GivingChampion.Application.Services.DonationOrderService;
+using GivingChampion.API.Handlers;
+using GivingChampion.Application.Interfaces.Admin;
+using GivingChampion.Application.Interfaces.VolunteerHistoryService;
+using FluentValidation.AspNetCore;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
