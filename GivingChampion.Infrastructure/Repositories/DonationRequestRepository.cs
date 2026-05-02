@@ -24,13 +24,12 @@ namespace GivingChampion.Persistance.Repositories
         public async Task AddAsync(DonationRequest donationRequest)
         {
             await _context.DonationRequests.AddAsync(donationRequest);
-            await _context.SaveChangesAsync();
         }
 
         public Task DeleteAsync(DonationRequest donationRequest)
-    {
+        {
             _context.DonationRequests.Remove(donationRequest);
-            return _context.SaveChangesAsync(); 
+            return Task.CompletedTask;
         }
 
         public async Task<PagedList<DonationRequest>> GetAllAsync(PageParameters pageParameters)
@@ -84,10 +83,10 @@ namespace GivingChampion.Persistance.Repositories
                 .ToPagedListAsync(pageParameters);
         }
 
-        public async Task UpdateAsync(DonationRequest donationRequest)
+        public Task UpdateAsync(DonationRequest donationRequest)
         {
             _context.DonationRequests.Update(donationRequest);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
     }
 }

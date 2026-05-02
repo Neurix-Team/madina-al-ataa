@@ -8,6 +8,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<Review?> GetByIdAsync(Guid id);
         Task AddAsync(Review review);
         void Update(Review review);
-        Task SaveChangesAsync();
     }
 }

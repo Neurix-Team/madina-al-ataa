@@ -13,13 +13,16 @@ namespace GivingChampion.Application.Services
     public class VolunteerHistoryService : IVolunteerHistoryService
     {
         private readonly IVolunteerHistoryRepository _repo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public VolunteerHistoryService(
             IVolunteerHistoryRepository repo,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _repo = repo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -78,7 +81,7 @@ namespace GivingChampion.Application.Services
             };
 
             await _repo.AddAsync(history);
-            await _repo.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

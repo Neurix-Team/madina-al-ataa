@@ -23,7 +23,6 @@ namespace GivingChampion.Persistance.Repositories
         public async Task CreateAsync(DonationOrder donationOrder)
         {
             await _context.DonationOrders.AddAsync(donationOrder);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<PagedList<DonationOrder>> GetAllAsync(PageParameters pageParameters)
@@ -76,10 +75,10 @@ namespace GivingChampion.Persistance.Repositories
         }
 
         // Implement UpdateAsync method
-        public async Task UpdateAsync(DonationOrder donationOrder)
+        public Task UpdateAsync(DonationOrder donationOrder)
         {
             _context.DonationOrders.Update(donationOrder);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         //private static async Task<PagedList<DonationOrder>> CreatePagedListAsync(

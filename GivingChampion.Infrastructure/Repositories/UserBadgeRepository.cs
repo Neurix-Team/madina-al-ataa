@@ -42,21 +42,10 @@ namespace GivingChampion.API.Repositories
             _context.UserBadges.Update(userBadge);
         }
 
-        public Task DeleteAsync(UserBadge userBadge)
-        {
-            _context.UserBadges.Update(userBadge);
-            return Task.CompletedTask;
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<UserBadge?> GetByProfileAndBadgeAsync(
-            Guid profileId,
-            Guid badgeId,
-            bool includeDeleted = false)
+                Guid profileId,
+                Guid badgeId,
+                bool includeDeleted = false)
         {
             var query = _context.UserBadges
                 .Include(ub => ub.Badge)

@@ -8,6 +8,7 @@ using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.Application.Services
 {
@@ -15,15 +16,18 @@ namespace GivingChampion.Application.Services
     {
         private readonly IUserMissionRepository _userMissionRepository;
         private readonly IMissionRepository _missionRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public UserMissionService(
             IUserMissionRepository userMissionRepository,
             IMissionRepository missionRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _userMissionRepository = userMissionRepository;
             _missionRepository = missionRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -71,6 +75,7 @@ namespace GivingChampion.Application.Services
             };
 
             await _userMissionRepository.CreateAsync(userMission);
+            await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<UserMissionDto>(userMission);
             resultDto.MissionTitle = mission.Title;
@@ -117,6 +122,7 @@ namespace GivingChampion.Application.Services
             }
 
             await _userMissionRepository.UpdateAsync(userMission);
+            await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<UserMissionDto>(userMission);
             resultDto.MissionTitle = userMission.Mission?.Title ?? "Unknown Mission";

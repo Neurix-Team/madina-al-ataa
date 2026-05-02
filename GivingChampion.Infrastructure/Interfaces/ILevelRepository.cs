@@ -10,6 +10,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<Level?> GetFirstLevelAsync();
         Task AddAsync(Level level);
         void Update(Level level);
-        Task SaveChangesAsync();
     }
 }

@@ -10,6 +10,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<UserGeoQuest?> GetByUserIdAndGeoQuestIdAsync(Guid userId, Guid geoQuestId);
         Task AddAsync(UserGeoQuest userGeoQuest);
         void Update(UserGeoQuest userGeoQuest);
-        Task SaveChangesAsync();
     }
 }

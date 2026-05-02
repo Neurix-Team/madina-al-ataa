@@ -43,11 +43,6 @@ namespace GivingChampion.API.Repositories
             _context.Levels.Update(level);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<Level?> GetFirstLevelAsync()
         {
             return await _context.Levels

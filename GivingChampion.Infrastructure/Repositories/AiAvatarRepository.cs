@@ -37,9 +37,5 @@ namespace GivingChampion.API.Repositories
             _context.AiAvatars.Update(aiAvatar);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

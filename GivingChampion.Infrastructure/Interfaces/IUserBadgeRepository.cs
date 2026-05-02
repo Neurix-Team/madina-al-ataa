@@ -13,9 +13,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task AddAsync(UserBadge userBadge);
 
         void Update(UserBadge userBadge);
-
-        Task DeleteAsync(UserBadge userBadge);
-
-        Task SaveChangesAsync();
     }
 }

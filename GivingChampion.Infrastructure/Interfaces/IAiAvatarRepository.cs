@@ -8,6 +8,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<AiAvatar?> GetByIdAsync(Guid id);
         Task AddAsync(AiAvatar aiAvatar);
         void Update(AiAvatar aiAvatar);
-        Task SaveChangesAsync();
     }
 }

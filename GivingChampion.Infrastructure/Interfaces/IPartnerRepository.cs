@@ -20,10 +20,10 @@ namespace GivingChampion.Persistance.Interfaces
             // Get a partner by its ID
             Task<Partner> GetByIdAsync(Guid id);
 
-        // Get all partners
-        Task<PagedList<Partner>> GetAllAsync(PageParameters pageParameters);
-        // Save changes to the database
-        Task SaveChangesAsync();
+            // Get all partners
+            Task<List<Partner>> GetAllAsync();
+
+            // Save changes to the database
         }
     }
 

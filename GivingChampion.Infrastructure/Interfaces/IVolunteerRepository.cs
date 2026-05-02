@@ -20,7 +20,6 @@ namespace GivingChampion.Persistance.Interfaces
 
         Task AddAsync(Guid userId); // Add a new volunteer (Entity)
         //void Update(Volunteer volunteer); // Update existing volunteer (Entity)
-        Task SaveChangesAsync(); // Save changes to the database
 
         #endregion
     }

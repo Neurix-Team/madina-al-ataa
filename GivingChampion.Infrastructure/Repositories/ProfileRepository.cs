@@ -35,18 +35,13 @@ namespace GivingChampion.API.Repositories
                 LevelId = levelId
             };
             await _context.Profiles.AddAsync(profile);
-            await _context.SaveChangesAsync();
             return profile;
         }
 
-        public async Task Update(Profile profile)
+        public Task Update(Profile profile)
         {
             _context.Profiles.Update(profile);
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task<Profile?> GetByUserIdAsync(Guid id)

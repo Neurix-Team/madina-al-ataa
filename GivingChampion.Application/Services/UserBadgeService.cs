@@ -9,14 +9,16 @@ namespace GivingChampion.API.Services
 {
     public class UserBadgeService : IUserBadgeService
     {
-        private readonly IUserBadgeRepository _userBadgeRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<UserBadge> _userBadgeRepository;
         private readonly IMapper _mapper;
 
         public UserBadgeService(
-            IUserBadgeRepository userBadgeRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _userBadgeRepository = userBadgeRepository;
+            _unitOfWork = unitOfWork;
+            _userBadgeRepository = unitOfWork.Repository<UserBadge>();
             _mapper = mapper;
         }
 
@@ -25,7 +27,7 @@ namespace GivingChampion.API.Services
             if (profileId == Guid.Empty)
                 throw new BadRequestException("Profile ID is required.");
 
-            var userBadges = await _userBadgeRepository.GetAllByProfileIdAsync(profileId);
+            var userBadges = await _userBadgeRepository.ListAsync(userBadge => userBadge.ProfileId == profileId);
 
             return _mapper.Map<List<UserBadgeDto>>(userBadges);
         }
@@ -73,7 +75,8 @@ namespace GivingChampion.API.Services
             var userBadge = _mapper.Map<UserBadge>(dto);
 
             await _userBadgeRepository.AddAsync(userBadge);
-            await _userBadgeRepository.SaveChangesAsync();
+
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<UserBadgeDto>(userBadge);
         }
@@ -98,7 +101,7 @@ namespace GivingChampion.API.Services
 
             _userBadgeRepository.Update(userBadge);
 
-            await _userBadgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -121,7 +124,7 @@ namespace GivingChampion.API.Services
 
             await _userBadgeRepository.DeleteAsync(userBadge);
 
-            await _userBadgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

@@ -38,9 +38,5 @@ namespace GivingChampion.API.Repositories
             _context.Reviews.Update(review);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

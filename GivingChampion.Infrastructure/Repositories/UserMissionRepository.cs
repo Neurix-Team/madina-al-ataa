@@ -56,7 +56,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             userMission.StartedAt = DateTime.UtcNow;
             userMission.Status = MissionStatus.InProgress;
             await _context.UserMissions.AddAsync(userMission);
-            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(UserMission userMission)
@@ -68,7 +67,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             }
 
             _context.UserMissions.Update(userMission);
-            await _context.SaveChangesAsync();
         }
 
         public async Task SoftDeleteAsync(Guid userMissionId)
@@ -78,8 +76,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
             userMission.IsDeleted = true;
             userMission.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> IsMissionStartedAsync(Guid userId, Guid missionId)

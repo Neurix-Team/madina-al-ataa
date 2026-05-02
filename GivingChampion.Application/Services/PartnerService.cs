@@ -12,12 +12,18 @@ namespace GivingChampion.Application.Services
 {
     public class PartnerService : IPartnerService
     {
-        private readonly IPartnerRepository _partnerRepository;
+
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Partner> _partnerRepository;
         private readonly IMapper _mapper;
 
-        public PartnerService(IPartnerRepository partnerRepository, IMapper mapper)
+        #region Constructor
+
+        // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
+        public PartnerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _partnerRepository = partnerRepository;
+            _unitOfWork = unitOfWork;
+            _partnerRepository = unitOfWork.Repository<Partner>();
             _mapper = mapper;
         }
 
@@ -25,7 +31,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<Result<PagedList<PartnerDto>>> GetAllAsync(PageParameters pageParameters)
         {
-            var partners = await _partnerRepository.GetAllAsync(pageParameters);
+            // Fetching all partners from the repository
+            var partners = await _partnerRepository.ListAsync();
 
             var dtos = _mapper.MapPagedList<Partner, PartnerDto>(partners);
 
@@ -51,7 +58,7 @@ namespace GivingChampion.Application.Services
             var partner = _mapper.Map<Partner>(dto);
 
             await _partnerRepository.AddAsync(partner);
-            await _partnerRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<PartnerDto>(partner);
         }
@@ -69,7 +76,7 @@ namespace GivingChampion.Application.Services
 
             _partnerRepository.Update(partner);
 
-            await _partnerRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<PartnerDto>(partner);
         }
@@ -81,9 +88,11 @@ namespace GivingChampion.Application.Services
             if (partner == null)
                 return false;
 
-            _partnerRepository.SoftDelete(partner);
+            partner.IsDeleted = true;
+            partner.DeletedAt = DateTime.UtcNow;
+            _partnerRepository.Update(partner);
 
-            await _partnerRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

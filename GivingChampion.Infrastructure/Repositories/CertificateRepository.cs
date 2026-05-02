@@ -52,7 +52,15 @@ namespace GivingChampion.Persistance.Repositories
             CancellationToken cancellationToken = default)
         {
             await _context.Certificates.AddAsync(certificate, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Get all certificates
+        public async Task<List<Certificate>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Certificates
+                .AsNoTracking()
+                .OrderByDescending(c => c.IssuedDate)
+                .ToListAsync(cancellationToken);
         }
     }
 }

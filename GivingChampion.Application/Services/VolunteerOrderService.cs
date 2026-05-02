@@ -19,6 +19,7 @@ namespace GivingChampion.Application.Services
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly IVolunteerHistoryService _historyService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         #endregion
@@ -29,11 +30,13 @@ namespace GivingChampion.Application.Services
             IVolunteerOrderRepository volunteerOrderRepository,
             IServiceRequestRepository serviceRequestRepository,
             IVolunteerHistoryService historyService,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
             _historyService = historyService;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -110,7 +113,7 @@ namespace GivingChampion.Application.Services
 
             await _volunteerOrderRepository.AddAsync(volunteerOrder);
 
-            await _volunteerOrderRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             var createdOrder = await _volunteerOrderRepository.GetByIdAsync(volunteerOrder.Id);
 
@@ -143,7 +146,7 @@ namespace GivingChampion.Application.Services
 
             _volunteerOrderRepository.Update(order);
 
-            await _volunteerOrderRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<bool> DeleteAsync(
@@ -173,7 +176,7 @@ namespace GivingChampion.Application.Services
 
             _volunteerOrderRepository.Update(existingVolunteerOrder);
 
-            await _volunteerOrderRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -261,8 +264,7 @@ namespace GivingChampion.Application.Services
 
             _volunteerOrderRepository.Update(order);
 
-            await _serviceRequestRepository.SaveChangesAsync();
-            await _volunteerOrderRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }
@@ -319,8 +321,7 @@ namespace GivingChampion.Application.Services
 
             await _serviceRequestRepository.UpdateAsync(serviceRequest);
 
-            await _serviceRequestRepository.SaveChangesAsync();
-            await _volunteerOrderRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }
@@ -352,7 +353,7 @@ namespace GivingChampion.Application.Services
 
             _volunteerOrderRepository.Update(order);
 
-            await _volunteerOrderRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             await _historyService.AddAsync(
                 order.UserId,

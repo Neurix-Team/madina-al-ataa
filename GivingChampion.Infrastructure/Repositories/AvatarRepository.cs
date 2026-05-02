@@ -33,18 +33,12 @@ namespace GivingChampion.API.Repositories
                 ProfileId = profileId
             };
             await _context.Avatars.AddAsync(avatar);
-            await _context.SaveChangesAsync();
             return avatar;
         }
 
         public void Update(Avatar avatar)
         {
             _context.Avatars.Update(avatar);
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
         }
 
         public async Task<Avatar?> GetByProfileIdAsync(Guid id)

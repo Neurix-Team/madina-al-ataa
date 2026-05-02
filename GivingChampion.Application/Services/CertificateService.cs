@@ -7,18 +7,22 @@ using GivingChampion.Common.Results;
 using GivingChampion.Persistance.Interfaces;
 using CertificateEntity = GivingChampion.Domain.Entities.Certificate;
 
-namespace GivingChampion.Application.Services.Certificate
+public class CertificateService : ICertificateService
 {
-    public class CertificateService : ICertificateService
-    {
-        private readonly ICertificateRepository _certificateRepository;
-        private readonly IMapper _mapper;
+    private readonly ICertificateRepository _certificateRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-        public CertificateService(ICertificateRepository certificateRepository, IMapper mapper)
-        {
-            _certificateRepository = certificateRepository;
-            _mapper = mapper;
-        }
+    // Constructor to initialize repository and mapper
+    public CertificateService(
+        ICertificateRepository certificateRepository,
+        IUnitOfWork unitOfWork,
+        IMapper mapper)
+    {
+        _certificateRepository = certificateRepository ?? throw new ArgumentNullException(nameof(certificateRepository));
+        _unitOfWork = unitOfWork;
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+    }
 
         public async Task<CertificateReadAllDto?> CreateAsync(
             CertificateCreateDto dto,
@@ -33,7 +37,10 @@ namespace GivingChampion.Application.Services.Certificate
 
             var certificate = _mapper.Map<CertificateEntity>(dto);
 
-            await _certificateRepository.AddAsync(certificate, cancellationToken);
+
+        // Step 4: Add the certificate to the repository
+        await _certificateRepository.AddAsync(certificate, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return _mapper.Map<CertificateReadAllDto>(certificate);
         }

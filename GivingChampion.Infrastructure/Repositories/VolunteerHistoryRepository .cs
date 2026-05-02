@@ -50,9 +50,5 @@ namespace GivingChampion.Persistance.Repositories
                 pageParameters.PageSize);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

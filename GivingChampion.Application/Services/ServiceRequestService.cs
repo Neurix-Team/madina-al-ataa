@@ -13,14 +13,16 @@ namespace GivingChampion.Application.Services
 {
     public class ServiceRequestService : IServiceRequestService
     {
-        private readonly IServiceRequestRepository _serviceRequestRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<ServiceRequest> _serviceRequestRepository;
         private readonly IMapper _mapper;
 
         public ServiceRequestService(
-            IServiceRequestRepository serviceRequestRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _serviceRequestRepository = serviceRequestRepository;
+            _unitOfWork = unitOfWork;
+            _serviceRequestRepository = unitOfWork.Repository<ServiceRequest>();
             _mapper = mapper;
         }
 
@@ -29,7 +31,7 @@ namespace GivingChampion.Application.Services
         // Gets all service requests and maps them from Entity list to DTO list.
         public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
         {
-            var serviceRequests = await _serviceRequestRepository.GetAllAsync(pageParameters);
+            var serviceRequests = await _serviceRequestRepository.ListAsync();
 
             var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(serviceRequests);
 
@@ -51,7 +53,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<List<ServiceRequestDto>> GetApprovedRequestsAsync()
         {
-            var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync();
+            var approvedRequests = await _serviceRequestRepository.ListAsync(
+                serviceRequest => serviceRequest.Status == RequestStatus.Approved);
 
             return _mapper.Map<List<ServiceRequestDto>>(approvedRequests);
         }
@@ -60,13 +63,10 @@ namespace GivingChampion.Application.Services
         RequestStatus status,
         PageParameters pageParameters)
         {
-            var serviceRequests = await _serviceRequestRepository.GetByStatusAsync(
-                status,
-                pageParameters);
+            var filtered = await _serviceRequestRepository.ListAsync(
+                serviceRequest => serviceRequest.Status == status);
 
-            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(serviceRequests);
-
-            return Result<PagedList<ServiceRequestDto>>.Success(dtos);
+            return _mapper.Map<List<ServiceRequestDto>>(filtered);
         }
 
         public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)
@@ -74,7 +74,8 @@ namespace GivingChampion.Application.Services
             if (partnerId == Guid.Empty)
                 throw new BadRequestException("Partner ID is required.");
 
-            var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
+            var serviceRequests = await _serviceRequestRepository.ListAsync(
+                serviceRequest => serviceRequest.PartnerId == partnerId);
 
             return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
         }
@@ -90,7 +91,7 @@ namespace GivingChampion.Application.Services
             serviceRequest.CreatedAt = DateTime.UtcNow;
 
             await _serviceRequestRepository.AddAsync(serviceRequest);
-            await _serviceRequestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             var createdServiceRequest = await _serviceRequestRepository.GetByIdAsync(serviceRequest.Id);
 
@@ -124,8 +125,8 @@ namespace GivingChampion.Application.Services
 
             serviceRequest.UpdatedAt = DateTime.UtcNow;
 
-            await _serviceRequestRepository.UpdateAsync(serviceRequest);
-            await _serviceRequestRepository.SaveChangesAsync();
+            _serviceRequestRepository.Update(serviceRequest);
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -140,9 +141,12 @@ namespace GivingChampion.Application.Services
             if (serviceRequest == null)
                 throw new NotFoundException("Service request not found.");
 
-            await _serviceRequestRepository.SoftDeleteAsync(serviceRequest);
-            await _serviceRequestRepository.SaveChangesAsync();
+            serviceRequest.IsDeleted = true;
+            serviceRequest.DeletedAt = DateTime.UtcNow;
+            _serviceRequestRepository.Update(serviceRequest);
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
-    } }
+    }
+}
