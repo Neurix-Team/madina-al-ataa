@@ -6,8 +6,8 @@ namespace GivingChampion.Persistance.Interfaces
     public interface IVolunteerHistoryRepository
     {
        
-            Task AddAsync(VolunteerHistories history);
-            Task<List<VolunteerHistories>> GetByUserIdAsync(Guid userId);
-            Task<List<VolunteerHistories>> GetByRequestIdAsync(Guid requestId);
-        }
+        Task AddAsync(VolunteerHistories history);
+        Task<PagedList<VolunteerHistories>> GetByUserIdAsync(Guid userId, PageParameters pageParameters);
+        Task<PagedList<VolunteerHistories>> GetByRequestIdAsync(Guid requestId, PageParameters pageParameters);
     }
+}

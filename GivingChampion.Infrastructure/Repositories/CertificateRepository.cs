@@ -2,7 +2,6 @@
 using GivingChampion.Domain.Entities;
 using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Contexts;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CertificateEntity = GivingChampion.Domain.Entities.Certificate;

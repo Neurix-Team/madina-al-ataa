@@ -17,7 +17,6 @@ namespace GivingChampion.Application.Services
         private readonly IGenericRepository<Partner> _partnerRepository;
         private readonly IMapper _mapper;
 
-        #region Constructor
 
         // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
         public PartnerService(IUnitOfWork unitOfWork, IMapper mapper)
@@ -27,7 +26,6 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
-        #region Query Methods
 
         public async Task<Result<PagedList<PartnerDto>>> GetAllAsync(PageParameters pageParameters)
         {
@@ -49,9 +47,6 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<PartnerDto>(partner);
         }
 
-        #endregion
-
-        #region Command Methods
 
         public async Task<PartnerDto> CreateAsync(CreatePartnerDto dto)
         {
@@ -97,6 +92,5 @@ namespace GivingChampion.Application.Services
             return true;
         }
 
-        #endregion
     }
 }

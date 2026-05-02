@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 namespace GivingChampion.Application.Interfaces.Certificate
 {
     public interface ICertificateService

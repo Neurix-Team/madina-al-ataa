@@ -2,6 +2,7 @@
 using GivingChampion.Application.DTO.VolunteerDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.API.Controllers.Volunteer
 {

@@ -4,6 +4,7 @@ using GivingChampion.Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.API.Controllers.Certificate
 {

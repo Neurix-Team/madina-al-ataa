@@ -19,7 +19,6 @@ using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
-using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Services.DonationOrderService;
 using GivingChampion.Application.Transformers;
 using GivingChampion.Application.DTO.Auth;
@@ -37,6 +36,10 @@ using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
 using GivingChampion.Persistance;
+using GivingChampion.Persistence.Contexts;
+using FluentValidation.AspNetCore;
+using GivingChampion.Application.Validators.Auth;
+using FluentValidation;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
