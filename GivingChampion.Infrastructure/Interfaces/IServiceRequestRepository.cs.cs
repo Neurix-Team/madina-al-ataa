@@ -1,21 +1,25 @@
-﻿using System;
+﻿using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.Persistance.Interfaces
 {
     public interface IServiceRequestRepository
     {
         // Gets all service requests that are not soft deleted
-        Task<List<ServiceRequest>> GetAllAsync();
-
+        Task<PagedList<ServiceRequest>> GetAllAsync(PageParameters pageParameters);
         // Gets a single service request by its id
         // Returns null if the request does not exist or is soft deleted
         Task<ServiceRequest?> GetByIdAsync(Guid id);
 
         // Gets all service requests with Pending status
         //Task<List<ServiceRequest>> GetPendingAsync();
+        Task<PagedList<ServiceRequest>> GetByStatusAsync(
+    RequestStatus status,
+    PageParameters pageParameters);
         Task<List<ServiceRequest>> GetApprovedRequestsAsync();
 
 

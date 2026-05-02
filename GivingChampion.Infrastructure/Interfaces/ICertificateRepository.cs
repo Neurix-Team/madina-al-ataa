@@ -1,18 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GivingChampion.Domain.Entities;
+﻿using GivingChampion.Common.Pagination;
+using CertificateEntity = GivingChampion.Domain.Entities.Certificate;
+
 namespace GivingChampion.Persistance.Interfaces
 {
     public interface ICertificateRepository
     {
+        Task<PagedList<CertificateEntity>> GetCertificateByIdAsync(
+            Guid userId,
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default);
 
+        Task<PagedList<CertificateEntity>> GetAllAsync(
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default);
 
-        public  Task<List<Certificate>> GetCertificateByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<bool> VolunteerExistsAsync(
+            Guid volunteerId,
+            CancellationToken cancellationToken = default);
 
-            Task<bool> VolunteerExistsAsync(Guid volunteerId, CancellationToken cancellationToken = default);
-
-            Task AddAsync(Certificate certificate, CancellationToken cancellationToken = default);
-           Task<List<Certificate>> GetAllAsync(CancellationToken cancellationToken = default);  // Method to get all certificates
+        Task AddAsync(
+            CertificateEntity certificate,
+            CancellationToken cancellationToken = default);
     }
 }

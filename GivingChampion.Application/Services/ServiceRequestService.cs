@@ -3,8 +3,11 @@ using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Common.DTO.ServiceRequestDto;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using GivingChampion.Common.Extensions.Mapper;
 
 namespace GivingChampion.Application.Services
 {
@@ -21,11 +24,18 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<List<ServiceRequestDto>> GetAllAsync()
-        {
-            var serviceRequests = await _serviceRequestRepository.GetAllAsync();
+        #endregion
 
-            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        #region Get Methods
+
+        // Gets all service requests and maps them from Entity list to DTO list.
+        public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
+        {
+            var serviceRequests = await _serviceRequestRepository.GetAllAsync(pageParameters);
+
+            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(serviceRequests);
+
+            return Result<PagedList<ServiceRequestDto>>.Success(dtos);
         }
 
         public async Task<ServiceRequestDto?> GetByIdAsync(Guid id)
@@ -47,16 +57,18 @@ namespace GivingChampion.Application.Services
 
             return _mapper.Map<List<ServiceRequestDto>>(approvedRequests);
         }
-
-        public async Task<List<ServiceRequestDto>> GetByStatusAsync(RequestStatus status)
+        // Gets all service requests filtered by specific status
+        public async Task<Result<PagedList<ServiceRequestDto>>> GetByStatusAsync(
+        RequestStatus status,
+        PageParameters pageParameters)
         {
-            var all = await _serviceRequestRepository.GetAllAsync();
+            var serviceRequests = await _serviceRequestRepository.GetByStatusAsync(
+                status,
+                pageParameters);
 
-            var filtered = all
-                .Where(sr => sr.Status == status)
-                .ToList();
+            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(serviceRequests);
 
-            return _mapper.Map<List<ServiceRequestDto>>(filtered);
+            return Result<PagedList<ServiceRequestDto>>.Success(dtos);
         }
 
         public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)

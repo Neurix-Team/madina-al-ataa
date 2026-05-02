@@ -1,11 +1,8 @@
-﻿using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Common.Pagination;
+using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using Microsoft.EntityFrameworkCore;  // Add this for Entity Framework extension methods
-using System;
-using System.Collections.Generic;
-using System.Linq;  // Ensure LINQ extension methods like Where, OrderBy are available
-using System.Threading.Tasks;  // Ensure async methods are available
+using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.Persistance.Repositories
 {
@@ -21,28 +18,41 @@ namespace GivingChampion.Persistance.Repositories
         public async Task AddAsync(VolunteerHistories history)
         {
             await _context.VolunteerHistories.AddAsync(history);
-            await SaveChangesAsync();  // Ensure changes are saved after adding
         }
 
-        public async Task<List<VolunteerHistories>> GetByUserIdAsync(Guid userId)
+        public async Task<PagedList<VolunteerHistories>> GetByUserIdAsync(
+            Guid userId,
+            PageParameters pageParameters)
         {
-            return await _context.VolunteerHistories
+            var query = _context.VolunteerHistories
+                .AsNoTracking()
                 .Where(x => x.UserId == userId)
-                .OrderByDescending(x => x.CreatedAt)
-                .ToListAsync(); // ToListAsync() works correctly if Entity Framework is set up properly
+                .OrderByDescending(x => x.CreatedAt);
+
+            return await PagedList<VolunteerHistories>.CreateAsync(
+                query,
+                pageParameters.PageNumber,
+                pageParameters.PageSize);
         }
 
-        public async Task<List<VolunteerHistories>> GetByRequestIdAsync(Guid requestId)
+        public async Task<PagedList<VolunteerHistories>> GetByRequestIdAsync(
+            Guid requestId,
+            PageParameters pageParameters)
         {
-            return await _context.VolunteerHistories
+            var query = _context.VolunteerHistories
+                .AsNoTracking()
                 .Where(x => x.ServiceRequestId == requestId)
-                .OrderByDescending(x => x.CreatedAt)
-                .ToListAsync(); // ToListAsync() works correctly if Entity Framework is set up properly
+                .OrderByDescending(x => x.CreatedAt);
+
+            return await PagedList<VolunteerHistories>.CreateAsync(
+                query,
+                pageParameters.PageNumber,
+                pageParameters.PageSize);
         }
 
         public async Task SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();  // Ensure changes are saved
+            await _context.SaveChangesAsync();
         }
     }
 }

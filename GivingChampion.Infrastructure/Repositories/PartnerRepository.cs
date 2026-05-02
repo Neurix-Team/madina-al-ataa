@@ -1,11 +1,13 @@
-﻿using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Domain.Contexts;
+using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.Persistance.Repositories
 {
@@ -75,19 +77,20 @@ namespace GivingChampion.Persistance.Repositories
             return await _context.Partners
                 .Where(p => p.Id == id && !p.IsDeleted) // Ensure the partner is not soft-deleted
                 .FirstOrDefaultAsync(); // Retrieve the first matching partner
-        } 
+        }
         #endregion
 
         #region GetAll
         /// <summary>
         /// Retrieves all Partners from the database, excluding soft-deleted ones.
         /// </summary>
-        public async Task<List<Partner>> GetAllAsync()
+        public async Task<PagedList<Partner>> GetAllAsync(PageParameters pageParameters)
         {
-            // Retrieving all partners that are not soft-deleted
             return await _context.Partners
-                .Where(p => !p.IsDeleted) // Filter out the deleted partners
-                .ToListAsync(); // Convert the result into a list
+                .Where(p => !p.IsDeleted)
+                .OrderBy(p => p.Id)
+                .AsNoTracking()
+                .ToPagedListAsync(pageParameters);
         }
         #endregion
 

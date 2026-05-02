@@ -1,4 +1,6 @@
 ﻿using GivingChampion.Common.Enums;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
@@ -15,22 +17,32 @@ namespace GivingChampion.Persistance.Repositories
             _context = context;
         }
 
-        public async Task<List<ServiceRequest>> GetAllAsync()
+        public async Task<PagedList<ServiceRequest>> GetAllAsync(PageParameters pageParameters)
         {
             return await _context.ServiceRequests
                 .AsNoTracking()
                 .Include(x => x.Partner)
                 .Where(x => !x.IsDeleted)
-                .ToListAsync();
+                .OrderByDescending(x => x.Id)
+                .ToPagedListAsync(pageParameters);
         }
-
         public async Task<ServiceRequest?> GetByIdAsync(Guid id)
         {
             return await _context.ServiceRequests
                 .Include(x => x.Partner)
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
-
+        public async Task<PagedList<ServiceRequest>> GetByStatusAsync(
+    RequestStatus status,
+    PageParameters pageParameters)
+        {
+            return await _context.ServiceRequests
+                .AsNoTracking()
+                .Include(x => x.Partner)
+                .Where(x => x.Status == status && !x.IsDeleted)
+                .OrderByDescending(x => x.Id)
+                .ToPagedListAsync(pageParameters);
+        }
         public async Task<List<ServiceRequest>> GetApprovedRequestsAsync()
         {
             return await _context.ServiceRequests

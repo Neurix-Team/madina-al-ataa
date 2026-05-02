@@ -1,54 +1,78 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.Certificate;
 using GivingChampion.Common.DTO.CertificateDto;
+using GivingChampion.Common.Extensions.Mapper;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Persistance.Interfaces;
-namespace GivingChampion.Application.Services.Certificate;
+using CertificateEntity = GivingChampion.Domain.Entities.Certificate;
 
-public class CertificateService : ICertificateService
+namespace GivingChampion.Application.Services.Certificate
 {
-    private readonly ICertificateRepository _certificateRepository;
-    private readonly IMapper _mapper;
-
-    // Constructor to initialize repository and mapper
-    public CertificateService(ICertificateRepository certificateRepository, IMapper mapper)
+    public class CertificateService : ICertificateService
     {
-        _certificateRepository = certificateRepository ?? throw new ArgumentNullException(nameof(certificateRepository));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-    }
+        private readonly ICertificateRepository _certificateRepository;
+        private readonly IMapper _mapper;
 
-    // Create a new certificate
-    public async Task<CertificateReadAllDto?> CreateAsync(CertificateCreateDto dto, CancellationToken cancellationToken = default)
-    {
-        // Step 1: Check if the volunteer exists
-        var volunteerExists = await _certificateRepository.VolunteerExistsAsync(dto.VolunteerId, cancellationToken);
-        if (!volunteerExists)
+        public CertificateService(ICertificateRepository certificateRepository, IMapper mapper)
         {
-            return null; // Return null if the volunteer does not exist
+            _certificateRepository = certificateRepository;
+            _mapper = mapper;
         }
 
-        // Step 2: Map the CertificateCreateDto to Certificate entity
-        var certificate = _mapper.Map<Domain.Entities.Certificate>(dto);
+        public async Task<CertificateReadAllDto?> CreateAsync(
+            CertificateCreateDto dto,
+            CancellationToken cancellationToken = default)
+        {
+            var volunteerExists = await _certificateRepository.VolunteerExistsAsync(
+                dto.VolunteerId,
+                cancellationToken);
 
+            if (!volunteerExists)
+                return null;
 
-        // Step 4: Add the certificate to the repository
-        await _certificateRepository.AddAsync(certificate, cancellationToken);
+            var certificate = _mapper.Map<CertificateEntity>(dto);
 
-        // Step 5: Return the created certificate as a DTO
-        return _mapper.Map<CertificateReadAllDto>(certificate);
-    }
+            await _certificateRepository.AddAsync(certificate, cancellationToken);
 
-    // Check if a volunteer exists by their ID
-    public async Task<bool> CheckVolunteerExists(Guid volunteerId, CancellationToken cancellationToken = default)
-    {
-        // Check if volunteer exists in the repository
-        return await _certificateRepository.VolunteerExistsAsync(volunteerId, cancellationToken);
-    }
-    public async Task<List<CertificateReadAllDto>> GetCertificatesByIdAsync(
-     Guid userId,
-     CancellationToken cancellationToken = default)
-    {
-        var certificates = await _certificateRepository.GetCertificateByIdAsync(userId, cancellationToken);
+            return _mapper.Map<CertificateReadAllDto>(certificate);
+        }
 
-        return _mapper.Map<List<CertificateReadAllDto>>(certificates);
+        public async Task<bool> CheckVolunteerExists(
+            Guid volunteerId,
+            CancellationToken cancellationToken = default)
+        {
+            return await _certificateRepository.VolunteerExistsAsync(
+                volunteerId,
+                cancellationToken);
+        }
+
+        public async Task<Result<PagedList<CertificateReadAllDto>>> GetCertificatesByIdAsync(
+            Guid userId,
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default)
+        {
+            var certificates = await _certificateRepository.GetCertificateByIdAsync(
+                userId,
+                pageParameters,
+                cancellationToken);
+
+            var dtos = _mapper.MapPagedList<CertificateEntity, CertificateReadAllDto>(certificates);
+
+            return Result<PagedList<CertificateReadAllDto>>.Success(dtos);
+        }
+
+        public async Task<Result<PagedList<CertificateReadAllDto>>> GetAllAsync(
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default)
+        {
+            var certificates = await _certificateRepository.GetAllAsync(
+                pageParameters,
+                cancellationToken);
+
+            var dtos = _mapper.MapPagedList<CertificateEntity, CertificateReadAllDto>(certificates);
+
+            return Result<PagedList<CertificateReadAllDto>>.Success(dtos);
+        }
     }
 }

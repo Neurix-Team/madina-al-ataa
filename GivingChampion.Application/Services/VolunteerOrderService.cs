@@ -4,6 +4,8 @@ using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
@@ -35,15 +37,20 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
-        #endregion
-
-        #region Get All Volunteer Orders
-
-        public async Task<List<VolunteerOrderDto>> GetAllAsync()
+        public async Task<Result<PagedList<VolunteerOrderDto>>> GetAllAsync(PageParameters pageParameters)
         {
-            var volunteerOrders = await _volunteerOrderRepository.GetAllAsync();
+            var volunteerOrders = await _volunteerOrderRepository.GetAllAsync(pageParameters);
 
-            return _mapper.Map<List<VolunteerOrderDto>>(volunteerOrders);
+            var mappedItems = _mapper.Map<IReadOnlyList<VolunteerOrderDto>>(volunteerOrders.Items);
+
+            var pagedDtos = new PagedList<VolunteerOrderDto>(
+                mappedItems,
+                volunteerOrders.PageNumber,
+                volunteerOrders.PageSize,
+                volunteerOrders.TotalCount
+            );
+
+            return Result<PagedList<VolunteerOrderDto>>.Success(pagedDtos);
         }
 
         #endregion

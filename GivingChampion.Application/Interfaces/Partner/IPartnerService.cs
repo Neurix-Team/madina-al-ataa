@@ -1,5 +1,7 @@
 ﻿using GivingChampion.Common.DTO.Partner;
 using GivingChampion.Common.DTO.PartnerDto;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,10 +10,10 @@ namespace GivingChampion.Application.Interfaces.Partner
 {
     public interface IPartnerService
     {
-            // Query Methods
+        // Query Methods
 
-            Task<List<PartnerDto>> GetAllAsync(); // Get all partners
-            Task<PartnerDto?> GetByIdAsync(Guid id); // Get a partner by ID
+        Task<Result<PagedList<PartnerDto>>> GetAllAsync(PageParameters pageParameters);
+        Task<PartnerDto?> GetByIdAsync(Guid id); // Get a partner by ID
 
             // Command Methods
 

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using GivingChampion.Application.Interfaces.Partner;
+﻿using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Common.DTO.Partner;
+using GivingChampion.Common.Pagination;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -65,18 +66,20 @@ namespace GivingChampion.API.Controllers
         #region GetALLPartner
         /// <summary>
         /// Retrieves all partners.
-        /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             try
             {
-                var partners = await _partnerService.GetAllAsync();
-                return Ok(partners);
+                var result = await _partnerService.GetAllAsync(pageParameters);
+
+                if (!result.IsSuccess)
+                    return BadRequest(result);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                // Log error and return 500 Internal Server Error
                 _logger.LogError(ex, "Error occurred while fetching all partners.");
                 return StatusCode(500, "Internal server error");
             }

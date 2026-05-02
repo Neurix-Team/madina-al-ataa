@@ -1,6 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Common.DTO.ServiceRequestDto;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,19 +19,48 @@ namespace GivingChampion.API.Controllers
             _serviceRequestService = serviceRequestService;
         }
 
-        // GET: api/ServiceRequests
+        #endregion
+
+
+
+
+        #region Get Endpoints
+        [Authorize(Roles = "Volunteer")]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] RequestStatus? status)
+        public async Task<IActionResult> GetAll(
+     [FromQuery] PageParameters pageParameters,
+     [FromQuery] RequestStatus? status)
         {
-            if (status.HasValue)
+            try
             {
-                var filtered = await _serviceRequestService.GetByStatusAsync(status.Value);
-                return Ok(filtered);
+                if (status.HasValue)
+                {
+                    var filteredResult = await _serviceRequestService.GetByStatusAsync(
+                        status.Value,
+                        pageParameters);
+
+                    if (!filteredResult.IsSuccess)
+                        return BadRequest(filteredResult);
+
+                    return Ok(filteredResult);
+                }
+
+                var result = await _serviceRequestService.GetAllAsync(pageParameters);
+
+                if (!result.IsSuccess)
+                    return BadRequest(result);
+
+                return Ok(result);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting all service requests.");
 
-            var serviceRequests = await _serviceRequestService.GetAllAsync();
-
-            return Ok(serviceRequests);
+                return StatusCode(500, new
+                {
+                    Message = "An unexpected error occurred while retrieving service requests."
+                });
+            }
         }
 
         // GET: api/ServiceRequests/{id}
@@ -68,21 +98,26 @@ namespace GivingChampion.API.Controllers
 
         // GET: api/ServiceRequests/filter?status=Approved
         [HttpGet("filter")]
+        [Authorize(Roles = "Volunteer, Admin")] 
         public async Task<IActionResult> GetByStatus([FromQuery] RequestStatus status)
         {
-            var filteredRequests = await _serviceRequestService.GetByStatusAsync(status);
-
-            if (!filteredRequests.Any())
+            try
             {
-                return NotFound(new
+                var filteredRequests = await _serviceRequestService.GetByStatusAsync(status);
+
+                if (filteredRequests == null || !filteredRequests.Any())
                 {
-                    Message = $"No service requests found with status: {status}"
-                });
+                    return NotFound(new { Message = $"No service requests found with status: {status}" });
+                }
+
+                return Ok(filteredRequests);
             }
-
-            return Ok(filteredRequests);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while filtering service requests by status {Status}.", status);
+                return StatusCode(500, new { Message = "Internal server error while filtering requests." });
+            }
         }
-
         // DELETE: api/ServiceRequests/{id}
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]

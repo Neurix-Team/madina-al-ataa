@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-
+﻿using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 
 namespace GivingChampion.Persistance.Repositories
 {
@@ -33,19 +34,14 @@ namespace GivingChampion.Persistance.Repositories
 
         #region GetAllVolunteer
 
-        ///// <summary>
-        ///// Gets all volunteers from the database, excluding soft-deleted ones.
-        ///// </summary>
-        ///// <returns>A list of non-deleted volunteers.</returns>
-        //public async Task<List<Volunteer>> GetAllAsync()
-        //{
-        //    // Use AsNoTracking for better performance since we don't need to modify the retrieved entities
-        //    return await _context.Volunteers
-        //        .Where(v => !v.IsDeleted) // Only non-deleted volunteers
-        //        .AsNoTracking() // Avoid tracking entities to improve performance
-        //        .ToListAsync()
-        //        .ConfigureAwait(false); // Avoid blocking UI thread in production
-        //} 
+        public async Task<PagedList<Volunteer>> GetAllAsync(PageParameters pageParameters)
+        {
+            return await _context.Volunteers
+                .Where(v => !v.IsDeleted)
+                .AsNoTracking()
+                .ToPagedListAsync(pageParameters);
+        }
+
         #endregion
 
         #region GetById

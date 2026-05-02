@@ -1,5 +1,6 @@
 ﻿using GivingChampion.API.Extensions;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,46 +11,66 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
     [Authorize]
     public class VolunteerHistoriesController : ControllerBase
     {
-        #region Fields
-
         private readonly IVolunteerHistoryService _historyService;
 
-        #endregion
-
-        #region Constructor
-
-        public VolunteerHistoriesController(IVolunteerHistoryService historyService)
+        public VolunteerHistoriesController(
+            IVolunteerHistoryService historyService,
+            ILogger<VolunteerHistoriesController> logger)
         {
             _historyService = historyService;
         }
 
-        #endregion
-
-        #region Get My History
-
         [HttpGet("me")]
-        public async Task<IActionResult> GetMyHistory()
+        [Authorize(Roles = "Volunteer,Admin")]
+        public async Task<IActionResult> GetMyHistory([FromQuery] PageParameters pageParameters)
         {
             if (!User.TryGetCurrentUserId(out var userId))
                 return Unauthorized(new { message = "Invalid or missing user ID in token." });
 
-            var result = await _historyService.GetUserHistory(userId);
+                var result = await _historyService.GetUserHistory(userId, pageParameters);
 
-            return Ok(result);
+                if (!result.IsSuccess)
+                    return BadRequest(result);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while fetching history for authenticated user.");
+
+                return StatusCode(500, new
+                {
+                    message = "Error while fetching user history",
+                    error = ex.Message
+                });
+            }
         }
-
-        #endregion
-
-        #region Get Request History
 
         [HttpGet("request/{requestId:guid}")]
-        public async Task<IActionResult> GetRequestHistory(Guid requestId)
+        [Authorize(Roles = "Volunteer,Admin")]
+        public async Task<IActionResult> GetRequestHistory(
+            Guid requestId,
+            [FromQuery] PageParameters pageParameters)
         {
-            var result = await _historyService.GetRequestHistory(requestId);
+            try
+            {
+                var result = await _historyService.GetRequestHistory(requestId, pageParameters);
 
-            return Ok(result);
+                if (!result.IsSuccess)
+                    return BadRequest(result);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while fetching history for request {RequestId}", requestId);
+
+                return StatusCode(500, new
+                {
+                    message = "Error while fetching request history",
+                    error = ex.Message
+                });
+            }
         }
-
-        #endregion
     }
 }

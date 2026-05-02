@@ -1,24 +1,26 @@
 ﻿using GivingChampion.Common.DTO.CertificateDto;
-using GivingChampion.Domain.Contexts;
-using GivingChampion.Persistance.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using GivingChampion.Domain.Entities;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
+
 namespace GivingChampion.Application.Interfaces.Certificate
 {
     public interface ICertificateService
     {
-      
+        Task<CertificateReadAllDto?> CreateAsync(
+            CertificateCreateDto dto,
+            CancellationToken cancellationToken = default);
 
-            // Create a new certificate
-            Task<CertificateReadAllDto?> CreateAsync(CertificateCreateDto dto, CancellationToken cancellationToken = default);
+        Task<bool> CheckVolunteerExists(
+            Guid volunteerId,
+            CancellationToken cancellationToken = default);
 
-            // Check if a volunteer exists
-            Task<bool> CheckVolunteerExists(Guid volunteerId, CancellationToken cancellationToken = default);
+        Task<Result<PagedList<CertificateReadAllDto>>> GetCertificatesByIdAsync(
+            Guid userId,
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default);
 
-        Task<List<CertificateReadAllDto>> GetCertificatesByIdAsync(Guid userId, CancellationToken cancellationToken = default);
+        Task<Result<PagedList<CertificateReadAllDto>>> GetAllAsync(
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default);
     }
 }
-
-
