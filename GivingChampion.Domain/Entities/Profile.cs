@@ -24,7 +24,7 @@ namespace GivingChampion.Domain.Entities
         [ForeignKey("Level")]
         public Guid LevelId { get; set; }
         public Level Level { get; set; }
-        public ICollection<Badge> Badges { get; set; }
+        public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
         public ICollection<Review> Reviews { get; set; }
     }
 }

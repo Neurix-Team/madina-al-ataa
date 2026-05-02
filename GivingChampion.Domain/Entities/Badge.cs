@@ -23,8 +23,7 @@ namespace GivingChampion.Domain.Entities
         [Required]
         [StringLength(50)]
         public string Category { get; set; }
-        [ForeignKey("Profile")]
-        public Guid ProfileId { get; set; }
-        public Profile Profile { get; set; }
+        public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
+
     }
 }

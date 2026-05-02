@@ -18,14 +18,18 @@ namespace GivingChampion.API.Repositories
         {
             return await _context.UserBadges
                 .AsNoTracking()
-                .Where(ub => ub.ProfileId == profileId)
+                .Include(ub => ub.Badge)
+                .Include(ub => ub.Profile)
+                .Where(ub => ub.ProfileId == profileId && !ub.IsDeleted)
                 .ToListAsync();
         }
 
         public async Task<UserBadge?> GetByIdAsync(Guid id)
         {
             return await _context.UserBadges
-                .FirstOrDefaultAsync(ub => ub.Id == id);
+                .Include(ub => ub.Badge)
+                .Include(ub => ub.Profile)
+                .FirstOrDefaultAsync(ub => ub.Id == id && !ub.IsDeleted);
         }
 
         public async Task AddAsync(UserBadge userBadge)
@@ -38,9 +42,33 @@ namespace GivingChampion.API.Repositories
             _context.UserBadges.Update(userBadge);
         }
 
+        public Task DeleteAsync(UserBadge userBadge)
+        {
+            _context.UserBadges.Update(userBadge);
+            return Task.CompletedTask;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<UserBadge?> GetByProfileAndBadgeAsync(
+            Guid profileId,
+            Guid badgeId,
+            bool includeDeleted = false)
+        {
+            var query = _context.UserBadges
+                .Include(ub => ub.Badge)
+                .Include(ub => ub.Profile)
+                .AsQueryable();
+
+            if (includeDeleted)
+                query = query.IgnoreQueryFilters();
+
+            return await query.FirstOrDefaultAsync(ub =>
+                ub.ProfileId == profileId &&
+                ub.BadgeId == badgeId);
         }
     }
 }

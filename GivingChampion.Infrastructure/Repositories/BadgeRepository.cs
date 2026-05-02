@@ -19,7 +19,7 @@ namespace GivingChampion.API.Repositories
         public async Task<PagedList<Badge>> GetAllAsync(PageParameters pageParameters)
         {
             return await _context.Badges
-                .AsNoTracking().ToPagedListAsync(pageParameters);
+                .AsNoTracking().Where(b => !b.IsDeleted).ToPagedListAsync(pageParameters);
         }
 
         public async Task<Badge?> GetByIdAsync(Guid id)

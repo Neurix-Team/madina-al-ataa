@@ -15,6 +15,5 @@ namespace GivingChampion.Domain.Entities
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
 
-
     }
 }

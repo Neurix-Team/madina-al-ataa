@@ -54,12 +54,22 @@ namespace GivingChampion.Domain.Contexts
             modelBuilder.ApplySoftDeleteQueryFilter();
 
             // ====================== Specific Configurations ======================
-            // Only add manual configurations here if needed (relationships, indexes, etc.)
 
-            modelBuilder.Entity<Profile>()
-                .HasMany(p => p.Badges)
-                .WithOne(ub => ub.Profile)
+            // ====================== Profile & Badges Relationship ======================
+
+            modelBuilder.Entity<UserBadge>()
+                .HasOne(ub => ub.Profile)
+                .WithMany(p => p.UserBadges)
                 .HasForeignKey(ub => ub.ProfileId);
+
+            modelBuilder.Entity<UserBadge>()
+                .HasOne(ub => ub.Badge)
+                .WithMany(b => b.UserBadges)
+                .HasForeignKey(ub => ub.BadgeId);
+
+            modelBuilder.Entity<UserBadge>()
+                .HasIndex(ub => new { ub.ProfileId, ub.BadgeId })
+                .IsUnique();
 
             modelBuilder.Entity<Profile>()
                 .HasOne(p => p.Level)
@@ -69,6 +79,7 @@ namespace GivingChampion.Domain.Contexts
                 .HasMany(p => p.Reviews)
                 .WithOne(r => r.Profile)
                 .HasForeignKey(r => r.ProfileId);
+
             modelBuilder.Entity<UserGeoQuest>()
                 .HasOne(ugq => ugq.GeoQuest)
                 .WithMany()

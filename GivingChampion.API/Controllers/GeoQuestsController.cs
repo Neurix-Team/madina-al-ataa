@@ -75,6 +75,7 @@ namespace GivingChampion.API.Controllers
         [HttpPost("{geoQuestId:guid}/start")]
         public async Task<IActionResult> StartGeoQuest(Guid geoQuestId)
         {
+            
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? User.FindFirstValue("sub");
 

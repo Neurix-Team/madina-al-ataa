@@ -176,16 +176,14 @@ namespace GivingChampion.Application.Mapper
             #region DonationRequest Mappings
 
             CreateMap<UserGeoQuest, UserGeoQuestDto>()
-                .ForMember(dest => dest.GeoQuestId,
-                    opt => opt.MapFrom(src => src.GeoQuestId))
-                .ForMember(dest => dest.Title,
-                    opt => opt.MapFrom(src =>
-                        src.GeoQuest != null ? src.GeoQuest.Title : src.Title))
-                .ForMember(dest => dest.LocationLatitude,
-                    opt => opt.MapFrom(src =>
-                        src.GeoQuest.Location.Latitude ?? "0"))
-                .ForMember(dest => dest.LocationLongitude,
-                    opt => opt.MapFrom(src => src.GeoQuest.Location.Longitude ?? "0"))
+                .ForMember(dest => dest.GeoQuestId, opt => opt.MapFrom(src => src.GeoQuestId))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src =>
+                    src.GeoQuest != null && !string.IsNullOrWhiteSpace(src.GeoQuest.Title)
+                        ? src.GeoQuest.Title
+                        : src.Title))
+                
+                .ForMember(dest => dest.LocationLatitude, opt => opt.MapFrom(src =>src.GeoQuest.Location.Latitude ?? "0"))
+                .ForMember(dest => dest.LocationLongitude, opt => opt.MapFrom(src =>src.GeoQuest.Location.Longitude ?? "0"))
                 .ReverseMap();
 
             CreateMap<UpdateDonationRequestDto, DonationRequest>()

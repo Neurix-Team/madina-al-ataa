@@ -51,10 +51,28 @@ namespace GivingChampion.API.Services
             if (dto == null)
                 throw new BadRequestException("UserBadge create data is required.");
 
+            var existingUserBadge = await _userBadgeRepository.GetByProfileAndBadgeAsync(
+                dto.ProfileId,
+                dto.BadgeId,
+                includeDeleted: true);
+
+            if (existingUserBadge != null)
+            {
+                if (!existingUserBadge.IsDeleted)
+                    throw new BadRequestException("This badge is already assigned to this profile.");
+
+                existingUserBadge.IsDeleted = false;
+                existingUserBadge.DeletedAt = null;
+
+                _userBadgeRepository.Update(existingUserBadge);
+                await _userBadgeRepository.SaveChangesAsync();
+
+                return _mapper.Map<UserBadgeDto>(existingUserBadge);
+            }
+
             var userBadge = _mapper.Map<UserBadge>(dto);
 
             await _userBadgeRepository.AddAsync(userBadge);
-
             await _userBadgeRepository.SaveChangesAsync();
 
             return _mapper.Map<UserBadgeDto>(userBadge);
@@ -101,7 +119,7 @@ namespace GivingChampion.API.Services
             userBadge.IsDeleted = true;
             userBadge.DeletedAt = DateTime.UtcNow;
 
-            _userBadgeRepository.Update(userBadge);
+            await _userBadgeRepository.DeleteAsync(userBadge);
 
             await _userBadgeRepository.SaveChangesAsync();
 
