@@ -15,7 +15,6 @@ using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.Services;
-using GivingChampion.Application.Services.Certificate;
 using GivingChampion.Application.Services.DonationOrderService;
 using Microsoft.Extensions.DependencyInjection;
 using System;
