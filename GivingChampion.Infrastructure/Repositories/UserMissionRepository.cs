@@ -74,8 +74,10 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             var userMission = await _context.UserMissions.FindAsync(userMissionId);
             if (userMission == null) return;
 
-            userMission.IsDeleted = true;
-            userMission.DeletedAt = DateTime.UtcNow;
+            //userMission.IsDeleted = true;
+            //userMission.DeletedAt = DateTime.UtcNow;
+
+            _context.UserMissions.Remove(userMission);
         }
 
         public async Task<bool> IsMissionStartedAsync(Guid userId, Guid missionId)

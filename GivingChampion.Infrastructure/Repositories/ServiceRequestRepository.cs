@@ -62,10 +62,12 @@ namespace GivingChampion.Persistance.Repositories
 
         public Task SoftDeleteAsync(ServiceRequest serviceRequest)
         {
-            serviceRequest.IsDeleted = true;
-            serviceRequest.DeletedAt = DateTime.UtcNow;
+            //serviceRequest.IsDeleted = true;
+            //serviceRequest.DeletedAt = DateTime.UtcNow;
 
-            _context.ServiceRequests.Update(serviceRequest);
+            //_context.ServiceRequests.Update(serviceRequest);
+            _context.ServiceRequests.Remove(serviceRequest);
+
             return Task.CompletedTask;
         }
 
