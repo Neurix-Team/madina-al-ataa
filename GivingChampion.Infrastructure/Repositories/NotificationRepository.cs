@@ -19,7 +19,6 @@ namespace GivingChampion.Persistence.Repositories
             notification.SentAt = DateTime.UtcNow;
             notification.IsRead = false;
             await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Notification>> GetByUserIdAsync(Guid userId)
@@ -44,7 +43,6 @@ namespace GivingChampion.Persistence.Repositories
             if (notification != null)
             {
                 notification.IsRead = true;
-                await _context.SaveChangesAsync();
             }
         }
 
@@ -59,7 +57,6 @@ namespace GivingChampion.Persistence.Repositories
                 notification.IsRead = true;
             }
 
-            await _context.SaveChangesAsync();
         }
 
         public async Task SoftDeleteAsync(Guid notificationId)
@@ -68,7 +65,6 @@ namespace GivingChampion.Persistence.Repositories
             if (notification != null)
             {
                 _context.Notifications.Remove(notification);
-                await _context.SaveChangesAsync();
             }
         }
 

@@ -61,13 +61,12 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
         {
             mission.Status = MissionStatus.Open;
             await _context.Missions.AddAsync(mission);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Mission mission)
+        public Task UpdateAsync(Mission mission)
         {
             _context.Missions.Update(mission);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task SoftDeleteAsync(Guid missionId)
@@ -77,8 +76,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
             mission.IsDeleted = true;
             mission.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
         }
     }
 }

@@ -42,13 +42,12 @@ namespace GivingChampion.Persistence.Repositories
                 UserId = userId,
             };
             await _context.Donors.AddAsync(donor);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Donor donor)
+        public Task UpdateAsync(Donor donor)
         {
             _context.Donors.Update(donor);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -62,8 +61,6 @@ namespace GivingChampion.Persistence.Repositories
             if (donor == null) return;
 
             _context.Donors.Remove(donor);
-
-            await _context.SaveChangesAsync();
         }
     }
 }

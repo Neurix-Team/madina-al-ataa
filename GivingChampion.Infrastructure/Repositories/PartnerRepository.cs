@@ -91,17 +91,6 @@ namespace GivingChampion.Persistance.Repositories
         }
         #endregion
 
-        #region SaveChange
-        /// <summary>
-        /// Saves all changes to the database asynchronously.
-        /// </summary>
-        public async Task SaveChangesAsync()
-        {
-            // Saving all the changes made to the DbContext
-            await _context.SaveChangesAsync();
-        } 
-        #endregion
-
         #endregion
     }
     }

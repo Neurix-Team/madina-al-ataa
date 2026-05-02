@@ -23,7 +23,6 @@ namespace GivingChampion.Persistance.Interfaces
             Task<List<Partner>> GetAllAsync();
 
             // Save changes to the database
-            Task SaveChangesAsync();
         }
     }
 

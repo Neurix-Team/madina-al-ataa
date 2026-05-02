@@ -21,7 +21,6 @@ namespace GivingChampion.Persistance.Repositories
         public async Task AddAsync(VolunteerHistories history)
         {
             await _context.VolunteerHistories.AddAsync(history);
-            await SaveChangesAsync();  // Ensure changes are saved after adding
         }
 
         public async Task<List<VolunteerHistories>> GetByUserIdAsync(Guid userId)
@@ -40,9 +39,5 @@ namespace GivingChampion.Persistance.Repositories
                 .ToListAsync(); // ToListAsync() works correctly if Entity Framework is set up properly
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();  // Ensure changes are saved
-        }
     }
 }

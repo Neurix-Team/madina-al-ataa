@@ -53,8 +53,11 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
 
     public DonationRequestsController CreateDonationRequestsController(Guid? userId = null, params string[] roles)
     {
+        var context = CreateDbContext();
+
         IDonationRequestService service = new DonationRequestService(
-            new DonationRequestRepository(CreateDbContext()),
+            new DonationRequestRepository(context),
+            new UnitOfWork(context),
             Mapper);
 
         return new DonationRequestsController(service)

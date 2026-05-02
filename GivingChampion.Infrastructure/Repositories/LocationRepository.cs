@@ -41,13 +41,12 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
         public async Task CreateAsync(Location location)
         {
             await _context.Locations.AddAsync(location);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Location location)
+        public Task UpdateAsync(Location location)
         {
             _context.Locations.Update(location);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task SoftDeleteAsync(Guid locationId)
@@ -57,8 +56,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
             location.IsDeleted = true;
             location.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
         }
     }
 }

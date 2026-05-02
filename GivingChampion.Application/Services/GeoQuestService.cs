@@ -13,14 +13,16 @@ namespace GivingChampion.Application.Services
 {
     public class GeoQuestService : IGeoQuestService
     {
-        private readonly IGeoQuestRepository _geoQuestRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<GeoQuest> _geoQuestRepository;
         private readonly IMapper _mapper;
 
         public GeoQuestService(
-            IGeoQuestRepository geoQuestRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _geoQuestRepository = geoQuestRepository;
+            _unitOfWork = unitOfWork;
+            _geoQuestRepository = unitOfWork.Repository<GeoQuest>();
             _mapper = mapper;
         }
 
@@ -62,7 +64,7 @@ namespace GivingChampion.Application.Services
             var geoQuest = _mapper.Map<GeoQuest>(dto);
 
             await _geoQuestRepository.AddAsync(geoQuest);
-            await _geoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             var geoQuestDto = _mapper.Map<GeoQuestDto>(geoQuest);
 
@@ -89,7 +91,7 @@ namespace GivingChampion.Application.Services
 
             _geoQuestRepository.Update(geoQuest);
 
-            await _geoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
@@ -112,7 +114,7 @@ namespace GivingChampion.Application.Services
 
             _geoQuestRepository.Update(geoQuest);
 
-            await _geoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }

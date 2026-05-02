@@ -9,6 +9,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<UserLevel?> GetByIdAsync(Guid id);
         Task AddAsync(UserLevel userLevel);
         void Update(UserLevel userLevel);
-        Task SaveChangesAsync();
     }
 }

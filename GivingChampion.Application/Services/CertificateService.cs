@@ -7,12 +7,17 @@ namespace GivingChampion.Application.Services.Certificate;
 public class CertificateService : ICertificateService
 {
     private readonly ICertificateRepository _certificateRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
     // Constructor to initialize repository and mapper
-    public CertificateService(ICertificateRepository certificateRepository, IMapper mapper)
+    public CertificateService(
+        ICertificateRepository certificateRepository,
+        IUnitOfWork unitOfWork,
+        IMapper mapper)
     {
         _certificateRepository = certificateRepository ?? throw new ArgumentNullException(nameof(certificateRepository));
+        _unitOfWork = unitOfWork;
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
@@ -32,6 +37,7 @@ public class CertificateService : ICertificateService
 
         // Step 4: Add the certificate to the repository
         await _certificateRepository.AddAsync(certificate, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Step 5: Return the created certificate as a DTO
         return _mapper.Map<CertificateReadAllDto>(certificate);

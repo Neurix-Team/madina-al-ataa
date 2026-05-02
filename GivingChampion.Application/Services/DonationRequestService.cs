@@ -13,13 +13,16 @@ namespace GivingChampion.Application.Services
     public class DonationRequestService : IDonationRequestService
     {
         private readonly IDonationRequestRepository _donationRequestRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public DonationRequestService(
             IDonationRequestRepository donationRequestRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _donationRequestRepository = donationRequestRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -92,6 +95,7 @@ namespace GivingChampion.Application.Services
             }
 
             await _donationRequestRepository.AddAsync(donationRequest);
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<DonationRequestDto>(donationRequest);
         }
@@ -122,6 +126,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Amount remaining cannot be negative.");
 
             await _donationRequestRepository.UpdateAsync(existingRequest);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task ApproveAsync(Guid id)
@@ -140,6 +145,7 @@ namespace GivingChampion.Application.Services
             donationRequest.Status = RequestStatus.Approved;
 
             await _donationRequestRepository.UpdateAsync(donationRequest);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task RejectAsync(Guid id)
@@ -161,6 +167,7 @@ namespace GivingChampion.Application.Services
             donationRequest.Status = RequestStatus.Cancelled;
 
             await _donationRequestRepository.UpdateAsync(donationRequest);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task SoftDeleteAsync(
@@ -180,6 +187,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("You cannot delete a completed donation request.");
 
             await _donationRequestRepository.DeleteAsync(donationRequest);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

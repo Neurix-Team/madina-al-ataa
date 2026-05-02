@@ -22,6 +22,7 @@ namespace GivingChampion.Application.Services
         private readonly IProfileRepository _profileRepository;
         private readonly IAvatarRepository _avatarRepository;
         private readonly ILevelRepository _levelRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<UserService> _logger;
 
@@ -34,6 +35,7 @@ namespace GivingChampion.Application.Services
             IProfileRepository profileRepository,
             IAvatarRepository avatarRepository,
             ILevelRepository levelRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<UserService> logger)
         {
@@ -45,6 +47,7 @@ namespace GivingChampion.Application.Services
             _profileRepository = profileRepository;
             _avatarRepository = avatarRepository;
             _levelRepository = levelRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
         }
@@ -117,6 +120,7 @@ namespace GivingChampion.Application.Services
             await AddRolesOrThrowAsync(user, new[] { "User", "Volunteer", "Donor" });
 
             await _donorRepository.CreateAsync(user.Id);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("New user created: {Email}", dto.Email);
 
@@ -238,6 +242,7 @@ namespace GivingChampion.Application.Services
             await AddRolesOrThrowAsync(user, new[] { "Admin", "User", "Volunteer", "Donor" });
 
             await _donorRepository.CreateAsync(user.Id);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Admin user created: {Email}", dto.Email);
 
@@ -379,6 +384,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException(BuildIdentityErrorMessage(deleteResult));
 
             await _donorRepository.SoftDeleteAsync(user.Id);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogWarning(
                 "User deleted own account. UserId: {UserId}. Reason: {Reason}",
@@ -405,6 +411,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException(BuildIdentityErrorMessage(deleteResult));
 
             await _donorRepository.SoftDeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogWarning(
                 "Admin soft-deleted user {UserId}. Reason: {Reason}",
@@ -474,14 +481,17 @@ namespace GivingChampion.Application.Services
         private async Task EnsureApprovedUserProfileAsync(Guid userId)
         {
             if (!await _donorRepository.ExistsByUserIdAsync(userId))
+            {
                 await _donorRepository.CreateAsync(userId);
+                await _unitOfWork.SaveChangesAsync();
+            }
 
             var volunteer = await _volunteerRepository.GetByUserIdAsync(userId);
 
             if (volunteer == null)
             {
                 await _volunteerRepository.AddAsync(userId);
-                await _volunteerRepository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
 
             var profile = await _profileRepository.GetByUserIdAsync(userId);
@@ -494,12 +504,16 @@ namespace GivingChampion.Application.Services
                     throw new NotFoundException("Default level was not found.");
 
                 profile = await _profileRepository.AddAsync(userId, level.Id);
+                await _unitOfWork.SaveChangesAsync();
             }
 
             var avatar = await _avatarRepository.GetByProfileIdAsync(profile.Id);
 
             if (avatar == null)
+            {
                 await _avatarRepository.AddAsync(profile.Id);
+                await _unitOfWork.SaveChangesAsync();
+            }
         }
 
         private async Task AddRolesOrThrowAsync(

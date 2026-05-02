@@ -3,23 +3,26 @@ using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.DTO.ProfileDto;
 using GivingChampion.Common.Results;
+using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using DomainProfile = GivingChampion.Domain.Entities.Profile;
 
 namespace GivingChampion.API.Services
 {
     public class ProfileService : IProfileService
     {
-        private readonly IProfileRepository _profileRepository;
-        private readonly IAvatarRepository _avatarRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<DomainProfile> _profileRepository;
+        private readonly IGenericRepository<Avatar> _avatarRepository;
         private readonly IMapper _mapper;
 
         public ProfileService(
-            IProfileRepository profileRepository,
-            IAvatarRepository avatarRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _profileRepository = profileRepository;
-            _avatarRepository = avatarRepository;
+            _unitOfWork = unitOfWork;
+            _profileRepository = unitOfWork.Repository<DomainProfile>();
+            _avatarRepository = unitOfWork.Repository<Avatar>();
             _mapper = mapper;
         }
 
@@ -38,7 +41,7 @@ namespace GivingChampion.API.Services
 
             var profileDto = _mapper.Map<ProfileDto>(profile);
 
-            var avatar = await _avatarRepository.GetByProfileIdAsync(profile.Id);
+            var avatar = await _avatarRepository.FirstOrDefaultAsync(a => a.ProfileId == profile.Id);
             if (avatar != null)
             {
 
@@ -69,7 +72,7 @@ namespace GivingChampion.API.Services
 
             _profileRepository.Update(profile);
 
-            await _profileRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -92,7 +95,7 @@ namespace GivingChampion.API.Services
 
             _profileRepository.Update(profile);
 
-            await _profileRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -102,7 +105,7 @@ namespace GivingChampion.API.Services
             if (id == Guid.Empty)
                 throw new BadRequestException("User ID is required.");
 
-            var profile = await _profileRepository.GetByUserIdAsync(id);
+            var profile = await _profileRepository.FirstOrDefaultAsync(p => p.UserId == id);
 
             if (profile == null)
                 throw new NotFoundException($"Profile with User ID {id} was not found.");
@@ -112,7 +115,7 @@ namespace GivingChampion.API.Services
 
             var profileDto = _mapper.Map<ProfileDto>(profile);
 
-            var avatar = await _avatarRepository.GetByProfileIdAsync(profile.Id);
+            var avatar = await _avatarRepository.FirstOrDefaultAsync(a => a.ProfileId == profile.Id);
             if (avatar != null)
             {
                

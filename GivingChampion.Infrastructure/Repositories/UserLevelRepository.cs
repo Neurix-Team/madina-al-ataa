@@ -39,11 +39,6 @@ namespace GivingChampion.API.Repositories
             _context.UserLevels.Update(userLevel);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<UserLevel?> GetByIdAsync(Guid id)
         {
             return await _context.UserLevels

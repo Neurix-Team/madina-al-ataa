@@ -48,10 +48,5 @@ namespace GivingChampion.API.Repositories
             _context.GeoQuests.Update(geoQuest);
         }
 
-        // Save changes to the database
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

@@ -38,9 +38,5 @@ namespace GivingChampion.API.Repositories
             _context.Badges.Update(badge);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

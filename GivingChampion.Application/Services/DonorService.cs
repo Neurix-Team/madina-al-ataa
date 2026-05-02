@@ -10,17 +10,20 @@ namespace GivingChampion.Application.Services
     {
         private readonly IDonorRepository _donorRepository;
         //private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<DonorService> _logger;
 
         public DonorService(
             IDonorRepository donorRepository,
             //IUserRepository userRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<DonorService> logger)
         {
             _donorRepository = donorRepository;
             //_userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
         }
@@ -69,6 +72,7 @@ namespace GivingChampion.Application.Services
             donor.UpdatedAt = DateTime.UtcNow;
 
             await _donorRepository.UpdateAsync(donor);
+            await _unitOfWork.SaveChangesAsync();
 
             var updatedDto = _mapper.Map<DonorDto>(donor);
             return updatedDto;
@@ -77,6 +81,7 @@ namespace GivingChampion.Application.Services
         public async Task<bool> SoftDeleteDonorAsync(Guid userId)
         {
             await _donorRepository.SoftDeleteAsync(userId);
+            await _unitOfWork.SaveChangesAsync();
             _logger.LogInformation("Donor profile soft deleted for user {UserId}", userId);
             return true;
         }

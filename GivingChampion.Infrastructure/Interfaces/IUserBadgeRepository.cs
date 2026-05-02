@@ -8,6 +8,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<UserBadge?> GetByIdAsync(Guid id);
         Task AddAsync(UserBadge userBadge);
         void Update(UserBadge userBadge);
-        Task SaveChangesAsync();
     }
 }

@@ -81,10 +81,5 @@ namespace GivingChampion.Persistance.Repositories
 
             _context.ServiceRequests.Update(serviceRequest);
         }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

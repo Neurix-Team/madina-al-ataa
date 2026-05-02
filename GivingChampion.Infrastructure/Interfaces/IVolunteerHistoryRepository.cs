@@ -11,6 +11,5 @@ namespace GivingChampion.Persistance.Interfaces
             Task AddAsync(VolunteerHistories history);
             Task<List<VolunteerHistories>> GetByUserIdAsync(Guid userId);
             Task<List<VolunteerHistories>> GetByRequestIdAsync(Guid requestId);
-            Task SaveChangesAsync();
         }
     }

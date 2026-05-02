@@ -5,6 +5,7 @@ using GivingChampion.Application.Interfaces.Location;
 using GivingChampion.Common.DTO.Location;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace GivingChampion.Application.Services
@@ -12,15 +13,18 @@ namespace GivingChampion.Application.Services
     public class LocationService : ILocationService
     {
         private readonly ILocationRepository _locationRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<LocationService> _logger;
 
         public LocationService(
             ILocationRepository locationRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<LocationService> logger)
         {
             _locationRepository = locationRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
         }
@@ -72,6 +76,7 @@ namespace GivingChampion.Application.Services
             var location = _mapper.Map<Location>(dto);
 
             await _locationRepository.CreateAsync(location);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Location created successfully. LocationId: {LocationId}", location.Id);
 
@@ -99,6 +104,7 @@ namespace GivingChampion.Application.Services
             _mapper.Map(dto, location);
 
             await _locationRepository.UpdateAsync(location);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Location updated successfully. LocationId: {LocationId}", id);
 
@@ -119,6 +125,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Location is already deleted.");
 
             await _locationRepository.SoftDeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Location soft-deleted successfully. LocationId: {LocationId}", id);
 

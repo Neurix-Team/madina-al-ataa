@@ -34,7 +34,6 @@ namespace GivingChampion.Persistance.Repositories
         public async Task AddAsync(Certificate certificate, CancellationToken cancellationToken = default)
         {
             await _context.Certificates.AddAsync(certificate, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);  // Save changes inside the repository
         }
 
         // Get all certificates

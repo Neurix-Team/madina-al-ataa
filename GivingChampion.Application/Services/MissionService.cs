@@ -6,19 +6,23 @@ using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.Application.Services
 {
     public class MissionService : IMissionService
     {
         private readonly IMissionRepository _missionRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public MissionService(
             IMissionRepository missionRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _missionRepository = missionRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -30,6 +34,7 @@ namespace GivingChampion.Application.Services
             var mission = _mapper.Map<Mission>(dto);
 
             await _missionRepository.CreateAsync(mission);
+            await _unitOfWork.SaveChangesAsync();
 
             var createdDto = _mapper.Map<MissionDto>(mission);
 
@@ -70,6 +75,7 @@ namespace GivingChampion.Application.Services
             _mapper.Map(dto, mission);
 
             await _missionRepository.UpdateAsync(mission);
+            await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
         }
@@ -88,6 +94,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Mission is already deleted.");
 
             await _missionRepository.SoftDeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
         }

@@ -10,15 +10,17 @@ namespace GivingChampion.Application.Services
     public class PartnerService : IPartnerService
     {
 
-        private readonly IPartnerRepository _partnerRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Partner> _partnerRepository;
         private readonly IMapper _mapper;
 
         #region Constructor
 
         // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
-        public PartnerService(IPartnerRepository partnerRepository, IMapper mapper)
+        public PartnerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _partnerRepository = partnerRepository;
+            _unitOfWork = unitOfWork;
+            _partnerRepository = unitOfWork.Repository<Partner>();
             _mapper = mapper;
         }
 
@@ -34,7 +36,7 @@ namespace GivingChampion.Application.Services
         public async Task<List<PartnerDto>> GetAllAsync()
         {
             // Fetching all partners from the repository
-            var partners = await _partnerRepository.GetAllAsync();
+            var partners = await _partnerRepository.ListAsync();
 
             // Mapping the partners to PartnerDto
             return _mapper.Map<List<PartnerDto>>(partners);
@@ -77,7 +79,7 @@ namespace GivingChampion.Application.Services
 
             // Adding the partner to the repository
             await _partnerRepository.AddAsync(partner);
-            await _partnerRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             // Returning the newly created partner as a DTO
             return _mapper.Map<PartnerDto>(partner);
@@ -105,7 +107,7 @@ namespace GivingChampion.Application.Services
             // Updating the partner in the repository
             _partnerRepository.Update(partner);
 
-            await _partnerRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             // Returning the updated partner as a DTO
             return _mapper.Map<PartnerDto>(partner);
@@ -125,10 +127,11 @@ namespace GivingChampion.Application.Services
             if (partner == null)
                 return false;
 
-            // Soft deleting the partner
-            _partnerRepository.SoftDelete(partner);
+            partner.IsDeleted = true;
+            partner.DeletedAt = DateTime.UtcNow;
+            _partnerRepository.Update(partner);
 
-            await _partnerRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             // Returning true to indicate successful deletion
             return true;
