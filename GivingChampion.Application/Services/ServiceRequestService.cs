@@ -24,9 +24,7 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
-        #endregion
 
-        #region Get Methods
 
         // Gets all service requests and maps them from Entity list to DTO list.
         public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
@@ -147,5 +145,4 @@ namespace GivingChampion.Application.Services
 
             return true;
         }
-    }
-}
+    } }
