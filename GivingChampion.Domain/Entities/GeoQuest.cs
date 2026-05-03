@@ -11,7 +11,6 @@ namespace GivingChampion.Domain.Entities
         [Required]
         [MaxLength(200)]
         public string Title { get; set; }
-        [ForeignKey("Location")]
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
 

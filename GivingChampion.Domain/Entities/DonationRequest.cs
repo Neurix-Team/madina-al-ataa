@@ -34,7 +34,6 @@ namespace GivingChampion.Domain.Entities
         /// Location where the donation is needed
         /// </summary>
         public Guid LocationId { get; set; }
-        [ForeignKey(nameof(LocationId))]
         public Location? Location { get; set; }
 
         /// <summary>
@@ -73,7 +72,6 @@ namespace GivingChampion.Domain.Entities
         [Required]
         public Guid PartnerId { get; set; }
 
-		[ForeignKey("PartnerId")]
 		public Partner Partner { get; set; } = null!;
 
 

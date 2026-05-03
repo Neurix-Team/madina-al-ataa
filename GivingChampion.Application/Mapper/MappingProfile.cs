@@ -353,7 +353,10 @@ namespace GivingChampion.Application.Mapper
 
             #region UserMission Mappings
 
-            CreateMap<UserMission, UserMissionDto>().ReverseMap();
+            CreateMap<UserMission, UserMissionDto>()
+                .ForMember(dest => dest.KPReward, opt => opt.MapFrom(src => src.Mission.KPReward))
+                .ForMember(dest => dest.XPReward, opt => opt.MapFrom(src => src.Mission.XPReward))
+                .ReverseMap();
             CreateMap<StartMissionDto, Mission>().ReverseMap();
             CreateMap<Application.DTO.Mission.UpdateProgressDto, Mission>().ReverseMap();
 

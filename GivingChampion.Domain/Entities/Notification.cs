@@ -20,7 +20,6 @@ namespace GivingChampion.Domain.Entities
         public DateTime SentAt { get; set; }
         public Guid? LinkedEntityId { get; set; }
         public string LinkedEntityType { get; set; }
-        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
         //public bool IsDeleted { get; set; }

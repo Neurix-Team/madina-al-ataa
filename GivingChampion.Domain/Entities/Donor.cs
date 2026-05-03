@@ -15,7 +15,6 @@ namespace GivingChampion.Domain.Entities
         //public string DonorType { get; set; }
         public decimal TotalDonated { get; set; }
         public int PreferedCategory { get; set; }
-        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
         //public DateTime CreatedAt { get; set; } = DateTime.Now;

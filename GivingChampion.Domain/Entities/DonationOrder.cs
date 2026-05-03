@@ -72,7 +72,6 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Donor Reference
         /// </summary>
-        [ForeignKey("DonorId")]
         public ApplicationUser Donor { get; set; }
 
         /// <summary>
@@ -81,7 +80,6 @@ namespace GivingChampion.Domain.Entities
         public Guid DonationRequestId { get; set; }
 
         // Navigation Property to DonationRequest
-        [ForeignKey("DonationRequestId")]
         public DonationRequest DonationRequest { get; set; }
     }
 }

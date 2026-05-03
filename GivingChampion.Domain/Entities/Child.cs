@@ -20,13 +20,10 @@ namespace GivingChampion.Domain.Entities
         public ObjectStatus Status { get; set; }
         public string? RejectionReason { get; set; }
         public DateTime? ApprovedAt { get; set; }
-        [ForeignKey("Approver")]
         public Guid? ApprovedById { get; set; }
         public ApplicationUser? Approver { get; set; }
-        [ForeignKey("Parent")]
         public Guid ParentId { get; set; }
         public ApplicationUser Parent { get; set; }
-        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
         //public DateTime CreatedAt { get; set; }
