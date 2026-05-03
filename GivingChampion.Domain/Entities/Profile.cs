@@ -17,11 +17,9 @@ namespace GivingChampion.Domain.Entities
 
         [Range(0, int.MaxValue)]
         public int Impact { get; set; }
-        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
 
-        [ForeignKey("Level")]
         public Guid LevelId { get; set; }
         public Level Level { get; set; }
         public UserLevel? UserLevel { get; set; }

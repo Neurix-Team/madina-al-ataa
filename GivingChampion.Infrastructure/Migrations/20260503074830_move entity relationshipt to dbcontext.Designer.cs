@@ -3,6 +3,7 @@ using System;
 using GivingChampion.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GivingChampion.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260503074830_move entity relationshipt to dbcontext")]
+    partial class moveentityrelationshipttodbcontext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1747,8 +1750,6 @@ namespace GivingChampion.Domain.Migrations
             modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
                 {
                     b.Navigation("Profiles");
-
-                    b.Navigation("UserLevels");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
@@ -1756,8 +1757,6 @@ namespace GivingChampion.Domain.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("UserBadges");
-
-                    b.Navigation("UserLevel");
                 });
 #pragma warning restore 612, 618
         }

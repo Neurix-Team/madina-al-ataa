@@ -50,68 +50,304 @@ namespace GivingChampion.Persistence.Contexts
             base.OnModelCreating(modelBuilder);
 
             // ====================== GLOBAL SOFT DELETE FILTER ======================
-            // This applies automatically to ALL entities that implement ISoftDeletable
             modelBuilder.ApplySoftDeleteQueryFilter();
 
-            // ====================== Specific Configurations ======================
+            // ====================== Avatar ======================
 
-            // ====================== Profile & Badges Relationship ======================
+            modelBuilder.Entity<Avatar>(entity =>
+            {
+                entity.HasOne(a => a.Profile)
+                    .WithMany()
+                    .HasForeignKey(a => a.ProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            modelBuilder.Entity<UserBadge>()
-                .HasOne(ub => ub.Profile)
-                .WithMany(p => p.UserBadges)
-                .HasForeignKey(ub => ub.ProfileId);
+            // ====================== Profile ======================
 
-            modelBuilder.Entity<UserBadge>()
-                .HasOne(ub => ub.Badge)
-                .WithMany(b => b.UserBadges)
-                .HasForeignKey(ub => ub.BadgeId);
+            modelBuilder.Entity<Profile>(entity =>
+            {
+                entity.HasOne(p => p.User)
+                    .WithMany()
+                    .HasForeignKey(p => p.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<UserBadge>()
-                .HasIndex(ub => new { ub.ProfileId, ub.BadgeId })
-                .IsUnique();
+                entity.HasOne(p => p.Level)
+                    .WithMany(l => l.Profiles)
+                    .HasForeignKey(p => p.LevelId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Profile>()
-               .HasOne(p => p.Level)
-               .WithMany(l => l.Profiles)
-              .HasForeignKey(p => p.LevelId)
-              .OnDelete(DeleteBehavior.Restrict);
+                entity.HasMany(p => p.UserBadges)
+                    .WithOne(ub => ub.Profile)
+                    .HasForeignKey(ub => ub.ProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Profile>()
-                .HasOne(p => p.UserLevel)
-                .WithOne(ul => ul.Profile)
-                .HasForeignKey<UserLevel>(ul => ul.ProfileId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(p => p.Reviews)
+                    .WithOne(r => r.Profile)
+                    .HasForeignKey(r => r.ProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserLevel>()
-                .HasOne(ul => ul.Level)
-                .WithMany(l => l.UserLevels)
-                .HasForeignKey(ul => ul.LevelId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(p => p.UserId)
+                    .IsUnique();
+            });
 
-            modelBuilder.Entity<UserLevel>()
-                .HasIndex(ul => ul.ProfileId)
-                .IsUnique();
+            // ====================== UserBadge ======================
 
-            modelBuilder.Entity<Profile>()
-                .HasMany(p => p.Reviews)
-                .WithOne(r => r.Profile)
-                .HasForeignKey(r => r.ProfileId);
+            modelBuilder.Entity<UserBadge>(entity =>
+            {
+                entity.HasOne(ub => ub.Profile)
+                    .WithMany(p => p.UserBadges)
+                    .HasForeignKey(ub => ub.ProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserGeoQuest>()
-                .HasOne(ugq => ugq.GeoQuest)
-                .WithMany()
-               .HasForeignKey(ugq => ugq.GeoQuestId);
+                entity.HasOne(ub => ub.Badge)
+                    .WithMany(b => b.UserBadges)
+                    .HasForeignKey(ub => ub.BadgeId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserGeoQuest>()
-                .HasOne(ugq => ugq.User)
-                .WithMany()
-                .HasForeignKey(ugq => ugq.UserId);
+                entity.HasIndex(ub => new { ub.ProfileId, ub.BadgeId })
+                    .IsUnique();
+            });
 
-            // Example: If you want to disable soft delete for a specific entity
-            // modelBuilder.Entity<SomeEntity>().HasQueryFilter(null);
+            // ====================== UserLevel ======================
+
+            modelBuilder.Entity<UserLevel>(entity =>
+            {
+                entity.HasOne(ul => ul.Level)
+                    .WithMany()
+                    .HasForeignKey(ul => ul.LevelId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ul => ul.Profile)
+                    .WithMany()
+                    .HasForeignKey(ul => ul.ProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== Review ======================
+
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.HasOne(r => r.Reviewer)
+                    .WithMany()
+                    .HasForeignKey(r => r.ReviewerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(r => r.Profile)
+                    .WithMany(p => p.Reviews)
+                    .HasForeignKey(r => r.ProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ====================== Child ======================
+
+            modelBuilder.Entity<Child>(entity =>
+            {
+                entity.HasOne(c => c.Approver)
+                    .WithMany()
+                    .HasForeignKey(c => c.ApprovedById)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(c => c.Parent)
+                    .WithMany()
+                    .HasForeignKey(c => c.ParentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(c => c.UserId)
+                    .IsUnique();
+            });
+
+            // ====================== Donor ======================
+
+            modelBuilder.Entity<Donor>(entity =>
+            {
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(d => d.UserId)
+                    .IsUnique();
+            });
+
+            // ====================== Volunteer ======================
+
+            modelBuilder.Entity<Volunteer>(entity =>
+            {
+                entity.HasOne(v => v.User)
+                    .WithMany()
+                    .HasForeignKey(v => v.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(v => v.UserId)
+                    .IsUnique();
+            });
+
+            // ====================== Certificate ======================
+
+            modelBuilder.Entity<Certificate>(entity =>
+            {
+                entity.HasOne(c => c.Volunteer)
+                    .WithMany()
+                    .HasForeignKey(c => c.IssuedTo)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== DonationRequest ======================
+
+            modelBuilder.Entity<DonationRequest>(entity =>
+            {
+                entity.HasOne(dr => dr.Location)
+                    .WithMany()
+                    .HasForeignKey(dr => dr.LocationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(dr => dr.Partner)
+                    .WithMany()
+                    .HasForeignKey(dr => dr.PartnerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== DonationOrder ======================
+
+            modelBuilder.Entity<DonationOrder>(entity =>
+            {
+                entity.HasOne(d => d.Donor)
+                    .WithMany()
+                    .HasForeignKey(d => d.DonorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.DonationRequest)
+                    .WithMany()
+                    .HasForeignKey(d => d.DonationRequestId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== ServiceRequest ======================
+
+            modelBuilder.Entity<ServiceRequest>(entity =>
+            {
+                entity.HasOne(sr => sr.Location)
+                    .WithMany()
+                    .HasForeignKey(sr => sr.LocationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sr => sr.Partner)
+                    .WithMany()
+                    .HasForeignKey(sr => sr.PartnerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(sr => sr.Volunteer)
+                    .WithMany()
+                    .HasForeignKey(sr => sr.VolunteerUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== VolunteerOrder ======================
+
+            modelBuilder.Entity<VolunteerOrder>(entity =>
+            {
+                entity.HasOne(vo => vo.ServiceRequest)
+                    .WithMany()
+                    .HasForeignKey(vo => vo.ServiceRequestId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(vo => vo.User)
+                    .WithMany()
+                    .HasForeignKey(vo => vo.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== VolunteerHistories ======================
+
+            modelBuilder.Entity<VolunteerHistories>(entity =>
+            {
+                entity.HasOne<ApplicationUser>()
+                    .WithMany()
+                    .HasForeignKey(vh => vh.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<ServiceRequest>()
+                    .WithMany()
+                    .HasForeignKey(vh => vh.ServiceRequestId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<VolunteerOrder>()
+                    .WithMany()
+                    .HasForeignKey(vh => vh.VolunteerOrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== GeoQuest ======================
+
+            modelBuilder.Entity<GeoQuest>(entity =>
+            {
+                entity.HasOne(gq => gq.Location)
+                    .WithMany()
+                    .HasForeignKey(gq => gq.LocationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== UserGeoQuest ======================
+
+            modelBuilder.Entity<UserGeoQuest>(entity =>
+            {
+                entity.HasOne(ugq => ugq.GeoQuest)
+                    .WithMany()
+                    .HasForeignKey(ugq => ugq.GeoQuestId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ugq => ugq.User)
+                    .WithMany()
+                    .HasForeignKey(ugq => ugq.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(ugq => new { ugq.UserId, ugq.GeoQuestId })
+                    .IsUnique();
+            });
+
+            // ====================== Mission ======================
+
+            modelBuilder.Entity<Mission>(entity =>
+            {
+                entity.HasOne(m => m.Location)
+                    .WithMany()
+                    .HasForeignKey(m => m.LocationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ====================== UserMission ======================
+
+            modelBuilder.Entity<UserMission>(entity =>
+            {
+                entity.HasOne(um => um.User)
+                    .WithMany()
+                    .HasForeignKey(um => um.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(um => um.Mission)
+                    .WithMany()
+                    .HasForeignKey(um => um.MissionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(um => new { um.UserId, um.MissionId })
+                    .IsUnique();
+            });
+
+            // ====================== Notification ======================
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasOne(n => n.User)
+                    .WithMany()
+                    .HasForeignKey(n => n.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
-
         // ====================== SOFT DELETE HANDLING ======================
         public override int SaveChanges()
         {

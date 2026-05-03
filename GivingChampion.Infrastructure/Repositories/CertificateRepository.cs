@@ -24,7 +24,7 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.Certificates
                 .AsNoTracking()
-                .Where(c => c.VolunteerId == userId)
+                .Where(c => c.IssuedTo == userId)
                 .OrderByDescending(c => c.IssuedDate)
                 .ToPagedListAsync(pageParameters, cancellationToken);
         }
