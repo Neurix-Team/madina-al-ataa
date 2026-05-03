@@ -14,7 +14,21 @@ namespace GivingChampion.Application.Services
                 _httpContextAccessor = httpContextAccessor;
             }
 
-            protected Guid UserId =>
-                new Guid(_httpContextAccessor.HttpContext!.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!);
+        protected Guid UserId
+        {
+            get
+            {
+                var userIdValue = _httpContextAccessor.HttpContext?
+                    .User
+                    .Claims
+                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?
+                    .Value;
+
+                if (string.IsNullOrWhiteSpace(userIdValue))
+                    throw new UnauthorizedAccessException("User ID claim was not found.");
+
+                return new Guid(userIdValue);
+            }
+        }
     }
     }
