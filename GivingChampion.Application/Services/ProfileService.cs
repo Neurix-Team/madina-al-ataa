@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.DTO.ProfileDto;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using DomainProfile = GivingChampion.Domain.Entities.Profile;
 
 namespace GivingChampion.API.Services
@@ -14,6 +15,7 @@ namespace GivingChampion.API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenericRepository<DomainProfile> _profileRepository;
         private readonly IGenericRepository<Avatar> _avatarRepository;
+        private readonly IGenericRepository<UserLevel> _userLevelRepository;
         private readonly IMapper _mapper;
 
         public ProfileService(
@@ -23,6 +25,8 @@ namespace GivingChampion.API.Services
             _unitOfWork = unitOfWork;
             _profileRepository = unitOfWork.Repository<DomainProfile>();
             _avatarRepository = unitOfWork.Repository<Avatar>();
+
+            _userLevelRepository = unitOfWork.Repository<UserLevel>();
             _mapper = mapper;
         }
 
@@ -40,6 +44,15 @@ namespace GivingChampion.API.Services
                 throw new NotFoundException($"Profile with ID {id} was not found.");
 
             var profileDto = _mapper.Map<ProfileDto>(profile);
+            var userLevel = await _userLevelRepository.Query()
+              .Include(ul => ul.Level)
+              .FirstOrDefaultAsync(ul => ul.ProfileId == profile.Id);
+
+            if (userLevel != null)
+            {
+                profileDto.LevelId = userLevel.LevelId;
+                profileDto.LevelNumber = userLevel.Level?.Number;
+            }
 
             var avatar = await _avatarRepository.FirstOrDefaultAsync(a => a.ProfileId == profile.Id);
             if (avatar != null)
@@ -114,6 +127,15 @@ namespace GivingChampion.API.Services
                 throw new NotFoundException($"Profile with User ID {id} was not found.");
 
             var profileDto = _mapper.Map<ProfileDto>(profile);
+            var userLevel = await _userLevelRepository.Query()
+               .Include(ul => ul.Level)
+              .FirstOrDefaultAsync(ul => ul.ProfileId == profile.Id);
+
+            if (userLevel != null)
+            {
+                profileDto.LevelId = userLevel.LevelId;
+                profileDto.LevelNumber = userLevel.Level?.Number;
+            }
 
             var avatar = await _avatarRepository.FirstOrDefaultAsync(a => a.ProfileId == profile.Id);
             if (avatar != null)

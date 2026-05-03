@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.DTO.UserLevelDto;
-using GivingChampion.Domain.Entities;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
@@ -10,15 +9,16 @@ namespace GivingChampion.API.Services
     public class UserLevelService : IUserLevelService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IGenericRepository<UserLevel> _userLevelRepository;
+        private readonly IUserLevelRepository _userLevelRepository;
         private readonly IMapper _mapper;
 
         public UserLevelService(
             IUnitOfWork unitOfWork,
+            IUserLevelRepository userLevelRepository,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _userLevelRepository = unitOfWork.Repository<UserLevel>();
+            _userLevelRepository = userLevelRepository;
             _mapper = mapper;
         }
 
@@ -27,7 +27,7 @@ namespace GivingChampion.API.Services
             if (profileId == Guid.Empty)
                 throw new BadRequestException("Profile ID is required.");
 
-            var userLevel = await _userLevelRepository.FirstOrDefaultAsync(level => level.ProfileId == profileId);
+            var userLevel = await _userLevelRepository.GetByProfileIdAsync(profileId);
 
             if (userLevel == null)
                 throw new NotFoundException($"User level for profile ID {profileId} was not found.");
@@ -48,9 +48,6 @@ namespace GivingChampion.API.Services
             if (userLevel == null)
                 throw new NotFoundException($"User level with ID {id} was not found.");
 
-            if (userLevel.IsDeleted)
-                throw new BadRequestException("Cannot update a deleted user level.");
-
             _mapper.Map(dto, userLevel);
 
             _userLevelRepository.Update(userLevel);
@@ -69,9 +66,6 @@ namespace GivingChampion.API.Services
 
             if (userLevel == null)
                 throw new NotFoundException($"User level with ID {id} was not found.");
-
-            if (userLevel.IsDeleted)
-                throw new BadRequestException("User level is already deleted.");
 
             userLevel.IsDeleted = true;
             userLevel.DeletedAt = DateTime.UtcNow;
