@@ -4,8 +4,6 @@ using GivingChampion.Application.DTO.Donor;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GivingChampion.API.Controllers
@@ -23,23 +21,6 @@ namespace GivingChampion.API.Controllers
             _donorService = donorService;
         }
 
-        ///// <summary>
-        ///// Creates a donor profile for the currently authenticated user
-        ///// </summary>
-        //[HttpPost]
-        //[Authorize]
-        //[ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status201Created)]
-        //[ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status400BadRequest)]
-        //public async Task<ActionResult<Result<DonorDto>>> CreateDonor([FromBody] CreateDonorDto dto)
-        //{
-        //    var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-
-        //    var result = await _donorService.CreateDonorAsync(dto, userId);
-        //    return result.Succeeded
-        //        ? CreatedAtAction(nameof(GetMyDonorProfile), result)
-        //        : BadRequest(result);
-        //}
-
         /// <summary>
         /// Gets the donor profile of the currently authenticated user
         /// </summary>
@@ -49,8 +30,7 @@ namespace GivingChampion.API.Controllers
         [ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Result<DonorDto>>> GetMyDonorProfile()
         {
-            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            var result = await _donorService.GetMyDonorProfileAsync(userId);
+            var result = await _donorService.GetMyDonorProfileAsync();
             return Ok(result);
         }
 
@@ -75,8 +55,7 @@ namespace GivingChampion.API.Controllers
         [ProducesResponseType(typeof(Result<DonorDto>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Result<DonorDto>>> UpdateMyDonorProfile([FromBody] UpdateDonorDto dto)
         {
-            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            var result = await _donorService.UpdateDonorAsync(dto, userId);
+            var result = await _donorService.UpdateDonorAsync(dto);
             return Ok(result);
         }
 

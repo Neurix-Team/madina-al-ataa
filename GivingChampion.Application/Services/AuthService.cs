@@ -5,10 +5,11 @@ using global::GivingChampion.Application.Auth.Interfaces;
 using global::GivingChampion.Application.Interfaces.Auth;
 using global::GivingChampion.Common.Results;
 using global::GivingChampion.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public sealed class AuthService : IAuthService
+    public sealed class AuthService : BaseService, IAuthService
     {
         private readonly IIdentityRepository _identityRepository;
         private readonly IJwtTokenFactory _jwtTokenFactory;
@@ -27,7 +28,9 @@ namespace GivingChampion.Application.Services
             IVolunteerRepository volunteerRepository,
             IProfileRepository profileRepository,
             IAvatarRepository avatarRepository,
-            IChildRepository childRepository)
+            IChildRepository childRepository,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _identityRepository = identityRepository;
             _jwtTokenFactory = jwtTokenFactory;
@@ -299,5 +302,23 @@ namespace GivingChampion.Application.Services
 
             return Task.FromResult(AuthServiceResult<TokenResponse>.Success(token));
         }
+
+        //public async Task<CurrentUserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default)
+        //{
+        //    var user = await _identityRepository.FindByIdAsync(UserId.ToString(), cancellationToken);
+
+        //    if (user is null)
+        //        throw new InvalidOperationException("Current user was not found.");
+
+        //    var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
+
+        //    return new CurrentUserDto
+        //    {
+        //        Id = user.Id,
+        //        Email = user.Email,
+        //        UserName = user.UserName,
+        //        Roles = roles.ToArray()
+        //    };
+        //}
     }
 }

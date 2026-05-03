@@ -7,12 +7,13 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace GivingChampion.Application.Services
 {
-    public class UserService : IUserService
+    public class UserService : BaseService, IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
@@ -37,7 +38,9 @@ namespace GivingChampion.Application.Services
             ILevelRepository levelRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<UserService> logger)
+            ILogger<UserService> logger,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -74,6 +77,14 @@ namespace GivingChampion.Application.Services
                 throw new NotFoundException($"User with ID {id} was not found.");
 
             return await MapUserWithRolesAsync(user);
+        }
+
+        public async Task<GetUserDto?> GetUserByIdForCurrentUserAsync(Guid id, bool isAdmin)
+        {
+            if (!isAdmin && id != UserId)
+                throw new ForbiddenException("You are not allowed to access this user.");
+
+            return await GetUserByIdAsync(id);
         }
 
         public async Task<GetUserDto?> GetUserByEmailAsync(string email)
@@ -368,8 +379,10 @@ namespace GivingChampion.Application.Services
 
         // ====================== DELETE OPERATIONS ======================
 
-        public async Task<Result<bool>> DeleteMyAccountAsync(Guid userId, string? reason = null)
+        public async Task<Result<bool>> DeleteMyAccountAsync(string? reason = null)
         {
+            var userId = UserId;
+
             if (userId == Guid.Empty)
                 throw new BadRequestException("Invalid user ID.");
 

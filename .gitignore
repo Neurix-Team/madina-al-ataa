@@ -58,3 +58,4 @@ nunit-*.xml
 /.dotnet-home/.dotnet
 /.nuget-packages
 /.dotnet/.nuget/packages
+/.dotnet/.dotnet

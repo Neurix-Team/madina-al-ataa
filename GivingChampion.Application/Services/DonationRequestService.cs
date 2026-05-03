@@ -7,10 +7,11 @@ using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class DonationRequestService : IDonationRequestService
+    public class DonationRequestService : BaseService, IDonationRequestService
     {
         private readonly IDonationRequestRepository _donationRequestRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -19,7 +20,9 @@ namespace GivingChampion.Application.Services
         public DonationRequestService(
             IDonationRequestRepository donationRequestRepository,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _donationRequestRepository = donationRequestRepository;
             _unitOfWork = unitOfWork;
@@ -35,23 +38,22 @@ namespace GivingChampion.Application.Services
             return donationRequestDtos;
         }
 
-        public async Task<PagedList<DonationRequestDto>> GetApprovedAsync(PageParameters pageParameters )
+        public async Task<PagedList<DonationRequestDto>> GetApprovedAsync(PageParameters pageParameters)
         {
             var donationRequests = await _donationRequestRepository.GetApprovedAsync(pageParameters);
 
             return _mapper.MapPagedList<DonationRequest, DonationRequestDto>(donationRequests);
         }
 
-        public async Task<PagedList<DonationRequestDto>> GetMyRequestsAsync(Guid parentUserId, PageParameters pageParameters)
+        public async Task<PagedList<DonationRequestDto>> GetMyRequestsAsync(PageParameters pageParameters)
         {
-            var donationRequests = await _donationRequestRepository.GetRequestsByUserAsync(parentUserId, pageParameters);
+            var donationRequests = await _donationRequestRepository.GetRequestsByUserAsync(UserId, pageParameters);
 
             return _mapper.MapPagedList<DonationRequest, DonationRequestDto>(donationRequests);
         }
 
         public async Task<DonationRequestDto?> GetByIdAsync(
             Guid id,
-            Guid currentUserId,
             bool isAdmin)
         {
             var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
@@ -72,11 +74,9 @@ namespace GivingChampion.Application.Services
 
         public async Task<DonationRequestDto> AddAsync(
             CreateDonationRequestDto dto,
-            Guid currentUserId,
             bool isAdmin)
         {
             var donationRequest = _mapper.Map<DonationRequest>(dto);
-
 
             // If Admin creates it, it is approved directly.
             // If Parent creates it, it waits for approval.
@@ -103,7 +103,6 @@ namespace GivingChampion.Application.Services
         public async Task UpdateAsync(
             Guid id,
             UpdateDonationRequestDto dto,
-            Guid currentUserId,
             bool isAdmin)
         {
             var existingRequest = await _donationRequestRepository.GetByIdAsync(id);
@@ -172,9 +171,8 @@ namespace GivingChampion.Application.Services
 
         public async Task SoftDeleteAsync(
             Guid id,
-            Guid currentUserId,
             bool isAdmin)
-    {
+        {
             var donationRequest = await _donationRequestRepository.GetByIdAsync(id);
 
             if (donationRequest == null)

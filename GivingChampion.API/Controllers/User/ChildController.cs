@@ -4,8 +4,6 @@ using GivingChampion.Application.DTO.Child;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GivingChampion.API.Controllers
@@ -28,10 +26,7 @@ namespace GivingChampion.API.Controllers
         [Authorize(Roles = "User")]
         public async Task<ActionResult<Result<ChildDto>>> CreateChild([FromBody] CreateChildDto dto)
         {
-            var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-
-
-            var result = await _childService.CreateChildAsync(dto, parentId);
+            var result = await _childService.CreateChildAsync(dto);
             return result.Succeeded ? CreatedAtAction(nameof(GetMyChildren), result) : BadRequest(result);
         }
 
@@ -40,8 +35,7 @@ namespace GivingChampion.API.Controllers
         [Authorize(Roles = "User")]
         public async Task<ActionResult<Result<List<ChildDto>>>> GetMyChildren()
         {
-            var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            var result = await _childService.GetMyChildrenAsync(parentId);
+            var result = await _childService.GetMyChildrenAsync();
             return Ok(result);
         }
 
@@ -59,8 +53,7 @@ namespace GivingChampion.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Result>> ApproveChild([FromBody] ApproveChildDto dto)
         {
-            var adminId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            var result = await _childService.ApproveChildAsync(dto.ChildId, adminId);
+            var result = await _childService.ApproveChildAsync(dto.ChildId);
             return result.Succeeded ? NoContent() : BadRequest(result);
         }
 
@@ -69,8 +62,7 @@ namespace GivingChampion.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Result>> RejectChild([FromBody] RejectChildDto dto)
         {
-            var adminId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "");
-            var result = await _childService.RejectChildAsync(dto, adminId);
+            var result = await _childService.RejectChildAsync(dto);
             return result.Succeeded ? NoContent() : BadRequest(result);
         }
     }
