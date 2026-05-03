@@ -4,7 +4,6 @@ using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers
 {
@@ -75,14 +74,7 @@ namespace GivingChampion.API.Controllers
         [HttpPost("{geoQuestId:guid}/start")]
         public async Task<IActionResult> StartGeoQuest(Guid geoQuestId)
         {
-            
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? User.FindFirstValue("sub");
-
-            if (!Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized("Invalid user id in token.");
-
-            var result = await _userGeoQuestService.StartAsync(geoQuestId, userId);
+            var result = await _userGeoQuestService.StartAsync(geoQuestId);
             if (!result.Succeeded)
                 return BadRequest(result.Error);
 
@@ -92,7 +84,5 @@ namespace GivingChampion.API.Controllers
                 data = result.Value
             });
         }
-
-       
     }
 }

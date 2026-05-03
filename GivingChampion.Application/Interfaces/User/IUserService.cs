@@ -13,6 +13,7 @@ namespace GivingChampion.Application.Interfaces.User
         // Read operations (available to users + admins)
         Task<PagedList<GetUserDto>> GetAllUsersAsync(PageParameters pageParameters, string? search = null);
         Task<GetUserDto?> GetUserByIdAsync(Guid id);
+        Task<GetUserDto?> GetUserByIdForCurrentUserAsync(Guid id, bool isAdmin);
         Task<GetUserDto?> GetUserByEmailAsync(string email);
 
         // Self-service operations (usually for current user)
@@ -20,7 +21,7 @@ namespace GivingChampion.Application.Interfaces.User
         Task<Result<GetUserDto>> CreateChildUserAsync(CreateUserDto dto);
         Task<Result> ApproveChildUserAsync(Guid userId);
 
-        Task<Result<bool>> DeleteMyAccountAsync(Guid userId, string? reason = null);
+        Task<Result<bool>> DeleteMyAccountAsync(string? reason = null);
 
         // Admin-only operations (protected by authorization policy)
         Task<Result<GetUserDto>> CreateUserByAdminAsync(CreateUserDto dto);

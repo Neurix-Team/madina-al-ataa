@@ -79,8 +79,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
- 
 
+builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddAuthentication(options =>
     {
@@ -116,6 +116,7 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
 {

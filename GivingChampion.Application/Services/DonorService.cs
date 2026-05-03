@@ -2,11 +2,12 @@
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.DTO.Donor;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace GivingChampion.Application.Services
 {
-    public class DonorService : IDonorService
+    public class DonorService : BaseService, IDonorService
     {
         private readonly IDonorRepository _donorRepository;
         //private readonly IUserRepository _userRepository;
@@ -19,7 +20,9 @@ namespace GivingChampion.Application.Services
             //IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<DonorService> logger)
+            ILogger<DonorService> logger,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _donorRepository = donorRepository;
             //_userRepository = userRepository;
@@ -28,26 +31,10 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        //public async Task<DonorDto> CreateDonorAsync(CreateDonorDto dto, Guid userId)
-        //{
-        //    // Check if donor profile already exists for this user
-        //    if (await _donorRepository.ExistsByUserIdAsync(userId))
-        //        throw new InvalidOperationException("Donor profile already exists for this user.");
-        //    var donor = _mapper.Map<Donor>(dto);
-        //    donor.UserId = userId;
-        //    donor.CreatedAt = DateTime.UtcNow;
-
-        //    await _donorRepository.CreateAsync(donor);
-
-        //    _logger.LogInformation("Donor profile created for user {UserId}", userId);
-
-        //    var donorDto = _mapper.Map<DonorDto>(donor);
-        //    return donorDto;
-        //}
-
-        public async Task<DonorDto> GetMyDonorProfileAsync(Guid userId)
+ 
+        public async Task<DonorDto> GetMyDonorProfileAsync()
         {
-            var donor = await _donorRepository.GetByUserIdAsync(userId);
+            var donor = await _donorRepository.GetByUserIdAsync(UserId);
             if (donor == null)
                 throw new InvalidOperationException("Donor profile not found.");
             var dto = _mapper.Map<DonorDto>(donor);
@@ -63,9 +50,9 @@ namespace GivingChampion.Application.Services
             return dto;
         }
 
-        public async Task<DonorDto> UpdateDonorAsync(UpdateDonorDto dto, Guid userId)
+        public async Task<DonorDto> UpdateDonorAsync(UpdateDonorDto dto)
         {
-            var donor = await _donorRepository.GetByUserIdAsync(userId);
+            var donor = await _donorRepository.GetByUserIdAsync(UserId);
             if (donor == null)
                 throw new InvalidOperationException("Donor profile not found.");
             _mapper.Map(dto, donor);

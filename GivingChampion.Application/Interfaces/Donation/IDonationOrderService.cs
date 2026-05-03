@@ -12,11 +12,11 @@ namespace GivingChampion.Application.Interfaces.DonationOrderService
 
         Task<Result<PagedList<DonationOrderReadDto>>> GetAllAsync(PageParameters pageParameters);
 
-        Task<Result<PagedList<DonationOrderReadDto>>> GetMyOrdersAsync(Guid donorUserId, PageParameters pageParameters);
+        Task<Result<PagedList<DonationOrderReadDto>>> GetMyOrdersAsync(PageParameters pageParameters);
 
-        Task<Result<DonationOrderDetailsDto?>> GetByIdAsync(Guid id, Guid currentUserId, bool isAdmin = false);
+        Task<Result<DonationOrderDetailsDto?>> GetByIdAsync(Guid id, bool isAdmin = false);
 
-        Task<Result<DonationOrderDetailsDto>> CreateAsync(CreateDonationOrderDto dto, Guid donorUserId);
+        Task<Result<DonationOrderDetailsDto>> CreateAsync(CreateDonationOrderDto dto);
         Task<Result<UpdateDonationOrderDTO>> UpdateAsync(Guid id, UpdateDonationOrderDTO dto);
         Task<Result<DonationOrderDetailsDto>> ApproveAsync(Guid id);
 

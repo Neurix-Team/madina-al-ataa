@@ -24,5 +24,7 @@ namespace GivingChampion.Application.Interfaces.Auth
         Task<AuthServiceResult<TokenResponse>> ExchangeExternalCodeAsync(
             string code,
             CancellationToken cancellationToken = default);
+
+        //Task<CurrentUserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default);
     }
 }

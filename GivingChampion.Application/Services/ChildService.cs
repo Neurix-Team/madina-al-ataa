@@ -7,11 +7,12 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace GivingChampion.Application.Services
 {
-    public class ChildService : IChildService
+    public class ChildService : BaseService, IChildService
     {
         private readonly IChildRepository _childRepository;
         private readonly IUserRepository _userRepository;
@@ -26,7 +27,9 @@ namespace GivingChampion.Application.Services
             IUserService userService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<ChildService> logger)
+            ILogger<ChildService> logger,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _childRepository = childRepository;
             _userRepository = userRepository;
@@ -36,8 +39,10 @@ namespace GivingChampion.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<ChildDto>> CreateChildAsync(CreateChildDto dto, Guid parentId)
+        public async Task<Result<ChildDto>> CreateChildAsync(CreateChildDto dto)
         {
+            var parentId = UserId;
+
             if (dto == null)
                 throw new BadRequestException("Child data is required.");
 
@@ -102,8 +107,10 @@ namespace GivingChampion.Application.Services
             return Result<ChildDto>.Success(childDto);
         }
 
-        public async Task<Result<List<ChildDto>>> GetMyChildrenAsync(Guid parentId)
+        public async Task<Result<List<ChildDto>>> GetMyChildrenAsync()
         {
+            var parentId = UserId;
+
             if (parentId == Guid.Empty)
                 throw new UnauthorizedAccessException("Invalid parent user token.");
 
@@ -128,8 +135,10 @@ namespace GivingChampion.Application.Services
             return Result<List<ChildDto>>.Success(dtos);
         }
 
-        public async Task<Result> ApproveChildAsync(Guid childId, Guid approvedById)
+        public async Task<Result> ApproveChildAsync(Guid childId)
         {
+            var approvedById = UserId;
+
             if (childId == Guid.Empty)
                 throw new BadRequestException("Child ID is required.");
 
@@ -158,8 +167,10 @@ namespace GivingChampion.Application.Services
             return Result.Success();
         }
 
-        public async Task<Result> RejectChildAsync(RejectChildDto dto, Guid rejectedById)
+        public async Task<Result> RejectChildAsync(RejectChildDto dto)
         {
+            var rejectedById = UserId;
+
             if (dto == null)
                 throw new BadRequestException("Reject child data is required.");
 

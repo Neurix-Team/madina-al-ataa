@@ -9,10 +9,11 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class VolunteerOrderService : IVolunteerOrderService
+    public class VolunteerOrderService : BaseService, IVolunteerOrderService
     {
         #region Fields
 
@@ -31,7 +32,9 @@ namespace GivingChampion.Application.Services
             IServiceRequestRepository serviceRequestRepository,
             IVolunteerHistoryService historyService,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
@@ -77,9 +80,10 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<VolunteerOrderDto> CreateAsync(
-            CreateVolunteerOrderDto dto,
-            Guid volunteerId)
+            CreateVolunteerOrderDto dto)
         {
+            var volunteerId = UserId;
+
             if (dto == null)
                 throw new BadRequestException("Volunteer order create data is required.");
 
@@ -150,9 +154,10 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<bool> DeleteAsync(
-            Guid id,
-            Guid volunteerId)
+            Guid id)
         {
+            var volunteerId = UserId;
+
             if (id == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
 
@@ -183,9 +188,10 @@ namespace GivingChampion.Application.Services
 
         public async Task<VolunteerOrderDto?> UpdateProgressAsync(
             Guid orderId,
-            Guid volunteerId,
             int progress)
         {
+            var volunteerId = UserId;
+
             if (orderId == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
 
