@@ -3,8 +3,6 @@ using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GivingChampion.API.Controllers
@@ -30,8 +28,7 @@ namespace GivingChampion.API.Controllers
         [ProducesResponseType(typeof(Result<List<NotificationDto>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<Result<List<NotificationDto>>>> GetNotifications([FromQuery] bool unreadOnly = false)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _notificationService.GetMyNotificationsAsync(userId, unreadOnly);
+            var result = await _notificationService.GetMyNotificationsAsync(unreadOnly);
             return Ok(result);
         }
 
@@ -44,9 +41,7 @@ namespace GivingChampion.API.Controllers
         [ProducesResponseType(typeof(Result), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkAsRead([FromBody] MarkAsReadDto dto)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            var result = await _notificationService.MarkAsReadAsync(userId, dto.NotificationId);
+            var result = await _notificationService.MarkAsReadAsync(dto.NotificationId);
             return result.Succeeded ? NoContent() : BadRequest(result);
         }
 
@@ -58,9 +53,7 @@ namespace GivingChampion.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> MarkAllAsRead()
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            var result = await _notificationService.MarkAllAsReadAsync(userId);
+            var result = await _notificationService.MarkAllAsReadAsync();
             return result.Succeeded ? NoContent() : BadRequest(result);
         }
     }

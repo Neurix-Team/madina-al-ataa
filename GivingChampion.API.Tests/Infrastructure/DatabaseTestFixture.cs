@@ -55,17 +55,24 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     {
         var context = CreateDbContext();
 
+        var controllerContext = CreateControllerContext(userId, roles);
+
+        var httpContextAccessor = new HttpContextAccessor
+        {
+            HttpContext = controllerContext.HttpContext
+        };
+
         IDonationRequestService service = new DonationRequestService(
             new DonationRequestRepository(context),
             new UnitOfWork(context),
-            Mapper);
+            Mapper,
+            httpContextAccessor);
 
         return new DonationRequestsController(service)
         {
-            ControllerContext = CreateControllerContext(userId, roles)
+            ControllerContext = controllerContext
         };
     }
-
     public VolunteerController CreateVolunteerController()
     {
         IVolunteerService service = new VolunteerService(

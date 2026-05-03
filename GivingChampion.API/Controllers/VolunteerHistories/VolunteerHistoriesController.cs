@@ -1,4 +1,3 @@
-﻿using GivingChampion.API.Extensions;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
@@ -28,10 +27,7 @@ namespace GivingChampion.API.Controllers.VolunteerHistories
         {
             try
             {
-                if (!User.TryGetCurrentUserId(out var userId))
-                    return Unauthorized(new { message = "Invalid or missing user ID in token." });
-
-                var result = await _historyService.GetUserHistory(userId, pageParameters);
+                var result = await _historyService.GetUserHistory(pageParameters);
 
                 return Ok(result);
             }

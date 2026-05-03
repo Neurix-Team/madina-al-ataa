@@ -34,6 +34,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // GET api/UserBadges/profile/{profileId}
+        [Authorize(Roles = "Admin")]
         [HttpGet("profile/{profileId:guid}")]
         public async Task<IActionResult> GetByProfileId(Guid profileId)
         {

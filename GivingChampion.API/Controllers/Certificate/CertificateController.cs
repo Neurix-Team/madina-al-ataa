@@ -1,10 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces.Certificate;
-using GivingChampion.Application.DTO.CertificateDto;
-using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.API.Controllers.Certificate
 {
@@ -24,6 +21,30 @@ namespace GivingChampion.API.Controllers.Certificate
         }
 
         [Authorize]
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyCertificates(
+            [FromQuery] PageParameters pageParameters,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _certificateService.GetMyCertificatesAsync(
+                    pageParameters,
+                    cancellationToken);
+
+                if (!result.Succeeded)
+                    return BadRequest(result);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching current user certificates.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId:guid}")]
         public async Task<IActionResult> GetCertificatesByUserId(
             Guid userId,
@@ -72,27 +93,5 @@ namespace GivingChampion.API.Controllers.Certificate
                 return StatusCode(500, "Internal server error");
             }
         }
-
-        //[Authorize(Roles = "Admin")]
-        //[HttpPost]
-        //public async Task<IActionResult> Create(
-        //    [FromBody] CertificateCreateDto dto,
-        //    CancellationToken cancellationToken)
-        //{
-        //    try
-        //    {
-        //        var createdCertificate = await _certificateService.CreateAsync(dto, cancellationToken);
-        //
-        //        if (createdCertificate == null)
-        //            return BadRequest("Volunteer does not exist.");
-        //
-        //        return Ok(createdCertificate);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error occurred while creating the certificate.");
-        //        return StatusCode(500, "Internal server error");
-        //    }
-        //}
     }
 }

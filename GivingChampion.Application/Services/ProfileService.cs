@@ -2,14 +2,16 @@
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.DTO.ProfileDto;
+using GivingChampion.Application.Services;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 using DomainProfile = GivingChampion.Domain.Entities.Profile;
 
 namespace GivingChampion.API.Services
 {
-    public class ProfileService : IProfileService
+    public class ProfileService : BaseService, IProfileService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenericRepository<DomainProfile> _profileRepository;
@@ -18,7 +20,9 @@ namespace GivingChampion.API.Services
 
         public ProfileService(
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _profileRepository = unitOfWork.Repository<DomainProfile>();
@@ -42,9 +46,9 @@ namespace GivingChampion.API.Services
             var profileDto = _mapper.Map<ProfileDto>(profile);
 
             var avatar = await _avatarRepository.FirstOrDefaultAsync(a => a.ProfileId == profile.Id);
+
             if (avatar != null)
             {
-
                 profileDto.AvatarId = avatar.Id;
                 profileDto.AvatarName = avatar.CharacterName;
             }
@@ -100,10 +104,9 @@ namespace GivingChampion.API.Services
             return true;
         }
 
-        public async Task<Result<ProfileDto?>> GetByUserIdAsync(Guid id)
+        public async Task<Result<ProfileDto?>> GetByUserIdAsync()
         {
-            if (id == Guid.Empty)
-                throw new BadRequestException("User ID is required.");
+            var id = UserId;
 
             var profile = await _profileRepository.FirstOrDefaultAsync(p => p.UserId == id);
 
@@ -116,13 +119,13 @@ namespace GivingChampion.API.Services
             var profileDto = _mapper.Map<ProfileDto>(profile);
 
             var avatar = await _avatarRepository.FirstOrDefaultAsync(a => a.ProfileId == profile.Id);
+
             if (avatar != null)
             {
-               
                 profileDto.AvatarId = avatar.Id;
                 profileDto.AvatarName = avatar.CharacterName;
             }
-            
+
             return Result<ProfileDto?>.Success(profileDto);
         }
     }
