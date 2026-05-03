@@ -72,8 +72,26 @@ namespace GivingChampion.Persistence.Contexts
                 .IsUnique();
 
             modelBuilder.Entity<Profile>()
-                .HasOne(p => p.Level)
-                .WithMany(ul => ul.Profiles);
+               .HasOne(p => p.Level)
+               .WithMany(l => l.Profiles)
+              .HasForeignKey(p => p.LevelId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Profile>()
+                .HasOne(p => p.UserLevel)
+                .WithOne(ul => ul.Profile)
+                .HasForeignKey<UserLevel>(ul => ul.ProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserLevel>()
+                .HasOne(ul => ul.Level)
+                .WithMany(l => l.UserLevels)
+                .HasForeignKey(ul => ul.LevelId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserLevel>()
+                .HasIndex(ul => ul.ProfileId)
+                .IsUnique();
 
             modelBuilder.Entity<Profile>()
                 .HasMany(p => p.Reviews)

@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.DTO.UserLevelDto;
 using GivingChampion.Application.Services;
 using GivingChampion.Domain.Entities;
@@ -88,9 +87,6 @@ namespace GivingChampion.API.Services
             if (userLevel == null)
                 throw new NotFoundException($"User level with ID {id} was not found.");
 
-            if (userLevel.IsDeleted)
-                throw new BadRequestException("Cannot update a deleted user level.");
-
             _mapper.Map(dto, userLevel);
 
             _userLevelRepository.Update(userLevel);
@@ -109,9 +105,6 @@ namespace GivingChampion.API.Services
 
             if (userLevel == null)
                 throw new NotFoundException($"User level with ID {id} was not found.");
-
-            if (userLevel.IsDeleted)
-                throw new BadRequestException("User level is already deleted.");
 
             userLevel.IsDeleted = true;
             userLevel.DeletedAt = DateTime.UtcNow;

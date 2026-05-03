@@ -44,8 +44,6 @@ namespace GivingChampion.API.Controllers
         [HttpPut("admin/{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserLevelDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             await _userLevelService.UpdateAsync(id, dto);
 
