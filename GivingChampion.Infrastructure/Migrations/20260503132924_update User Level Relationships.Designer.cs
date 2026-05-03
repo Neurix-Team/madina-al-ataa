@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GivingChampion.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260503111834_UpdatingProfileUserLevelRelation")]
-    partial class UpdatingProfileUserLevelRelation
+    [Migration("20260503132924_update User Level Relationships")]
+    partial class updateUserLevelRelationships
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -349,9 +349,6 @@ namespace GivingChampion.Domain.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<Guid>("VolunteerId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("IssuedTo");
@@ -407,7 +404,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Children");
                 });
@@ -553,7 +551,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Donors");
                 });
@@ -839,7 +838,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LevelId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Profiles");
                 });
@@ -1045,7 +1045,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("GeoQuestId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "GeoQuestId")
+                        .IsUnique();
 
                     b.ToTable("UserGeoQuests");
                 });
@@ -1130,7 +1131,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("MissionId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "MissionId")
+                        .IsUnique();
 
                     b.ToTable("UserMissions");
                 });
@@ -1171,7 +1173,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Volunteers");
                 });
@@ -1210,6 +1213,12 @@ namespace GivingChampion.Domain.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ServiceRequestId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VolunteerOrderId");
 
                     b.ToTable("VolunteerHistories");
                 });
@@ -1367,7 +1376,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Profile", "Profile")
                         .WithMany()
                         .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Profile");
@@ -1378,7 +1387,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Volunteer", "Volunteer")
                         .WithMany()
                         .HasForeignKey("IssuedTo")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Volunteer");
@@ -1388,18 +1397,19 @@ namespace GivingChampion.Domain.Migrations
                 {
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Approver")
                         .WithMany()
-                        .HasForeignKey("ApprovedById");
+                        .HasForeignKey("ApprovedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Approver");
@@ -1414,13 +1424,13 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.DonationRequest", "DonationRequest")
                         .WithMany()
                         .HasForeignKey("DonationRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Donor")
                         .WithMany()
                         .HasForeignKey("DonorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DonationRequest");
@@ -1433,13 +1443,13 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.Partner", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Location");
@@ -1452,7 +1462,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1463,7 +1473,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Location");
@@ -1474,7 +1484,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Location");
@@ -1485,7 +1495,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1493,8 +1503,8 @@ namespace GivingChampion.Domain.Migrations
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
                 {
-                    b.HasOne("GivingChampion.Domain.Entities.Level", "Level")
-                        .WithMany("Profiles")
+                    b.HasOne("GivingChampion.Domain.Entities.Level", null)
+                        .WithMany()
                         .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1502,10 +1512,8 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Level");
 
                     b.Navigation("User");
                 });
@@ -1521,7 +1529,7 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Reviewer")
                         .WithMany()
                         .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Profile");
@@ -1534,18 +1542,19 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.Partner", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "Volunteer")
                         .WithMany()
-                        .HasForeignKey("VolunteerUserId");
+                        .HasForeignKey("VolunteerUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Location");
 
@@ -1578,13 +1587,13 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.GeoQuest", "GeoQuest")
                         .WithMany()
                         .HasForeignKey("GeoQuestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("GeoQuest");
@@ -1595,7 +1604,7 @@ namespace GivingChampion.Domain.Migrations
             modelBuilder.Entity("GivingChampion.Domain.Entities.UserLevel", b =>
                 {
                     b.HasOne("GivingChampion.Domain.Entities.Level", "Level")
-                        .WithMany("UserLevels")
+                        .WithMany()
                         .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1616,13 +1625,13 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.Mission", "Mission")
                         .WithMany()
                         .HasForeignKey("MissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Mission");
@@ -1635,10 +1644,31 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerHistories", b =>
+                {
+                    b.HasOne("GivingChampion.Domain.Entities.ServiceRequest", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GivingChampion.Domain.Entities.VolunteerOrder", null)
+                        .WithMany()
+                        .HasForeignKey("VolunteerOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.VolunteerOrder", b =>
@@ -1646,13 +1676,13 @@ namespace GivingChampion.Domain.Migrations
                     b.HasOne("GivingChampion.Domain.Entities.ServiceRequest", "ServiceRequest")
                         .WithMany()
                         .HasForeignKey("ServiceRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ServiceRequest");
@@ -1714,13 +1744,6 @@ namespace GivingChampion.Domain.Migrations
             modelBuilder.Entity("GivingChampion.Domain.Entities.Badge", b =>
                 {
                     b.Navigation("UserBadges");
-                });
-
-            modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
-                {
-                    b.Navigation("Profiles");
-
-                    b.Navigation("UserLevels");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>

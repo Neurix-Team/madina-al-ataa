@@ -66,13 +66,15 @@ namespace GivingChampion.Persistence.Contexts
 
             modelBuilder.Entity<Profile>(entity =>
             {
+                entity.HasKey(p => p.Id);
+
                 entity.HasOne(p => p.User)
                     .WithMany()
                     .HasForeignKey(p => p.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(p => p.Level)
-                    .WithMany(l => l.Profiles)
+                entity.HasOne<Level>()
+                    .WithMany()
                     .HasForeignKey(p => p.LevelId)
                     .OnDelete(DeleteBehavior.Restrict);
 
@@ -88,6 +90,8 @@ namespace GivingChampion.Persistence.Contexts
 
                 entity.HasIndex(p => p.UserId)
                     .IsUnique();
+
+                entity.HasIndex(p => p.LevelId);
             });
 
             // ====================== UserBadge ======================
@@ -112,15 +116,21 @@ namespace GivingChampion.Persistence.Contexts
 
             modelBuilder.Entity<UserLevel>(entity =>
             {
+                entity.HasKey(ul => ul.Id);
+
+                // UserLevel.LevelId points to Level.Id
                 entity.HasOne(ul => ul.Level)
                     .WithMany()
                     .HasForeignKey(ul => ul.LevelId)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(ul => ul.Profile)
-                    .WithMany()
-                    .HasForeignKey(ul => ul.ProfileId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .WithOne(p => p.UserLevel)
+                    .HasForeignKey<UserLevel>(ul => ul.ProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(ul => ul.ProfileId)
+                    .IsUnique();
             });
 
             // ====================== Review ======================

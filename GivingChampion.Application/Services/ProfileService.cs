@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.DTO.ProfileDto;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Services;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using DomainProfile = GivingChampion.Domain.Entities.Profile;
 
 namespace GivingChampion.API.Services

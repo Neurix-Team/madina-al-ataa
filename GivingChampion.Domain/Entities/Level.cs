@@ -15,7 +15,7 @@ namespace GivingChampion.Domain.Entities
         public int Number { get; set; }
         [Range(0, int.MaxValue)]
         public int MaxXp { get; set; }
-        public ICollection<UserLevel> UserLevels { get; set; } = new List<UserLevel>();
-        public ICollection<Profile> Profiles { get; set; } = new List<Profile>();
+        //public ICollection<UserLevel> UserLevels { get; set; } = new List<UserLevel>();
+        //public ICollection<Profile> Profiles { get; set; } = new List<Profile>();
     }
 }

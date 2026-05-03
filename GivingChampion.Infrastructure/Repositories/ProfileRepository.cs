@@ -18,7 +18,6 @@ namespace GivingChampion.API.Repositories
         {
             return await _context.Profiles
                 .AsNoTracking()
-                .Include(p => p.Level)
                 .Include(p => p.UserLevel)
                     .ThenInclude(ul => ul.Level)
                 .Where(p => !p.IsDeleted)
@@ -28,7 +27,6 @@ namespace GivingChampion.API.Repositories
         public async Task<Profile?> GetByIdAsync(Guid id)
         {
             return await _context.Profiles
-                .Include(p => p.Level)
                 .Include(p => p.UserLevel)
                     .ThenInclude(ul => ul.Level)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
@@ -81,7 +79,6 @@ namespace GivingChampion.API.Repositories
         public async Task<Profile?> GetByUserIdAsync(Guid id)
         {
             return await _context.Profiles
-                .Include(p => p.Level)
                 .Include(p => p.UserLevel)
                     .ThenInclude(ul => ul.Level)
                 .FirstOrDefaultAsync(p => p.UserId == id && !p.IsDeleted);

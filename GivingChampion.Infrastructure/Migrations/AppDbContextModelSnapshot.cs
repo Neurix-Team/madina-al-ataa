@@ -1082,7 +1082,8 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LevelId");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex("ProfileId")
+                        .IsUnique();
 
                     b.ToTable("UserLevels");
                 });
@@ -1499,8 +1500,8 @@ namespace GivingChampion.Domain.Migrations
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
                 {
-                    b.HasOne("GivingChampion.Domain.Entities.Level", "Level")
-                        .WithMany("Profiles")
+                    b.HasOne("GivingChampion.Domain.Entities.Level", null)
+                        .WithMany()
                         .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1510,8 +1511,6 @@ namespace GivingChampion.Domain.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Level");
 
                     b.Navigation("User");
                 });
@@ -1608,9 +1607,9 @@ namespace GivingChampion.Domain.Migrations
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.Profile", "Profile")
-                        .WithMany()
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithOne("UserLevel")
+                        .HasForeignKey("GivingChampion.Domain.Entities.UserLevel", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Level");
@@ -1742,13 +1741,6 @@ namespace GivingChampion.Domain.Migrations
             modelBuilder.Entity("GivingChampion.Domain.Entities.Badge", b =>
                 {
                     b.Navigation("UserBadges");
-                });
-
-            modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
-                {
-                    b.Navigation("Profiles");
-
-                    b.Navigation("UserLevels");
                 });
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>

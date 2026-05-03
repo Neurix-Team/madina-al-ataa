@@ -21,7 +21,7 @@ namespace GivingChampion.Domain.Entities
         public ApplicationUser User { get; set; }
 
         public Guid LevelId { get; set; }
-        public Level Level { get; set; }
+        //public Level Level { get; set; }
         public UserLevel? UserLevel { get; set; }
         public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
