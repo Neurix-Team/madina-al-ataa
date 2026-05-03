@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.AiAvatarDto;
+using GivingChampion.Application.DTO.AiAvatarDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
@@ -9,14 +9,16 @@ namespace GivingChampion.API.Services
 {
     public class AiAvatarService : IAiAvatarService
     {
-        private readonly IAiAvatarRepository _aiAvatarRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<AiAvatar> _aiAvatarRepository;
         private readonly IMapper _mapper;
 
         public AiAvatarService(
-            IAiAvatarRepository aiAvatarRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _aiAvatarRepository = aiAvatarRepository;
+            _unitOfWork = unitOfWork;
+            _aiAvatarRepository = unitOfWork.Repository<AiAvatar>();
             _mapper = mapper;
         }
 
@@ -44,7 +46,7 @@ namespace GivingChampion.API.Services
             var aiAvatar = _mapper.Map<AiAvatar>(dto);
 
             await _aiAvatarRepository.AddAsync(aiAvatar);
-            await _aiAvatarRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<AiAvatarDto>(aiAvatar);
         }
@@ -69,7 +71,7 @@ namespace GivingChampion.API.Services
 
             _aiAvatarRepository.Update(existingAiAvatar);
 
-            await _aiAvatarRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -92,7 +94,7 @@ namespace GivingChampion.API.Services
 
             _aiAvatarRepository.Update(aiAvatar);
 
-            await _aiAvatarRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

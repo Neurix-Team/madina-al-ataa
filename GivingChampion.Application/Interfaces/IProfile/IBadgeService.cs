@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.BadgeDto;
+﻿using GivingChampion.Application.DTO.BadgeDto;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 

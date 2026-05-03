@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.DonationOrderService;
-using GivingChampion.Common.DTO.DonationOrder;
+using GivingChampion.Application.DTO.DonationOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
@@ -17,17 +17,20 @@ namespace GivingChampion.Application.Services.DonationOrderService
         private readonly IDonationOrderRepository _donationOrderRepository;
         private readonly IDonationRequestRepository _donationRequestRepository;
         private readonly IDonorRepository _donorRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public DonationOrderService(
             IDonationOrderRepository donationOrderRepository,
             IDonationRequestRepository donationRequestRepository,
             IDonorRepository donorRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _donationOrderRepository = donationOrderRepository;
             _donationRequestRepository = donationRequestRepository;
             _donorRepository = donorRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -103,6 +106,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             donationOrder.Status = OrderStatus.Pending;
 
             await _donationOrderRepository.CreateAsync(donationOrder);
+            await _unitOfWork.SaveChangesAsync();
 
             var createdOrder = await _donationOrderRepository.GetByIdAsync(donationOrder.Id) ?? throw new NotFoundException("Created donation order could not be retrieved.");
             var createdDto = _mapper.Map<DonationOrderDetailsDto>(createdOrder);
@@ -144,6 +148,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             _mapper.Map(dto, donationOrder);
 
             await _donationOrderRepository.UpdateAsync(donationOrder);
+            await _unitOfWork.SaveChangesAsync();
 
             var updatedDto = _mapper.Map<UpdateDonationOrderDTO>(donationOrder);
 
@@ -194,6 +199,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             await _donorRepository.UpdateAsync(donor);
             await _donationOrderRepository.UpdateAsync(donationOrder);
             await _donationRequestRepository.UpdateAsync(donationRequest);
+            await _unitOfWork.SaveChangesAsync();
 
             var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
 
@@ -218,6 +224,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             donationOrder.Status = OrderStatus.Rejected;
 
             await _donationOrderRepository.UpdateAsync(donationOrder);
+            await _unitOfWork.SaveChangesAsync();
 
             var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
 

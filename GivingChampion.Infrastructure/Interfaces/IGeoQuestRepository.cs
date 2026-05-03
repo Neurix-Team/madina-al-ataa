@@ -9,6 +9,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<GeoQuest?> GetByIdAsync(Guid id);
         Task AddAsync(GeoQuest geoQuest);
         void Update(GeoQuest geoQuest);
-        Task SaveChangesAsync();
     }
 }

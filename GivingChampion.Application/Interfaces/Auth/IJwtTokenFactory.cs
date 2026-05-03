@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.Auth;
+﻿using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Domain.Entities;
 
 namespace GivingChampion.Application.Interfaces.Auth

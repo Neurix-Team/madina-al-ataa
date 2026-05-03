@@ -1,4 +1,4 @@
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -38,9 +38,5 @@ namespace GivingChampion.API.Repositories
             _context.Reviews.Update(review);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

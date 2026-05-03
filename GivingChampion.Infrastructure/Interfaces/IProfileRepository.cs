@@ -9,6 +9,5 @@ namespace GivingChampion.Persistance.Interfaces
         Task<Profile?> GetByUserIdAsync(Guid id);
         Task<Profile> AddAsync(Guid userId, Guid levelId);
         Task Update(Profile profile);
-        Task SaveChangesAsync();
     }
 }

@@ -11,8 +11,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTO\Global\" />
-  </ItemGroup>
-
 </Project>

@@ -1,4 +1,6 @@
-﻿using GivingChampion.Common.DTO.VolunteerOrder;
+﻿using GivingChampion.Application.DTO.VolunteerOrder;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 
@@ -6,7 +8,7 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
 {
     public interface IVolunteerOrderService
     {
-        Task<List<VolunteerOrderDto>> GetAllAsync();
+        Task<Result<PagedList<VolunteerOrderDto>>> GetAllAsync(PageParameters pageParameters);
         Task<VolunteerOrderDto?> GetByIdAsync(Guid id);
 
         Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId);

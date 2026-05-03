@@ -1,5 +1,5 @@
 using GivingChampion.API.Interfaces;
-using GivingChampion.Common.DTO.ReviewDto;
+using GivingChampion.Application.DTO.ReviewDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 
 namespace GivingChampion.Persistance.Repositories
 {
@@ -12,11 +17,8 @@ namespace GivingChampion.Persistance.Repositories
     {
 
 
-        #region Field
         private readonly AppDbContext _context;
-        #endregion
 
-        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the VolunteerRepository class.
@@ -27,28 +29,18 @@ namespace GivingChampion.Persistance.Repositories
             _context = context; // Initialize the context to interact with the database
         }
 
-        #endregion
 
-        #region Query Methods
 
-        #region GetAllVolunteer
 
-        ///// <summary>
-        ///// Gets all volunteers from the database, excluding soft-deleted ones.
-        ///// </summary>
-        ///// <returns>A list of non-deleted volunteers.</returns>
-        //public async Task<List<Volunteer>> GetAllAsync()
-        //{
-        //    // Use AsNoTracking for better performance since we don't need to modify the retrieved entities
-        //    return await _context.Volunteers
-        //        .Where(v => !v.IsDeleted) // Only non-deleted volunteers
-        //        .AsNoTracking() // Avoid tracking entities to improve performance
-        //        .ToListAsync()
-        //        .ConfigureAwait(false); // Avoid blocking UI thread in production
-        //} 
-        #endregion
+        public async Task<PagedList<Volunteer>> GetAllAsync(PageParameters pageParameters)
+        {
+            return await _context.Volunteers
+                .Where(v => !v.IsDeleted)
+                .AsNoTracking()
+                .ToPagedListAsync(pageParameters);
+        }
 
-        #region GetById
+
         /// <summary>
         /// Retrieves a volunteer by its unique identifier (ID), ensuring it is not soft-deleted.
         /// </summary>
@@ -71,13 +63,9 @@ namespace GivingChampion.Persistance.Repositories
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
         }
-        #endregion
 
-        #endregion
 
-        #region Command Methods
 
-        #region AddVolunteer
         /// <summary>
         /// Adds a new volunteer to the database asynchronously.
         /// </summary>
@@ -90,9 +78,7 @@ namespace GivingChampion.Persistance.Repositories
             };
             await _context.Volunteers.AddAsync(volunteer).ConfigureAwait(false); // Add the volunteer to the database
         } 
-        #endregion
 
-        #region UpdateVolunteer
         ///// <summary>
         ///// Updates an existing volunteer in the database.
         ///// </summary>
@@ -101,19 +87,6 @@ namespace GivingChampion.Persistance.Repositories
         //{
         //    _context.Volunteers.Update(volunteer); // Update the volunteer in the database
         //} 
-        #endregion
 
-        #region SaveChanges
-        /// <summary>
-        /// Saves all changes to the database asynchronously.
-        /// </summary>
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync().ConfigureAwait(false); // Save changes to the database
-        }
-
-        #endregion
-
-        #endregion
     }
 }

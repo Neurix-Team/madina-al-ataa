@@ -1,5 +1,5 @@
 ﻿using GivingChampion.API.Interfaces;
-using GivingChampion.Common.DTO.BadgeDto;
+using GivingChampion.Application.DTO.BadgeDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

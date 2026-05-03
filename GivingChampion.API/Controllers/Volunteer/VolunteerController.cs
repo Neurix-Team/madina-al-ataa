@@ -1,7 +1,8 @@
 ﻿using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Common.DTO.VolunteerDto;
+using GivingChampion.Application.DTO.VolunteerDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.API.Controllers.Volunteer
 {
@@ -79,34 +80,24 @@ namespace GivingChampion.API.Controllers.Volunteer
 
         #endregion
 
-        //#region GetAllVolunteers
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
+        {
+            try
+            {
+                var result = await _volunteerService.GetAllAsync(pageParameters);
 
-        ///// <summary>
-        ///// Gets all volunteers.
-        ///// </summary>
-        ///// <returns>List of volunteers as DTOs.</returns>
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    try
-        //    {
-        //        // Get all volunteers from service layer as DTOs.
-        //        var volunteers = await _volunteerService.GetAllAsync();
+                if (!result.Succeeded)
+                    return BadRequest(result);
 
-        //        // Return volunteers list.
-        //        return Ok(volunteers);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log unexpected errors for production tracking.
-        //        _logger.LogError(ex, "Error occurred while fetching all volunteers.");
-
-        //        // Return generic error message to avoid exposing internal details.
-        //        return StatusCode(500, "Internal server error");
-        //    }
-        //}
-
-        //#endregion
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching all volunteers.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         #endregion
 

@@ -1,26 +1,25 @@
-﻿using GivingChampion.Common.DTO.VolunteerOrder;
+﻿using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
-using GivingChampion.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 
 namespace GivingChampion.Application.Interfaces.VolunteerHistoryService
 {
     public interface IVolunteerHistoryService
     {
-   
-            Task<List<VolunteerHistoryDto>> GetUserHistory(Guid userId);
+        Task<Result<PagedList<VolunteerHistoryDto>>> GetUserHistory(
+            Guid userId,
+            PageParameters pageParameters);
 
-            Task<List<VolunteerHistoryDto>> GetRequestHistory(Guid requestId);
+        Task<Result<PagedList<VolunteerHistoryDto>>> GetRequestHistory(
+            Guid requestId,
+            PageParameters pageParameters);
 
-        
-            Task AddAsync(
-                Guid userId,
-                Guid requestId,
-                Guid orderId,
-                VolunteerHistoryAction action,
-                int? progress = null);
-        }
+        Task AddAsync(
+            Guid userId,
+            Guid requestId,
+            Guid orderId,
+            VolunteerHistoryAction action,
+            int? progress = null);
     }
-    
+}

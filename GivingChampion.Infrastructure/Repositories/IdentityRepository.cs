@@ -1,5 +1,4 @@
 ﻿using GivingChampion.Application.Auth.Interfaces;
-using GivingChampion.Common.DTO.Donor;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;

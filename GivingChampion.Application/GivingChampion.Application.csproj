@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.3.9" />
     <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.29" />
@@ -22,6 +23,10 @@
     <ProjectReference Include="..\GivingChampion.Common\GivingChampion.Common.csproj" />
     <ProjectReference Include="..\GivingChampion.Domain\GivingChampion.Domain.csproj" />
     <ProjectReference Include="..\GivingChampion.Infrastructure\GivingChampion.Persistance.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTO\Global\" />
   </ItemGroup>
 
 </Project>

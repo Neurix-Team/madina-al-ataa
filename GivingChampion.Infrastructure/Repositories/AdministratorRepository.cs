@@ -1,8 +1,8 @@
-using GivingChampion.Common.DTO.Admin;
 using GivingChampion.Common.Enums;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
+using GivingChampion.Persistance.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.Infrastructure.Persistence.Repositories
@@ -16,9 +16,9 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<DashboardMetricsDto> GetDashboardMetricsAsync()
+        public async Task<DashboardMetricsData> GetDashboardMetricsAsync()
         {
-            return new DashboardMetricsDto
+            return new DashboardMetricsData
             {
                 TotalUsers = await _context.Users.CountAsync(),
                 TotalDonors = await _context.Donors.CountAsync(d => !d.IsDeleted),
@@ -47,9 +47,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
                     .SumAsync(o => (decimal?)o.Amount) ?? 0,
                 TotalDonationAmountRemaining = await _context.DonationRequests
                     .Where(r => !r.IsDeleted)
-                    .SumAsync(r => (decimal?)r.AmountRemaining) ?? 0,
-
-                GeneratedAtUtc = DateTime.UtcNow
+                    .SumAsync(r => (decimal?)r.AmountRemaining) ?? 0
             };
         }
     }

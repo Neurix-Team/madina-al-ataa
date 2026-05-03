@@ -1,6 +1,6 @@
 ﻿using GivingChampion.API.Interfaces;
-using GivingChampion.Common.DTO.ActivityDto;
-using GivingChampion.Common.DTO.GivingChampion.Common.DTO.ActivityDto;
+using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.DTO.GivingChampion.Application.DTO.ActivityDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

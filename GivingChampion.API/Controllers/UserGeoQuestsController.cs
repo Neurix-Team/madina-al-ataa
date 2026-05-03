@@ -1,6 +1,6 @@
 ﻿using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.GeoQuestDto;
+using GivingChampion.Application.DTO;
+using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +19,7 @@ namespace GivingChampion.API.Controllers
         {
             _userGeoQuestService = userGeoQuestService;
         }
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync([FromQuery] Guid userId, [FromQuery] PageParameters pageParameters)
@@ -73,15 +74,10 @@ namespace GivingChampion.API.Controllers
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            //if (userGeoQuest.GeoQuestId != geoQuestId)
-            //    return BadRequest("This UserGeoQuest does not belong to the provided GeoQuest.");
 
             var result = await _userGeoQuestService.UpdateAsyncVerification(
                 userId,
                 dto);
-
-            //if (!result.Succeeded)
-            //    return BadRequest(result.Error);
 
             return Ok(result);
         }

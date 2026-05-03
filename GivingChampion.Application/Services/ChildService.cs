@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.User;
-using GivingChampion.Common.DTO.Child;
-using GivingChampion.Common.DTO.User;
+using GivingChampion.Application.DTO.Child;
+using GivingChampion.Application.DTO.User;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
@@ -16,6 +16,7 @@ namespace GivingChampion.Application.Services
         private readonly IChildRepository _childRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserService _userService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<ChildService> _logger;
 
@@ -23,12 +24,14 @@ namespace GivingChampion.Application.Services
             IChildRepository childRepository,
             IUserRepository userRepository,
             IUserService userService,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<ChildService> logger)
         {
             _childRepository = childRepository;
             _userRepository = userRepository;
             _userService = userService;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
         }
@@ -84,6 +87,7 @@ namespace GivingChampion.Application.Services
             try
             {
                 await _childRepository.CreateAsync(child);
+                await _unitOfWork.SaveChangesAsync();
             }
             catch
             {
@@ -143,6 +147,7 @@ namespace GivingChampion.Application.Services
             await _userService.ApproveChildUserAsync(child.UserId);
 
             await _childRepository.ApproveAsync(childId, approvedById);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation(
                 "Child approved by admin {AdminId}. ChildId: {ChildId}",
@@ -180,6 +185,7 @@ namespace GivingChampion.Application.Services
                 dto.RejectionReason,
                 rejectedById
             );
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogWarning(
                 "Child rejected by admin {AdminId}. ChildId: {ChildId}, Reason: {Reason}",
@@ -205,6 +211,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Child is already deleted.");
 
             await _childRepository.SoftDeleteAsync(childId);
+            await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
         }

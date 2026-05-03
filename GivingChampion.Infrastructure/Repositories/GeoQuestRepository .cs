@@ -1,6 +1,6 @@
 ﻿using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -48,10 +48,5 @@ namespace GivingChampion.API.Repositories
             _context.GeoQuests.Update(geoQuest);
         }
 
-        // Save changes to the database
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

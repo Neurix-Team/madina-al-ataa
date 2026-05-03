@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.LevelDto;
+﻿using GivingChampion.Application.DTO.LevelDto;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 

@@ -1,6 +1,7 @@
 ﻿using GivingChampion.Application.Interfaces.ServiceRequestService;
-using GivingChampion.Common.DTO.ServiceRequestDto;
+using GivingChampion.Application.DTO.ServiceRequestDto;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,25 +13,49 @@ namespace GivingChampion.API.Controllers
     public class ServiceRequestsController : ControllerBase
     {
         private readonly IServiceRequestService _serviceRequestService;
+        private readonly ILogger<ServiceRequestsController> _logger;
 
-        public ServiceRequestsController(IServiceRequestService serviceRequestService)
+        public ServiceRequestsController(
+            IServiceRequestService serviceRequestService,
+            ILogger<ServiceRequestsController> logger)
         {
             _serviceRequestService = serviceRequestService;
+            _logger = logger;
         }
 
-        // GET: api/ServiceRequests
+        // GET: api/ServiceRequests?pageNumber=1&pageSize=20
+        // GET: api/ServiceRequests?status=Approved&pageNumber=1&pageSize=20
+        [Authorize(Roles = "Volunteer")]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] RequestStatus? status)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] PageParameters pageParameters,
+            [FromQuery] RequestStatus? status)
         {
-            if (status.HasValue)
+            try
             {
-                var filtered = await _serviceRequestService.GetByStatusAsync(status.Value);
-                return Ok(filtered);
+                if (status.HasValue)
+                {
+                    var filteredResult = await _serviceRequestService.GetByStatusAsync(
+                        status.Value,
+                        pageParameters);
+
+                    return Ok(filteredResult);
+                }
+
+                var result = await _serviceRequestService.GetAllAsync(pageParameters);
+
+                return Ok(result);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting service requests.");
 
-            var serviceRequests = await _serviceRequestService.GetAllAsync();
-
-            return Ok(serviceRequests);
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while retrieving service requests.",
+                    error = ex.Message
+                });
+            }
         }
 
         // GET: api/ServiceRequests/{id}
@@ -39,7 +64,37 @@ namespace GivingChampion.API.Controllers
         {
             var serviceRequest = await _serviceRequestService.GetByIdAsync(id);
 
+            if (serviceRequest == null)
+                return NotFound(new { message = "Service request not found." });
+
             return Ok(serviceRequest);
+        }
+
+        // GET: api/ServiceRequests/filter?status=Approved&pageNumber=1&pageSize=20
+        [HttpGet("filter")]
+        [Authorize(Roles = "Volunteer,Admin")]
+        public async Task<IActionResult> GetByStatus(
+            [FromQuery] RequestStatus status,
+            [FromQuery] PageParameters pageParameters)
+        {
+            try
+            {
+                var result = await _serviceRequestService.GetByStatusAsync(
+                    status,
+                    pageParameters);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while filtering service requests by status {Status}.", status);
+
+                return StatusCode(500, new
+                {
+                    message = "Internal server error while filtering requests.",
+                    error = ex.Message
+                });
+            }
         }
 
         // POST: api/ServiceRequests
@@ -61,26 +116,12 @@ namespace GivingChampion.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateServiceRequestDto dto)
         {
-            await _serviceRequestService.UpdateAsync(id, dto);
+            var updated = await _serviceRequestService.UpdateAsync(id, dto);
+
+            if (!updated)
+                return NotFound(new { message = "Service request not found." });
 
             return NoContent();
-        }
-
-        // GET: api/ServiceRequests/filter?status=Approved
-        [HttpGet("filter")]
-        public async Task<IActionResult> GetByStatus([FromQuery] RequestStatus status)
-        {
-            var filteredRequests = await _serviceRequestService.GetByStatusAsync(status);
-
-            if (!filteredRequests.Any())
-            {
-                return NotFound(new
-                {
-                    Message = $"No service requests found with status: {status}"
-                });
-            }
-
-            return Ok(filteredRequests);
         }
 
         // DELETE: api/ServiceRequests/{id}
@@ -88,7 +129,10 @@ namespace GivingChampion.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _serviceRequestService.DeleteAsync(id);
+            var deleted = await _serviceRequestService.DeleteAsync(id);
+
+            if (!deleted)
+                return NotFound(new { message = "Service request not found." });
 
             return NoContent();
         }

@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GivingChampion.Domain\GivingChampion.Domain.csproj" />
+    <ProjectReference Include="..\GivingChampion.Infrastructure\GivingChampion.Persistance.csproj" />
     <ProjectReference Include="..\GivingChampion\GivingChampion.ServiceDefaults\GivingChampion.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

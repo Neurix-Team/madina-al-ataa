@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Interfaces.User;
-using GivingChampion.Common.DTO.Donor;
+using GivingChampion.Application.DTO.Donor;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

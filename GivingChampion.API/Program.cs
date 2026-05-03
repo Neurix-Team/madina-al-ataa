@@ -1,24 +1,11 @@
-using GivingChampion.API.Interfaces;
-using GivingChampion.API.Repositories;
-using GivingChampion.API.Services;
+using GivingChampion.API.Handlers;
+using GivingChampion.Application;
 using GivingChampion.Application.Auth.Interfaces;
-using GivingChampion.Application.Interfaces;
-using GivingChampion.Application.Interfaces.Auth;
-using GivingChampion.Application.Interfaces.ServiceRequestService;
-using GivingChampion.Application.Interfaces.VolunteerOrderService;
-using GivingChampion.Application.Interfaces.Location;
-using GivingChampion.Application.Interfaces.Mission;
-using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Mapper;
-using GivingChampion.Application.Services;
 using GivingChampion.Application.Transformers;
-using GivingChampion.Common.DTO.Auth;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Domain.Entities;
-using GivingChampion.Infrastructure.Persistence.Repositories;
-using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Persistance.Repositories;
-using GivingChampion.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -27,15 +14,11 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
-using GivingChampion.Application.Interfaces.Partner;
-using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Application.Interfaces.Certificate;
-using GivingChampion.Application.Services.Certificate;
-using GivingChampion.Application.Interfaces.DonationOrderService;
-using GivingChampion.Application.Services.DonationOrderService;
-using GivingChampion.API.Handlers;
-using GivingChampion.Application.Interfaces.Admin;
-using GivingChampion.Application.Interfaces.VolunteerHistoryService;
+using GivingChampion.Persistance;
+using GivingChampion.Persistence.Contexts;
+using FluentValidation.AspNetCore;
+using GivingChampion.Application.Validators.Auth;
+using FluentValidation;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -67,7 +50,7 @@ if (_env.IsDevelopment())
         configureDbContextOptions: options =>
         {
             options.UseNpgsql(npgsql =>
-                npgsql.MigrationsAssembly("GivingChampion.Domain"));
+                npgsql.MigrationsAssembly("GivingChampion.Persistance"));
         });
 }
 else
@@ -77,7 +60,7 @@ else
 
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(connectionString, npgsql =>
-            npgsql.MigrationsAssembly("GivingChampion.Domain")));
+            npgsql.MigrationsAssembly("GivingChampion.Persistance")));
 }
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -96,30 +79,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
-builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
-builder.Services.AddScoped<IAvatarService, AvatarService>();
-builder.Services.AddScoped<IAdministratorRepository, AdministratorRepository>();
-builder.Services.AddScoped<IAdministratorService, AdministratorService>();
-builder.Services.AddScoped<IAiAvatarRepository, AiAvatarRepository>();
-builder.Services.AddScoped<IAiAvatarService, AiAvatarService>();
-builder.Services.AddScoped<ILevelRepository, LevelRepository>();
-builder.Services.AddScoped<ILevelService, LevelService>();
-builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
-builder.Services.AddScoped<IBadgeService, BadgeService>();
-builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-builder.Services.AddScoped<IProfileService, ProfileService>();
-builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
-builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
-builder.Services.AddScoped<IUserLevelRepository, UserLevelRepository>();
-builder.Services.AddScoped<IUserLevelService, UserLevelService>();
-builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IGeoQuestRepository, GeoQuestRepository>();
-builder.Services.AddScoped<IUserGeoQuestRepository, UserGeoQuestRepository>();
-builder.Services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
-builder.Services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
-builder.Services.AddScoped<IVolunteerHistoryService, VolunteerHistoryService  >();
-builder.Services.AddScoped<IVolunteerHistoryRepository, VolunteerHistoryRepository>();
+ 
 
 builder.Services
     .AddAuthentication(options =>
@@ -173,46 +133,16 @@ builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
 builder.Services.Configure<JwtOptions>(
             _conf.GetSection(JwtOptions.SectionName));
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IDonorRepository, DonorRepository>();
-builder.Services.AddScoped<IDonorService, DonorService>(); 
-builder.Services.AddScoped<IChildRepository, EfChildRepository>();
-builder.Services.AddScoped<IChildService, ChildService>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IMissionRepository, MissionRepository>();
-builder.Services.AddScoped<IMissionService, MissionService>();
-builder.Services.AddScoped<IUserMissionService, UserMissionService>();
-builder.Services.AddScoped<IUserMissionRepository, UserMissionRepository>();
-builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IGeoQuestService, GeoQuestService>();
-builder.Services.AddScoped<IUserGeoQuestService, UserGeoQuestService>();
 
-builder.Services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
-builder.Services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
-// Service Request dependencies
-builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
-builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
-builder.Services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
-builder.Services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
-builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();    
-builder.Services.AddScoped<IPartnerService, PartnerService>();
-builder.Services.AddScoped<IVolunteerRepository, VolunteerRepository>();
-builder.Services.AddScoped<IVolunteerService, VolunteerService>();
-builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
-builder.Services.AddScoped<ICertificateService, CertificateService>();
-builder.Services.AddScoped<IDonationRequestService,DonationRequestService>();
-builder.Services.AddScoped<IDonationRequestRepository, DonationRequestRepository>();
-builder.Services.AddScoped<IDonationOrderService, DonationOrderService>();
-builder.Services.AddScoped<IDonationOrderRepository, DonationOrderRepository>();
+builder.Services.AddGivingChampionRepositories();
+builder.Services.AddGivingChampionServices();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
 
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi("v1", options =>
 {

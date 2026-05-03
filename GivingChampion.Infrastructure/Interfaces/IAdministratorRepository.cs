@@ -1,9 +1,9 @@
-using GivingChampion.Common.DTO.Admin;
+using GivingChampion.Persistance.Models;
 
 namespace GivingChampion.Persistance.Interfaces
 {
     public interface IAdministratorRepository
     {
-        Task<DashboardMetricsDto> GetDashboardMetricsAsync();
+        Task<DashboardMetricsData> GetDashboardMetricsAsync();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.BadgeDto;
+using GivingChampion.Application.DTO.BadgeDto;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
@@ -12,14 +12,16 @@ namespace GivingChampion.API.Services
 {
     public class BadgeService : IBadgeService
     {
-        private readonly IBadgeRepository _badgeRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Badge> _badgeRepository;
         private readonly IMapper _mapper;
 
         public BadgeService(
-            IBadgeRepository badgeRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _badgeRepository = badgeRepository;
+            _unitOfWork = unitOfWork;
+            _badgeRepository = unitOfWork.Repository<Badge>();
             _mapper = mapper;
         }
 
@@ -62,7 +64,7 @@ namespace GivingChampion.API.Services
 
             await _badgeRepository.AddAsync(badge);
 
-            await _badgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             var badgeDto = _mapper.Map<BadgeDto>(badge);
 
@@ -89,7 +91,7 @@ namespace GivingChampion.API.Services
 
             _badgeRepository.Update(badge);
 
-            await _badgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
@@ -112,7 +114,7 @@ namespace GivingChampion.API.Services
 
             _badgeRepository.Update(badge);
 
-            await _badgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }

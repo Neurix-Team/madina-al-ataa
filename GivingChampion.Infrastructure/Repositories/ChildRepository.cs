@@ -1,4 +1,4 @@
-﻿using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
@@ -54,7 +54,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             child.Status = ObjectStatus.Pending;
             child.CreatedAt = DateTime.UtcNow;
             await _context.Children.AddAsync(child);
-            await _context.SaveChangesAsync();
         }
 
         public async Task ApproveAsync(Guid childId, Guid approvedById)
@@ -76,7 +75,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
                 // You can also set LockoutEnabled = false if needed
             }
 
-            await _context.SaveChangesAsync();
         }
 
         public async Task RejectAsync(Guid childId, string rejectionReason, Guid rejectedById)
@@ -88,7 +86,6 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             child.RejectionReason = rejectionReason;
             child.ApprovedById = rejectedById;
 
-            await _context.SaveChangesAsync();
         }
 
         public async Task SoftDeleteAsync(Guid childId)
@@ -97,14 +94,12 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             if (child == null) return;
 
             _context.Children.Remove(child);
-
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Child child)
+        public Task UpdateAsync(Child child)
         {
             _context.Children.Update(child);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
     }
 }

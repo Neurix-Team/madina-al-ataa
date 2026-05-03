@@ -1,21 +1,24 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.UserLevelDto;
+using GivingChampion.Application.DTO.UserLevelDto;
+using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
 {
     public class UserLevelService : IUserLevelService
     {
-        private readonly IUserLevelRepository _userLevelRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<UserLevel> _userLevelRepository;
         private readonly IMapper _mapper;
 
         public UserLevelService(
-            IUserLevelRepository userLevelRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _userLevelRepository = userLevelRepository;
+            _unitOfWork = unitOfWork;
+            _userLevelRepository = unitOfWork.Repository<UserLevel>();
             _mapper = mapper;
         }
 
@@ -24,7 +27,7 @@ namespace GivingChampion.API.Services
             if (profileId == Guid.Empty)
                 throw new BadRequestException("Profile ID is required.");
 
-            var userLevel = await _userLevelRepository.GetByProfileIdAsync(profileId);
+            var userLevel = await _userLevelRepository.FirstOrDefaultAsync(level => level.ProfileId == profileId);
 
             if (userLevel == null)
                 throw new NotFoundException($"User level for profile ID {profileId} was not found.");
@@ -52,7 +55,7 @@ namespace GivingChampion.API.Services
 
             _userLevelRepository.Update(userLevel);
 
-            await _userLevelRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -75,7 +78,7 @@ namespace GivingChampion.API.Services
 
             _userLevelRepository.Update(userLevel);
 
-            await _userLevelRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

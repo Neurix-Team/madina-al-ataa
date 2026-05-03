@@ -1,7 +1,7 @@
 using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.ReviewDto;
+using GivingChampion.Application.DTO.ReviewDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
@@ -9,14 +9,16 @@ namespace GivingChampion.API.Services
 {
     public class ReviewService : IReviewService
     {
-        private readonly IReviewRepository _reviewRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Review> _reviewRepository;
         private readonly IMapper _mapper;
 
         public ReviewService(
-            IReviewRepository reviewRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _reviewRepository = reviewRepository;
+            _unitOfWork = unitOfWork;
+            _reviewRepository = unitOfWork.Repository<Review>();
             _mapper = mapper;
         }
 
@@ -25,7 +27,7 @@ namespace GivingChampion.API.Services
             if (profileId == Guid.Empty)
                 throw new BadRequestException("Profile ID is required.");
 
-            var reviews = await _reviewRepository.GetAllByProfileIdAsync(profileId);
+            var reviews = await _reviewRepository.ListAsync(review => review.ProfileId == profileId);
 
             return _mapper.Map<List<ReviewDto>>(reviews);
         }
@@ -57,7 +59,7 @@ namespace GivingChampion.API.Services
 
             await _reviewRepository.AddAsync(review);
 
-            await _reviewRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<ReviewDto>(review);
         }
@@ -82,7 +84,7 @@ namespace GivingChampion.API.Services
 
             _reviewRepository.Update(review);
 
-            await _reviewRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -105,7 +107,7 @@ namespace GivingChampion.API.Services
 
             _reviewRepository.Update(review);
 
-            await _reviewRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

@@ -1,21 +1,24 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.AvatarDto;
+using GivingChampion.Application.DTO.AvatarDto;
+using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
 namespace GivingChampion.API.Services
 {
     public class AvatarService : IAvatarService
     {
-        private readonly IAvatarRepository _avatarRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Avatar> _avatarRepository;
         private readonly IMapper _mapper;
 
         public AvatarService(
-            IAvatarRepository avatarRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _avatarRepository = avatarRepository;
+            _unitOfWork = unitOfWork;
+            _avatarRepository = unitOfWork.Repository<Avatar>();
             _mapper = mapper;
         }
 
@@ -55,7 +58,7 @@ namespace GivingChampion.API.Services
 
             _avatarRepository.Update(avatar);
 
-            await _avatarRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -78,7 +81,7 @@ namespace GivingChampion.API.Services
 
             _avatarRepository.Update(avatar);
 
-            await _avatarRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

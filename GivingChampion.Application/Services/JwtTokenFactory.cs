@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
-using GivingChampion.Common.DTO.Auth;
+using GivingChampion.Application.DTO.Auth;
 
 namespace GivingChampion.Application.Services
 {

@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO.DonationRequest;
+using GivingChampion.Application.DTO.DonationRequest;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +38,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet("my")]
-        [Authorize(Roles = "Parent")]
+        [Authorize(Roles = "Donor")]
         public async Task<ActionResult<PagedList<DonationRequestDto>>> GetMyDonationRequests([FromQuery] PageParameters pageParameters)
         {
             var userId = GetCurrentUserId();
@@ -49,7 +49,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        [Authorize(Roles = "Donor,Parent,Admin")]
+        [Authorize(Roles = "Donor,Admin")]
         public async Task<ActionResult<DonationRequestDto>> GetById(Guid id)
         {
             var userId = GetCurrentUserId();
@@ -64,7 +64,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Parent,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DonationRequestDto>> Create([FromBody] CreateDonationRequestDto dto)
         {
             var userId = GetCurrentUserId();
@@ -80,7 +80,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Parent,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Update(Guid id, [FromBody] UpdateDonationRequestDto dto)
         {
             var userId = GetCurrentUserId();
@@ -110,7 +110,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "Parent,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Delete(Guid id)
         {
             var userId = GetCurrentUserId();

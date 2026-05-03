@@ -1,5 +1,5 @@
 ﻿using GivingChampion.Application.Interfaces;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,13 +41,12 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
         public async Task CreateAsync(Location location)
         {
             await _context.Locations.AddAsync(location);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Location location)
+        public Task UpdateAsync(Location location)
         {
             _context.Locations.Update(location);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task SoftDeleteAsync(Guid locationId)
@@ -55,10 +54,10 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             var location = await _context.Locations.FindAsync(locationId);
             if (location == null) return;
 
-            location.IsDeleted = true;
-            location.DeletedAt = DateTime.UtcNow;
+            //location.IsDeleted = true;
+            //location.DeletedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            _context.Locations.Remove(location);
         }
     }
 }

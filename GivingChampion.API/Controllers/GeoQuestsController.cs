@@ -1,6 +1,6 @@
 using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.GeoQuestDto;
+using GivingChampion.Application.DTO;
+using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,6 +75,7 @@ namespace GivingChampion.API.Controllers
         [HttpPost("{geoQuestId:guid}/start")]
         public async Task<IActionResult> StartGeoQuest(Guid geoQuestId)
         {
+            
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? User.FindFirstValue("sub");
 

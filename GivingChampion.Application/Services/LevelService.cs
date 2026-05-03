@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.LevelDto;
+using GivingChampion.Application.DTO.LevelDto;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
@@ -12,14 +12,16 @@ namespace GivingChampion.API.Services
 {
     public class LevelService : ILevelService
     {
-        private readonly ILevelRepository _levelRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Level> _levelRepository;
         private readonly IMapper _mapper;
 
         public LevelService(
-            ILevelRepository levelRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _levelRepository = levelRepository;
+            _unitOfWork = unitOfWork;
+            _levelRepository = unitOfWork.Repository<Level>();
             _mapper = mapper;
         }
 
@@ -65,7 +67,7 @@ namespace GivingChampion.API.Services
 
             await _levelRepository.AddAsync(level);
 
-            await _levelRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             var levelDto = _mapper.Map<LevelDto>(level);
 
@@ -98,7 +100,7 @@ namespace GivingChampion.API.Services
 
             _levelRepository.Update(level);
 
-            await _levelRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
@@ -121,7 +123,7 @@ namespace GivingChampion.API.Services
 
             _levelRepository.Update(level);
 
-            await _levelRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }

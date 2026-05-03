@@ -1,4 +1,4 @@
-﻿using GivingChampion.Common.DTO.UserLevelDto;
+﻿using GivingChampion.Application.DTO.UserLevelDto;
 
 namespace GivingChampion.API.Interfaces
 {

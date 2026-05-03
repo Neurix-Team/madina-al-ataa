@@ -1,4 +1,4 @@
-﻿using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -37,11 +37,6 @@ namespace GivingChampion.API.Repositories
         public void Update(UserLevel userLevel)
         {
             _context.UserLevels.Update(userLevel);
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
         }
 
         public async Task<UserLevel?> GetByIdAsync(Guid id)

@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO.Notification;
+using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace GivingChampion.Application.Services
@@ -12,15 +13,18 @@ namespace GivingChampion.Application.Services
     public class NotificationService : INotificationService
     {
         private readonly INotificationRepository _notificationRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<NotificationService> _logger;
 
         public NotificationService(
             INotificationRepository notificationRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<NotificationService> logger)
         {
             _notificationRepository = notificationRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
         }
@@ -61,6 +65,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Notification ID is required.");
 
             await _notificationRepository.MarkAsReadAsync(userId, notificationId);
+            await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
         }
@@ -71,6 +76,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("User ID is required.");
 
             await _notificationRepository.MarkAllAsReadAsync(userId);
+            await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
         }
@@ -87,6 +93,7 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Notification title is required.");
 
             await _notificationRepository.CreateAsync(notification);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation(
                 "Notification sent to user {UserId}: {Title}",

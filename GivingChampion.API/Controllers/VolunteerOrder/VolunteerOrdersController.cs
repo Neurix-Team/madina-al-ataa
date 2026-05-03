@@ -1,8 +1,9 @@
 ﻿using GivingChampion.API.Extensions;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
-using GivingChampion.Common.DTO.VolunteerOrder;
+using GivingChampion.Application.DTO.VolunteerOrder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.API.Controllers.VolunteerOrder
 {
@@ -14,26 +15,45 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         #region Fields
 
         private readonly IVolunteerOrderService _volunteerOrderService;
+        private readonly ILogger<VolunteerOrdersController> _logger;
 
         #endregion
 
         #region Constructor
 
-        public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService)
+        public VolunteerOrdersController(
+            IVolunteerOrderService volunteerOrderService,
+            ILogger<VolunteerOrdersController> logger)
         {
             _volunteerOrderService = volunteerOrderService;
+            _logger = logger;
         }
 
         #endregion
 
-        #region Get All Volunteer Orders
-
+        #region Get All
         [HttpGet]
-        public async Task<ActionResult<List<VolunteerOrderDto>>> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
-            var volunteerOrders = await _volunteerOrderService.GetAllAsync();
+            try
+            {
+                var result = await _volunteerOrderService.GetAllAsync(pageParameters);
 
-            return Ok(volunteerOrders);
+                if (!result.Succeeded)
+                    return BadRequest(result);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving volunteer orders.");
+
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while retrieving volunteer orders.",
+                    error = ex.Message
+                });
+            }
         }
 
         #endregion

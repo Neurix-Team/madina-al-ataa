@@ -2,7 +2,7 @@
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Contexts;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,13 +61,12 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
         {
             mission.Status = MissionStatus.Open;
             await _context.Missions.AddAsync(mission);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Mission mission)
+        public Task UpdateAsync(Mission mission)
         {
             _context.Missions.Update(mission);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task SoftDeleteAsync(Guid missionId)
@@ -75,10 +74,10 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
             var mission = await _context.Missions.FindAsync(missionId);
             if (mission == null) return;
 
-            mission.IsDeleted = true;
-            mission.DeletedAt = DateTime.UtcNow;
+            //mission.IsDeleted = true;
+            //mission.DeletedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            _context.Missions.Remove(mission);
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
-using GivingChampion.Common.DTO.VolunteerOrder;
+using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
@@ -10,55 +12,54 @@ namespace GivingChampion.Application.Services
 {
     public class VolunteerHistoryService : IVolunteerHistoryService
     {
-        #region Fields
-
         private readonly IVolunteerHistoryRepository _repo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
-        #endregion
-
-        #region Constructor
 
         public VolunteerHistoryService(
             IVolunteerHistoryRepository repo,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _repo = repo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        #endregion
-
-        #region Get User History
-
-        public async Task<List<VolunteerHistoryDto>> GetUserHistory(Guid userId)
+        public async Task<Result<PagedList<VolunteerHistoryDto>>> GetUserHistory(
+            Guid userId,
+            PageParameters pageParameters)
         {
-            if (userId == Guid.Empty)
-                throw new BadRequestException("User ID is required.");
+            var data = await _repo.GetByUserIdAsync(userId, pageParameters);
 
-            var data = await _repo.GetByUserIdAsync(userId);
+            var mappedItems = _mapper.Map<IReadOnlyList<VolunteerHistoryDto>>(data.Items);
 
-            if (data == null || !data.Any())
-                throw new NotFoundException("No history found for this user.");
+            var pagedDtos = new PagedList<VolunteerHistoryDto>(
+                mappedItems,
+                data.PageNumber,
+                data.PageSize,
+                data.TotalCount
+            );
 
-            return _mapper.Map<List<VolunteerHistoryDto>>(data);
+            return Result<PagedList<VolunteerHistoryDto>>.Success(pagedDtos);
         }
 
-        #endregion
-
-        #region Get Request History
-
-        public async Task<List<VolunteerHistoryDto>> GetRequestHistory(Guid requestId)
+        public async Task<Result<PagedList<VolunteerHistoryDto>>> GetRequestHistory(
+            Guid requestId,
+            PageParameters pageParameters)
         {
-            if (requestId == Guid.Empty)
-                throw new BadRequestException("Request ID is required.");
+            var data = await _repo.GetByRequestIdAsync(requestId, pageParameters);
 
-            var data = await _repo.GetByRequestIdAsync(requestId);
+            var mappedItems = _mapper.Map<IReadOnlyList<VolunteerHistoryDto>>(data.Items);
 
-            if (data == null || !data.Any())
-                throw new NotFoundException("No history found for this request.");
+            var pagedDtos = new PagedList<VolunteerHistoryDto>(
+                mappedItems,
+                data.PageNumber,
+                data.PageSize,
+                data.TotalCount
+            );
 
-            return _mapper.Map<List<VolunteerHistoryDto>>(data);
+            return Result<PagedList<VolunteerHistoryDto>>.Success(pagedDtos);
         }
 
         public async Task AddAsync(
@@ -68,21 +69,6 @@ namespace GivingChampion.Application.Services
             VolunteerHistoryAction action,
             int? progress = null)
         {
-            if (userId == Guid.Empty)
-                throw new BadRequestException("User ID is required.");
-
-            if (requestId == Guid.Empty)
-                throw new BadRequestException("Service request ID is required.");
-
-            if (orderId == Guid.Empty)
-                throw new BadRequestException("Volunteer order ID is required.");
-
-            if (!Enum.IsDefined(typeof(VolunteerHistoryAction), action))
-                throw new BadRequestException("Volunteer history action is invalid.");
-
-            if (progress.HasValue && (progress.Value < 0 || progress.Value > 100))
-                throw new BadRequestException("Progress value must be between 0 and 100.");
-
             var history = new VolunteerHistories
             {
                 Id = Guid.NewGuid(),
@@ -95,9 +81,7 @@ namespace GivingChampion.Application.Services
             };
 
             await _repo.AddAsync(history);
-            await _repo.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
         }
-
-        #endregion
     }
 }

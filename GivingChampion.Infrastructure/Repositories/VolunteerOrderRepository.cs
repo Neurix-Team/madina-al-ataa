@@ -1,4 +1,6 @@
-﻿using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Persistence.Contexts;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
@@ -15,13 +17,14 @@ namespace GivingChampion.Persistance.Repositories
             _context = context;
         }
 
-        public async Task<List<VolunteerOrder>> GetAllAsync()
+        public async Task<PagedList<VolunteerOrder>> GetAllAsync(PageParameters pageParameters)
         {
             return await _context.VolunteerOrders
                 .Include(vo => vo.ServiceRequest)
                 .Where(vo => !vo.IsDeleted)
+                .OrderByDescending(vo => vo.CreatedAt)
                 .AsNoTracking()
-                .ToListAsync();
+                .ToPagedListAsync(pageParameters);
         }
 
         public async Task<VolunteerOrder?> GetByIdAsync(Guid id)
@@ -53,11 +56,6 @@ namespace GivingChampion.Persistance.Repositories
         public void Update(VolunteerOrder volunteerOrder)
         {
             _context.Entry(volunteerOrder).State = EntityState.Modified;
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
         }
     }
 }

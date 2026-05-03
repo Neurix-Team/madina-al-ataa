@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Common.DTO.UserBadgeDto;
+using GivingChampion.Application.DTO.UserBadgeDto;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 
@@ -9,13 +9,16 @@ namespace GivingChampion.API.Services
 {
     public class UserBadgeService : IUserBadgeService
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IUserBadgeRepository _userBadgeRepository;
         private readonly IMapper _mapper;
 
         public UserBadgeService(
+            IUnitOfWork unitOfWork,
             IUserBadgeRepository userBadgeRepository,
             IMapper mapper)
         {
+            _unitOfWork = unitOfWork;
             _userBadgeRepository = userBadgeRepository;
             _mapper = mapper;
         }
@@ -51,11 +54,30 @@ namespace GivingChampion.API.Services
             if (dto == null)
                 throw new BadRequestException("UserBadge create data is required.");
 
+            var existingUserBadge = await _userBadgeRepository.GetByProfileAndBadgeAsync(
+                dto.ProfileId,
+                dto.BadgeId,
+                includeDeleted: true);
+
+            if (existingUserBadge != null)
+            {
+                if (!existingUserBadge.IsDeleted)
+                    throw new BadRequestException("This badge is already assigned to this profile.");
+
+                existingUserBadge.IsDeleted = false;
+                existingUserBadge.DeletedAt = null;
+
+                _userBadgeRepository.Update(existingUserBadge);
+                await _unitOfWork.SaveChangesAsync();
+
+                return _mapper.Map<UserBadgeDto>(existingUserBadge);
+            }
+
             var userBadge = _mapper.Map<UserBadge>(dto);
 
             await _userBadgeRepository.AddAsync(userBadge);
 
-            await _userBadgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<UserBadgeDto>(userBadge);
         }
@@ -80,7 +102,7 @@ namespace GivingChampion.API.Services
 
             _userBadgeRepository.Update(userBadge);
 
-            await _userBadgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }
@@ -103,7 +125,7 @@ namespace GivingChampion.API.Services
 
             _userBadgeRepository.Update(userBadge);
 
-            await _userBadgeRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

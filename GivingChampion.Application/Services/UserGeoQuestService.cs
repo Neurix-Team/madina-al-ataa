@@ -2,9 +2,9 @@
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Helpers;
 using GivingChampion.Application.Interfaces;
-using GivingChampion.Common.DTO;
-using GivingChampion.Common.DTO.GeoQuestDto;
-using GivingChampion.Common.DTO.UserGeoQuestDto;
+using GivingChampion.Application.DTO;
+using GivingChampion.Application.DTO.GeoQuestDto;
+using GivingChampion.Application.DTO.UserGeoQuestDto;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
@@ -17,17 +17,20 @@ namespace GivingChampion.Application.Services
         private readonly IUserGeoQuestRepository _userGeoQuestRepository;
         private readonly IGeoQuestRepository _geoQuestRepository;
         private readonly ILocationRepository _locationRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public UserGeoQuestService(
             IUserGeoQuestRepository userGeoQuestRepository,
             IGeoQuestRepository geoQuestRepository,
             ILocationRepository locationRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _userGeoQuestRepository = userGeoQuestRepository;
             _geoQuestRepository = geoQuestRepository;
             _locationRepository = locationRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -97,7 +100,7 @@ namespace GivingChampion.Application.Services
 
             _userGeoQuestRepository.Update(userGeoQuest);
 
-            await _userGeoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
@@ -120,7 +123,7 @@ namespace GivingChampion.Application.Services
 
             _userGeoQuestRepository.Update(userGeoQuest);
 
-            await _userGeoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<bool>.Success(true);
         }
@@ -168,7 +171,7 @@ namespace GivingChampion.Application.Services
 
             await _userGeoQuestRepository.AddAsync(userGeoQuest);
 
-            await _userGeoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             var dto = _mapper.Map<UserGeoQuestDto>(userGeoQuest);
 
@@ -231,7 +234,7 @@ namespace GivingChampion.Application.Services
 
             _userGeoQuestRepository.Update(userGeoQuest);
 
-            await _userGeoQuestRepository.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Result<string>.Success("Location verification Successful.");
         }

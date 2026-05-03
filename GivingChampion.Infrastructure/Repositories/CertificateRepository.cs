@@ -1,7 +1,10 @@
-﻿using GivingChampion.Domain.Contexts;
+﻿using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Common.Extensions.Pagination;
+using GivingChampion.Common.Pagination;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using CertificateEntity = GivingChampion.Domain.Entities.Certificate;
 
 namespace GivingChampion.Persistance.Repositories
 {
@@ -14,27 +17,42 @@ namespace GivingChampion.Persistance.Repositories
             _context = context;
         }
 
-        // Get all certificates for a specific user by UserId
-        public async Task<List<Certificate>> GetCertificateByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<PagedList<CertificateEntity>> GetCertificateByIdAsync(
+            Guid userId,
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default)
         {
             return await _context.Certificates
                 .AsNoTracking()
-                .Where(c => c.VolunteerId == userId)  
-                .ToListAsync(cancellationToken);
+                .Where(c => c.VolunteerId == userId)
+                .OrderByDescending(c => c.IssuedDate)
+                .ToPagedListAsync(pageParameters, cancellationToken);
         }
-        // Check if a volunteer exists by their ID
-        public async Task<bool> VolunteerExistsAsync(Guid volunteerId, CancellationToken cancellationToken = default)
+
+        public async Task<PagedList<CertificateEntity>> GetAllAsync(
+            PageParameters pageParameters,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Certificates
+                .AsNoTracking()
+                .OrderByDescending(c => c.IssuedDate)
+                .ToPagedListAsync(pageParameters, cancellationToken);
+        }
+
+        public async Task<bool> VolunteerExistsAsync(
+            Guid volunteerId,
+            CancellationToken cancellationToken = default)
         {
             return await _context.Volunteers
                 .AsNoTracking()
                 .AnyAsync(v => v.Id == volunteerId, cancellationToken);
         }
 
-        // Add a new certificate to the database
-        public async Task AddAsync(Certificate certificate, CancellationToken cancellationToken = default)
+        public async Task AddAsync(
+            CertificateEntity certificate,
+            CancellationToken cancellationToken = default)
         {
             await _context.Certificates.AddAsync(certificate, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);  // Save changes inside the repository
         }
 
         // Get all certificates

@@ -1,5 +1,5 @@
 using GivingChampion.Application.Interfaces.Admin;
-using GivingChampion.Common.DTO.Admin;
+using GivingChampion.Application.DTO.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
