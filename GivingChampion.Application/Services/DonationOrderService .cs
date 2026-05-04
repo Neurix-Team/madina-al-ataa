@@ -9,10 +9,11 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services.DonationOrderService
 {
-    public class DonationOrderService : IDonationOrderService
+    public class DonationOrderService : BaseService, IDonationOrderService
     {
         private readonly IDonationOrderRepository _donationOrderRepository;
         private readonly IDonationRequestRepository _donationRequestRepository;
@@ -25,7 +26,9 @@ namespace GivingChampion.Application.Services.DonationOrderService
             IDonationRequestRepository donationRequestRepository,
             IDonorRepository donorRepository,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _donationOrderRepository = donationOrderRepository;
             _donationRequestRepository = donationRequestRepository;
@@ -45,13 +48,11 @@ namespace GivingChampion.Application.Services.DonationOrderService
         }
 
         public async Task<Result<PagedList<DonationOrderReadDto>>> GetMyOrdersAsync(
-            Guid donorUserId,
             PageParameters pageParameters)
         {
             var donationOrders = await _donationOrderRepository.GetByDonorIdAsync(
-                donorUserId,
-                pageParameters
-            );
+                UserId,
+                pageParameters);
 
             var result = _mapper.MapPagedList<DonationOrder, DonationOrderReadDto>(donationOrders);
 
@@ -60,7 +61,6 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
         public async Task<Result<DonationOrderDetailsDto?>> GetByIdAsync(
             Guid id,
-            Guid currentUserId,
             bool isAdmin = false)
         {
             var donationOrder = await _donationOrderRepository.GetByIdAsync(id);
@@ -68,17 +68,16 @@ namespace GivingChampion.Application.Services.DonationOrderService
             if (donationOrder == null)
                 throw new NotFoundException($"Donation order with ID {id} was not found.");
 
-            if (!isAdmin && donationOrder.DonorId != currentUserId)
+            if (!isAdmin && donationOrder.DonorId != UserId)
                 throw new UnauthorizedAccessException("You are not allowed to view this donation order.");
 
             var dto = _mapper.Map<DonationOrderDetailsDto>(donationOrder);
 
             return Result<DonationOrderDetailsDto?>.Success(dto);
-            }
+        }
 
         public async Task<Result<DonationOrderDetailsDto>> CreateAsync(
-            CreateDonationOrderDto dto,
-            Guid donorUserId)
+            CreateDonationOrderDto dto)
         {
             if (dto == null)
                 throw new BadRequestException("Donation order data is required.");
@@ -102,13 +101,15 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             var donationOrder = _mapper.Map<DonationOrder>(dto);
 
-            donationOrder.DonorId = donorUserId;
+            donationOrder.DonorId = UserId;
             donationOrder.Status = OrderStatus.Pending;
 
             await _donationOrderRepository.CreateAsync(donationOrder);
             await _unitOfWork.SaveChangesAsync();
 
-            var createdOrder = await _donationOrderRepository.GetByIdAsync(donationOrder.Id) ?? throw new NotFoundException("Created donation order could not be retrieved.");
+            var createdOrder = await _donationOrderRepository.GetByIdAsync(donationOrder.Id)
+                ?? throw new NotFoundException("Created donation order could not be retrieved.");
+
             var createdDto = _mapper.Map<DonationOrderDetailsDto>(createdOrder);
 
             return Result<DonationOrderDetailsDto>.Success(createdDto);
@@ -126,6 +127,9 @@ namespace GivingChampion.Application.Services.DonationOrderService
             if (donationOrder == null)
                 throw new NotFoundException($"Donation order with ID {id} was not found.");
 
+            if (donationOrder.DonorId != UserId)
+                throw new UnauthorizedAccessException("You are not allowed to update this donation order.");
+
             if (donationOrder.Status != OrderStatus.Pending)
                 throw new BadRequestException("Only pending donation orders can be updated.");
 
@@ -133,8 +137,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 throw new BadRequestException("Donation amount must be greater than zero.");
 
             var donationRequest = await _donationRequestRepository.GetByIdAsync(
-                donationOrder.DonationRequestId
-            );
+                donationOrder.DonationRequestId);
 
             if (donationRequest == null)
                 throw new NotFoundException("Related donation request was not found.");
@@ -166,8 +169,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 throw new BadRequestException("Only pending donation orders can be approved.");
 
             var donationRequest = await _donationRequestRepository.GetByIdAsync(
-                donationOrder.DonationRequestId
-            );
+                donationOrder.DonationRequestId);
 
             if (donationRequest == null)
                 throw new NotFoundException("Related donation request was not found.");
@@ -183,9 +185,11 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             donationOrder.Status = OrderStatus.Approved;
 
-            var donor = await _donorRepository.GetByIdAsync(donationOrder.DonorId);
+            var donor = await _donorRepository.GetByUserIdAsync(donationOrder.DonorId);
+
             if (donor == null)
                 throw new NotFoundException("Donor was not found.");
+
             donor.TotalDonated += donationOrder.Amount;
 
             donationRequest.AmountRemaining -= donationOrder.Amount;

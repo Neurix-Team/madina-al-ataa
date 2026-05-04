@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.DTO.BadgeDto;
+using GivingChampion.Application.Exceptions;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
@@ -13,15 +13,16 @@ namespace GivingChampion.API.Services
     public class BadgeService : IBadgeService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IGenericRepository<Badge> _badgeRepository;
+        private readonly IBadgeRepository _badgeRepository;
         private readonly IMapper _mapper;
 
         public BadgeService(
             IUnitOfWork unitOfWork,
+            IBadgeRepository badgeRepository,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _badgeRepository = unitOfWork.Repository<Badge>();
+            _badgeRepository = badgeRepository;
             _mapper = mapper;
         }
 
@@ -45,9 +46,6 @@ namespace GivingChampion.API.Services
             var badge = await _badgeRepository.GetByIdAsync(id);
 
             if (badge == null)
-                throw new NotFoundException($"Badge with ID {id} was not found.");
-
-            if (badge.IsDeleted)
                 throw new NotFoundException($"Badge with ID {id} was not found.");
 
             var badgeDto = _mapper.Map<BadgeDto>(badge);
@@ -84,9 +82,6 @@ namespace GivingChampion.API.Services
             if (badge == null)
                 throw new NotFoundException($"Badge with ID {id} was not found.");
 
-            if (badge.IsDeleted)
-                throw new BadRequestException("Cannot update a deleted badge.");
-
             _mapper.Map(dto, badge);
 
             _badgeRepository.Update(badge);
@@ -105,9 +100,6 @@ namespace GivingChampion.API.Services
 
             if (badge == null)
                 throw new NotFoundException($"Badge with ID {id} was not found.");
-
-            if (badge.IsDeleted)
-                throw new BadRequestException("Badge is already deleted.");
 
             badge.IsDeleted = true;
             badge.DeletedAt = DateTime.UtcNow;

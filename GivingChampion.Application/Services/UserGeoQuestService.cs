@@ -9,10 +9,11 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class UserGeoQuestService : IUserGeoQuestService
+    public class UserGeoQuestService : BaseService, IUserGeoQuestService
     {
         private readonly IUserGeoQuestRepository _userGeoQuestRepository;
         private readonly IGeoQuestRepository _geoQuestRepository;
@@ -25,7 +26,9 @@ namespace GivingChampion.Application.Services
             IGeoQuestRepository geoQuestRepository,
             ILocationRepository locationRepository,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _userGeoQuestRepository = userGeoQuestRepository;
             _geoQuestRepository = geoQuestRepository;
@@ -35,9 +38,10 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<Result<PagedList<UserGeoQuestDto>>> GetAllAsync(
-            Guid userId,
             PageParameters pageParameters)
         {
+            var userId = UserId;
+
             if (userId == Guid.Empty)
                 throw new BadRequestException("User ID is required.");
 
@@ -128,10 +132,10 @@ namespace GivingChampion.Application.Services
             return Result<bool>.Success(true);
         }
 
-        public async Task<Result<UserGeoQuestDto>> StartAsync(
-            Guid geoQuestId,
-            Guid userId)
+        public async Task<Result<UserGeoQuestDto>> StartAsync(Guid geoQuestId)
         {
+            var userId = UserId;
+
             if (geoQuestId == Guid.Empty)
                 throw new BadRequestException("GeoQuest ID is required.");
 
@@ -155,16 +159,12 @@ namespace GivingChampion.Application.Services
             var userGeoQuest = new UserGeoQuest
             {
                 Id = Guid.NewGuid(),
-
                 UserId = userId,
                 GeoQuestId = geoQuestId,
-
                 Title = geoQuest.Title,
-
                 StartedAt = DateTime.UtcNow,
                 IsCompleted = false,
                 IsLocationVerified = false,
-
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
@@ -178,10 +178,10 @@ namespace GivingChampion.Application.Services
             return Result<UserGeoQuestDto>.Success(dto);
         }
 
-        public async Task<Result<string>> UpdateAsyncVerification(
-            Guid userId,
-            VerifyLocationDto dto)
+        public async Task<Result<string>> UpdateAsyncVerification(VerifyLocationDto dto)
         {
+            var userId = UserId;
+
             if (dto.UserGeoQuestId == Guid.Empty)
                 throw new BadRequestException("UserGeoQuest ID is required.");
 

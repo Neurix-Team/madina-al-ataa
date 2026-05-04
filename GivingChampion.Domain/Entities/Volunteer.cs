@@ -39,7 +39,6 @@ namespace GivingChampion.Domain.Entities
         /// <summary>
         /// Navigation property to the related Application User
         /// </summary>
-        [ForeignKey(nameof(UserId))]
         public ApplicationUser? User { get; set; }
 
 

@@ -15,10 +15,8 @@ namespace GivingChampion.Domain.Entities
         [StringLength(200)]
         public string Title { get; set; }
         [Required]
-        [ForeignKey(nameof(GeoQuest))]
         public Guid GeoQuestId { get; set; }
         [Required]
-        [ForeignKey(nameof(User))]
         public Guid UserId { get; set; }
         [Required]
         public GeoQuest GeoQuest { get; set; }

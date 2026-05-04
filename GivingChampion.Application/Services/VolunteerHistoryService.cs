@@ -7,10 +7,11 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class VolunteerHistoryService : IVolunteerHistoryService
+    public class VolunteerHistoryService : BaseService, IVolunteerHistoryService
     {
         private readonly IVolunteerHistoryRepository _repo;
         private readonly IUnitOfWork _unitOfWork;
@@ -19,7 +20,9 @@ namespace GivingChampion.Application.Services
         public VolunteerHistoryService(
             IVolunteerHistoryRepository repo,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _repo = repo;
             _unitOfWork = unitOfWork;
@@ -27,10 +30,9 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<Result<PagedList<VolunteerHistoryDto>>> GetUserHistory(
-            Guid userId,
             PageParameters pageParameters)
         {
-            var data = await _repo.GetByUserIdAsync(userId, pageParameters);
+            var data = await _repo.GetByUserIdAsync(UserId, pageParameters);
 
             var mappedItems = _mapper.Map<IReadOnlyList<VolunteerHistoryDto>>(data.Items);
 

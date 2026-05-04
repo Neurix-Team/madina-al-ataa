@@ -1,6 +1,4 @@
-﻿using GivingChampion.Common.Interfaces;
-using GivingChampion.Domain.Entities.Base;
-using System;
+﻿using GivingChampion.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations;
 
 namespace GivingChampion.Domain.Entities
@@ -11,16 +9,15 @@ namespace GivingChampion.Domain.Entities
         public Guid Id { get; set; }
 
         [Range(0, int.MaxValue)]
-        public int Xp { get; set; }
+        public int Xp { get; set; } = 0;
 
         [Range(0, int.MaxValue)]
-        public int Kp { get; set; }
+        public int Kp { get; set; } = 0;
 
         public Guid LevelId { get; set; }
         public Level Level { get; set; }
-        //public bool IsDeleted { get; set; } = false;
-        //public DateTime? DeletedAt { get; set; }
+
         public Guid ProfileId { get; set; }
-        public Profile Profile { get; set; } 
+        public Profile Profile { get; set; }
     }
 }

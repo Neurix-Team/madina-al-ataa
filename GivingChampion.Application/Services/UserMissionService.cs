@@ -9,10 +9,11 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class UserMissionService : IUserMissionService
+    public class UserMissionService : BaseService, IUserMissionService
     {
         private readonly IUserMissionRepository _userMissionRepository;
         private readonly IMissionRepository _missionRepository;
@@ -23,7 +24,9 @@ namespace GivingChampion.Application.Services
             IUserMissionRepository userMissionRepository,
             IMissionRepository missionRepository,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _userMissionRepository = userMissionRepository;
             _missionRepository = missionRepository;
@@ -31,8 +34,10 @@ namespace GivingChampion.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<Result<UserMissionDto>> StartMissionAsync(StartMissionDto dto, Guid userId)
+        public async Task<Result<UserMissionDto>> StartMissionAsync(StartMissionDto dto)
         {
+            var userId = UserId;
+
             if (dto == null)
                 throw new BadRequestException("Mission start data is required.");
 
@@ -47,7 +52,6 @@ namespace GivingChampion.Application.Services
             if (mission == null)
                 throw new NotFoundException("Mission not found.");
 
-            // لو عندك Status للـ Mission وعايز تمنع بدء Mission غير نشطة، فعّل الشرط ده:
             // if (mission.Status != MissionStatus.InProgress)
             //     throw new BadRequestException("This mission is not currently in progress.");
 
@@ -87,9 +91,10 @@ namespace GivingChampion.Application.Services
 
         public async Task<Result<UserMissionDto>> UpdateProgressAsync(
             Guid userMissionId,
-            UpdateProgressDto dto,
-            Guid userId)
+            UpdateProgressDto dto)
         {
+            var userId = UserId;
+
             if (dto == null)
                 throw new BadRequestException("Progress update data is required.");
 
@@ -131,9 +136,10 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<Result<PagedList<UserMissionDto>>> GetMyActiveMissionsAsync(
-            PageParameters pageParameters,
-            Guid userId)
+            PageParameters pageParameters)
         {
+            var userId = UserId;
+
             if (userId == Guid.Empty)
                 throw new UnauthorizedAccessException("Invalid user token.");
 
@@ -147,9 +153,10 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<Result<PagedList<UserMissionDto>>> GetMyCompletedMissionsAsync(
-            PageParameters pageParameters,
-            Guid userId)
+            PageParameters pageParameters)
         {
+            var userId = UserId;
+
             if (userId == Guid.Empty)
                 throw new UnauthorizedAccessException("Invalid user token.");
 
@@ -164,9 +171,10 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<Result<UserMissionDto>> GetByIdAsync(
-            Guid userMissionId,
-            Guid userId)
+            Guid userMissionId)
         {
+            var userId = UserId;
+
             if (userId == Guid.Empty)
                 throw new UnauthorizedAccessException("Invalid user token.");
 

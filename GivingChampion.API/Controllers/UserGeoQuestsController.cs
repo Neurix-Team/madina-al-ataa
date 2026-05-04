@@ -1,10 +1,9 @@
-﻿using GivingChampion.Application.Interfaces;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.DTO;
 using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace GivingChampion.API.Controllers
 {
@@ -20,66 +19,58 @@ namespace GivingChampion.API.Controllers
             _userGeoQuestService = userGeoQuestService;
         }
 
-        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync([FromQuery] Guid userId, [FromQuery] PageParameters pageParameters)
+        public async Task<IActionResult> GetAllAsync([FromQuery] PageParameters pageParameters)
         {
-            var userGeoQuests = await _userGeoQuestService.GetAllAsync(userId, pageParameters);
-            return Ok(userGeoQuests);
+            var result = await _userGeoQuestService.GetAllAsync(pageParameters);
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var userGeoQuest = await _userGeoQuestService.GetByIdAsync(id);
-            if (userGeoQuest == null || !userGeoQuest.Succeeded)
-                return NotFound("UserGeoQuest not found");
-
-            return Ok(userGeoQuest);
+            var result = await _userGeoQuestService.GetByIdAsync(id);
+            return Ok(result);
         }
 
-
         [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserGeoQuestDto dto)
         {
-            var updated = await _userGeoQuestService.UpdateAsync(id, dto);
-            if (!updated.Value) return NotFound("UserGeoQuest not found");
+            var result = await _userGeoQuestService.UpdateAsync(id, dto);
+
+            if (!result.Succeeded || !result.Value)
+                return BadRequest(result);
+
             return NoContent();
         }
+
         [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _userGeoQuestService.SoftDeleteAsync(id);
-            if (!deleted.Value) return NotFound("UserGeoQuest not found");
+            var result = await _userGeoQuestService.SoftDeleteAsync(id);
+
+            if (!result.Succeeded || !result.Value)
+                return BadRequest(result);
+
             return NoContent();
         }
+
         [Authorize(Roles = "Admin")]
-        [HttpGet("{id}/status")]
+        [HttpGet("{id:guid}/status")]
         public async Task<IActionResult> CheckGeoQuestStatus(Guid id)
         {
             var result = await _userGeoQuestService.CheckGeoQuestStatus(id);
-
-            if (!result.Succeeded)
-            {
-                return BadRequest("An error occurred while checking the GeoQuest status.");
-            }
-
-            return Ok(result.Value);
+            return Ok(result);
         }
-        [HttpPost("/verify-location")]
+
+        [HttpPost("verify-location")]
         public async Task<IActionResult> VerifyLocation([FromBody] VerifyLocationDto dto)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-
-            var result = await _userGeoQuestService.UpdateAsyncVerification(
-                userId,
-                dto);
-
+            var result = await _userGeoQuestService.UpdateAsyncVerification(dto);
             return Ok(result);
         }
     }
-  }
+}

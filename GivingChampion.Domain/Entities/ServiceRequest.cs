@@ -37,7 +37,6 @@ namespace GivingChampion.Domain.Entities
 		public DateTime ScheduleDate { get; set; }
         [Required]
         public Guid LocationId { get; set; }
-        [ForeignKey(nameof(LocationId))]
         public Location? Location { get; set; }
         // Duration in hours
         [Range(1, 1000)]
@@ -60,12 +59,10 @@ namespace GivingChampion.Domain.Entities
 		public Guid PartnerId { get; set; }
 
 		// Navigation Property
-		[ForeignKey("PartnerId")]
 		public Partner Partner { get; set; } = null!;
         [Range(0, 100)]
         public int Progress { get; set; }
         public Guid? VolunteerUserId { get; set; }
-        [ForeignKey(nameof(VolunteerUserId))]
         public ApplicationUser? Volunteer { get; set; }
 
 

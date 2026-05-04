@@ -17,10 +17,8 @@ namespace GivingChampion.Domain.Entities
         public MissionStatus Status { get; set; }
         public DateTime StartedAt { get; set; }
         public DateTime CompletedAt { get; set; }
-        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
-        [ForeignKey("Mission")]
         public Guid MissionId { get; set; }
         public Mission Mission { get; set; }
         //public bool IsDeleted { get; set; }

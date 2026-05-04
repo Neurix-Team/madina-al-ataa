@@ -1,8 +1,8 @@
 ﻿using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Persistence.Contexts;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using GivingChampion.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.API.Repositories
@@ -19,13 +19,16 @@ namespace GivingChampion.API.Repositories
         public async Task<PagedList<Badge>> GetAllAsync(PageParameters pageParameters)
         {
             return await _context.Badges
-                .AsNoTracking().Where(b => !b.IsDeleted).ToPagedListAsync(pageParameters);
+                .AsNoTracking()
+                .Where(b => !b.IsDeleted)
+                .OrderByDescending(b => b.Id)
+                .ToPagedListAsync(pageParameters);
         }
 
         public async Task<Badge?> GetByIdAsync(Guid id)
         {
             return await _context.Badges
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
         }
 
         public async Task AddAsync(Badge badge)
@@ -37,6 +40,5 @@ namespace GivingChampion.API.Repositories
         {
             _context.Badges.Update(badge);
         }
-
     }
 }

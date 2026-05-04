@@ -21,7 +21,6 @@ namespace GivingChampion.Domain.Entities
         public int XPReward { get; set; }
         public int ImpactReward { get; set; }
         public MissionStatus Status { get; set; }
-        [ForeignKey("Location")]
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
     }
