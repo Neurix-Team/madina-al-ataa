@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.DTO.VolunteerOrder;
@@ -19,6 +20,7 @@ namespace GivingChampion.Application.Services
 
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly IVolunteerHistoryService _historyService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -30,6 +32,7 @@ namespace GivingChampion.Application.Services
         public VolunteerOrderService(
             IVolunteerOrderRepository volunteerOrderRepository,
             IServiceRequestRepository serviceRequestRepository,
+            INotificationRepository notificationRepository,
             IVolunteerHistoryService historyService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -38,6 +41,7 @@ namespace GivingChampion.Application.Services
         {
             _volunteerOrderRepository = volunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
+            _notificationRepository = notificationRepository;
             _historyService = historyService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -326,6 +330,11 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository.Update(order);
 
             await _serviceRequestRepository.UpdateAsync(serviceRequest);
+            await CreateOrderStatusNotificationAsync(
+                order,
+                "Volunteer order approved",
+                "Your volunteer order has been approved.",
+                NotificationType.Information);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -358,6 +367,11 @@ namespace GivingChampion.Application.Services
             order.UpdatedAt = DateTime.UtcNow;
 
             _volunteerOrderRepository.Update(order);
+            await CreateOrderStatusNotificationAsync(
+                order,
+                "Volunteer order rejected",
+                $"Your volunteer order has been rejected. Reason: {rejectionReason}",
+                NotificationType.Warning);
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -369,6 +383,27 @@ namespace GivingChampion.Application.Services
             );
 
             return _mapper.Map<VolunteerOrderDto>(order);
+        }
+
+        private async Task CreateOrderStatusNotificationAsync(
+            VolunteerOrder order,
+            string title,
+            string message,
+            NotificationType type)
+        {
+            await _notificationRepository.CreateAsync(new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = order.UserId,
+                Type = type,
+                Title = title,
+                Message = message,
+                LinkedEntityId = order.Id,
+                LinkedEntityType = nameof(VolunteerOrder),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            });
         }
 
         #endregion
