@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GivingChampion.Application.Exceptions;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.DTO.DonationOrder;
 using GivingChampion.Common.Enums;
@@ -18,6 +19,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
         private readonly IDonationOrderRepository _donationOrderRepository;
         private readonly IDonationRequestRepository _donationRequestRepository;
         private readonly IDonorRepository _donorRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -25,6 +27,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             IDonationOrderRepository donationOrderRepository,
             IDonationRequestRepository donationRequestRepository,
             IDonorRepository donorRepository,
+            INotificationRepository notificationRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
@@ -33,6 +36,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             _donationOrderRepository = donationOrderRepository;
             _donationRequestRepository = donationRequestRepository;
             _donorRepository = donorRepository;
+            _notificationRepository = notificationRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -203,6 +207,12 @@ namespace GivingChampion.Application.Services.DonationOrderService
             await _donorRepository.UpdateAsync(donor);
             await _donationOrderRepository.UpdateAsync(donationOrder);
             await _donationRequestRepository.UpdateAsync(donationRequest);
+            await CreateOrderStatusNotificationAsync(
+                donationOrder,
+                "Donation order approved",
+                "Your donation order has been approved.",
+                NotificationType.Information);
+
             await _unitOfWork.SaveChangesAsync();
 
             var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
@@ -228,6 +238,12 @@ namespace GivingChampion.Application.Services.DonationOrderService
             donationOrder.Status = OrderStatus.Rejected;
 
             await _donationOrderRepository.UpdateAsync(donationOrder);
+            await CreateOrderStatusNotificationAsync(
+                donationOrder,
+                "Donation order rejected",
+                "Your donation order has been rejected.",
+                NotificationType.Warning);
+
             await _unitOfWork.SaveChangesAsync();
 
             var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
@@ -238,6 +254,27 @@ namespace GivingChampion.Application.Services.DonationOrderService
             var dto = _mapper.Map<DonationOrderDetailsDto>(updatedOrder);
 
             return Result<DonationOrderDetailsDto>.Success(dto);
+        }
+
+        private async Task CreateOrderStatusNotificationAsync(
+            DonationOrder donationOrder,
+            string title,
+            string message,
+            NotificationType type)
+        {
+            await _notificationRepository.CreateAsync(new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = donationOrder.DonorId,
+                Type = type,
+                Title = title,
+                Message = message,
+                LinkedEntityId = donationOrder.Id,
+                LinkedEntityType = nameof(DonationOrder),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            });
         }
     }
 }
