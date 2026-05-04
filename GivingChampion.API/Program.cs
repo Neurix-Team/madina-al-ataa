@@ -1,11 +1,17 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using GivingChampion.API.Handlers;
 using GivingChampion.Application;
 using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Transformers;
-using GivingChampion.Application.DTO.Auth;
+using GivingChampion.Application.Validators.Auth;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance;
+using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Persistance.Repositories;
+using GivingChampion.Persistence.Contexts;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -14,11 +20,6 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
-using GivingChampion.Persistance;
-using GivingChampion.Persistence.Contexts;
-using FluentValidation.AspNetCore;
-using GivingChampion.Application.Validators.Auth;
-using FluentValidation;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -129,7 +130,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
-
 
 builder.Services.Configure<JwtOptions>(
             _conf.GetSection(JwtOptions.SectionName));
