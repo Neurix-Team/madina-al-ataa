@@ -185,7 +185,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             donationOrder.Status = OrderStatus.Approved;
 
-            var donor = await _donorRepository.GetByIdAsync(donationOrder.DonorId);
+            var donor = await _donorRepository.GetByUserIdAsync(donationOrder.DonorId);
 
             if (donor == null)
                 throw new NotFoundException("Donor was not found.");
