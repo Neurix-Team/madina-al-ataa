@@ -22,7 +22,10 @@ namespace GivingChampion.API.Repositories
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize)
-                .Take(pageParameters.PageSize).ToPagedListAsync(pageParameters);
+                .Where(l => !l.IsDeleted)
+                .Take(pageParameters.PageSize).ToPagedListAsync(pageParameters)
+                ;
+
 
             return items;
         }
