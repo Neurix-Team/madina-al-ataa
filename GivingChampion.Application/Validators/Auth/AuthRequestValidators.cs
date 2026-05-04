@@ -24,6 +24,7 @@ namespace GivingChampion.Application.Validators.Auth
         }
     }
 
+   
     public sealed class CompleteSocialRegistrationRequestValidator : AbstractValidator<CompleteSocialRegistrationRequest>
     {
         public CompleteSocialRegistrationRequestValidator()

@@ -13,7 +13,6 @@ namespace GivingChampion.Application.Interfaces.ServiceRequestService
         Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters);
         Task<ServiceRequestDto?> GetByIdAsync(Guid id);
 
-        //Task<List<ServiceRequestDto>> GetPendingAsync();
         Task<Result<PagedList<ServiceRequestDto>>> GetByStatusAsync(
             RequestStatus status,
             PageParameters pageParameters);        //Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId);

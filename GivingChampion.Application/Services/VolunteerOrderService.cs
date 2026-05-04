@@ -19,6 +19,7 @@ namespace GivingChampion.Application.Services
         #region Fields
 
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
+        private readonly IGenericRepository<VolunteerOrder> _genericVolunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IVolunteerHistoryService _historyService;
@@ -27,19 +28,19 @@ namespace GivingChampion.Application.Services
 
         #endregion
 
+
         #region Constructor
 
         public VolunteerOrderService(
-            IVolunteerOrderRepository volunteerOrderRepository,
-            IServiceRequestRepository serviceRequestRepository,
-            INotificationRepository notificationRepository,
-            IVolunteerHistoryService historyService,
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+     IVolunteerOrderRepository volunteerOrderRepository,
+     IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
+     IServiceRequestRepository serviceRequestRepository,
+     IVolunteerHistoryService historyService,
+     IUnitOfWork unitOfWork,
+     IMapper mapper)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
+            _genericVolunteerOrderRepository = genericVolunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
             _notificationRepository = notificationRepository;
             _historyService = historyService;
@@ -61,6 +62,37 @@ namespace GivingChampion.Application.Services
             );
 
             return Result<PagedList<VolunteerOrderDto>>.Success(pagedDtos);
+        }
+
+        public async Task<Result<PagedList<VolunteerOrderDto>>> GetPendingAsync(PageParameters pageParameters)
+        {
+            var volunteerOrders = await _volunteerOrderRepository.GetPendingAsync(pageParameters);
+
+            var mappedItems = _mapper.Map<IReadOnlyList<VolunteerOrderDto>>(volunteerOrders.Items);
+
+            var pagedDtos = new PagedList<VolunteerOrderDto>(
+                mappedItems,
+                volunteerOrders.PageNumber,
+                volunteerOrders.PageSize,
+                volunteerOrders.TotalCount
+            );
+
+            return Result<PagedList<VolunteerOrderDto>>.Success(pagedDtos);
+        }
+
+        public async Task<Result<PendingVolunteerOrderCountDto>> GetPendingCountAsync()
+        {
+            var count = await _genericVolunteerOrderRepository.CountAsync(
+                order => order.Status == OrderStatus.Pending
+            );
+
+            var dto = new PendingVolunteerOrderCountDto
+            {
+                Exists = count > 0,
+                Count = count
+            };
+
+            return Result<PendingVolunteerOrderCountDto>.Success(dto);
         }
 
         #endregion
