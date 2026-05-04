@@ -28,7 +28,6 @@ namespace GivingChampion.Domain.Entities
         [Required(ErrorMessage = "IssuedTo is required")]
         public Guid IssuedTo { get; set; }
 
-        [ForeignKey(nameof(IssuedTo))]
         public Volunteer? Volunteer { get; set; }
 
         /// <summary>
@@ -42,7 +41,6 @@ namespace GivingChampion.Domain.Entities
         /// </summary>
         [MaxLength(2000)]
         public string QrCode { get; set; } = string.Empty;
-        public Guid VolunteerId { get; set; }
         
     }
 }

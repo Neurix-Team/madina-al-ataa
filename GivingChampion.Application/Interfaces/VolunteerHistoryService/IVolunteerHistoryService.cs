@@ -8,7 +8,6 @@ namespace GivingChampion.Application.Interfaces.VolunteerHistoryService
     public interface IVolunteerHistoryService
     {
         Task<Result<PagedList<VolunteerHistoryDto>>> GetUserHistory(
-            Guid userId,
             PageParameters pageParameters);
 
         Task<Result<PagedList<VolunteerHistoryDto>>> GetRequestHistory(

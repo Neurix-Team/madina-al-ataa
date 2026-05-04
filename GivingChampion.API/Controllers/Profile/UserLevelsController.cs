@@ -17,36 +17,47 @@ namespace GivingChampion.API.Controllers
             _userLevelService = userLevelService;
         }
 
-        // GET api/userlevels
-        [Authorize]
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        // GET api/UserLevels/my
+        // Current logged-in user gets his own level from token
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyLevel()
         {
-            var userLevel = await _userLevelService.GetByProfileIdAsync(id);
-            if (userLevel == null)
-                return NotFound("User level not found");
+            var userLevel = await _userLevelService.GetMyLevelAsync();
 
             return Ok(userLevel);
         }
 
-        // PUT api/userlevels/{id}
-        [Authorize]
-        [HttpPut("{id}")]
+        // GET api/UserLevels/admin/profile/{profileId}
+        // Admin gets level by profile id
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin/profile/{profileId:guid}")]
+        public async Task<IActionResult> GetByProfileIdForAdmin(Guid profileId)
+        {
+            var userLevel = await _userLevelService.GetByProfileIdAsync(profileId);
+
+            return Ok(userLevel);
+        }
+
+        // PUT api/UserLevels/admin/{id}
+        // Admin updates user level
+        [Authorize(Roles = "Admin")]
+        [HttpPut("admin/{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserLevelDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var updated = await _userLevelService.UpdateAsync(id, dto);
-            if (!updated) return NotFound("User level not found");
+
+            await _userLevelService.UpdateAsync(id, dto);
+
             return NoContent();
         }
 
-        // DELETE api/userlevels/{id}
-        [Authorize]
-        [HttpDelete("{id}")]
+        // DELETE api/UserLevels/admin/{id}
+        // Admin soft deletes user level
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("admin/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _userLevelService.SoftDeleteAsync(id);
-            if (!deleted) return NotFound("User level not found");
+            await _userLevelService.SoftDeleteAsync(id);
+
             return NoContent();
         }
     }

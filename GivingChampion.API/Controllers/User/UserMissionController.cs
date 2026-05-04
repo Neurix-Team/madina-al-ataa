@@ -5,8 +5,6 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GivingChampion.API.Controllers
@@ -29,8 +27,7 @@ namespace GivingChampion.API.Controllers
         [Authorize]
         public async Task<ActionResult<Result<UserMissionDto>>> StartMission([FromBody] StartMissionDto dto)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _userMissionService.StartMissionAsync(dto, userId);
+            var result = await _userMissionService.StartMissionAsync(dto);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
@@ -39,8 +36,7 @@ namespace GivingChampion.API.Controllers
         [Authorize]
         public async Task<ActionResult<Result<UserMissionDto>>> UpdateMissionProgress(Guid id, [FromBody] UpdateProgressDto dto)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _userMissionService.UpdateProgressAsync(id, dto, userId);
+            var result = await _userMissionService.UpdateProgressAsync(id, dto);
             return result.Succeeded ? Ok(result) : BadRequest(result);
         }
 
@@ -49,8 +45,7 @@ namespace GivingChampion.API.Controllers
         [Authorize]
         public async Task<ActionResult<Result<PagedList<UserMissionDto>>>> GetActiveMissions([FromQuery] PageParameters pageParameters)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _userMissionService.GetMyActiveMissionsAsync(pageParameters, userId);
+            var result = await _userMissionService.GetMyActiveMissionsAsync(pageParameters);
             return Ok(result);
         }
 
@@ -59,8 +54,7 @@ namespace GivingChampion.API.Controllers
         [Authorize]
         public async Task<ActionResult<Result<PagedList<UserMissionDto>>>> GetCompletedMissions([FromQuery] PageParameters pageParameters)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _userMissionService.GetMyCompletedMissionsAsync(pageParameters, userId);
+            var result = await _userMissionService.GetMyCompletedMissionsAsync(pageParameters);
             return Ok(result);
         }
 
@@ -69,8 +63,7 @@ namespace GivingChampion.API.Controllers
         [Authorize]
         public async Task<ActionResult<Result<UserMissionDto>>> GetById(Guid id)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _userMissionService.GetByIdAsync(id, userId);
+            var result = await _userMissionService.GetByIdAsync(id);
             return Ok(result);
         }
     }

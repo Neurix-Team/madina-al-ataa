@@ -18,12 +18,15 @@ namespace GivingChampion.Application.Interfaces.Certificate
         Task<bool> CheckVolunteerExists(
             Guid volunteerId,
             CancellationToken cancellationToken = default);
+        Task<Result<PagedList<CertificateReadAllDto>>> GetMyCertificatesAsync(
+    PageParameters pageParameters,
+    CancellationToken cancellationToken = default);
 
         Task<Result<PagedList<CertificateReadAllDto>>> GetCertificatesByIdAsync(
             Guid userId,
             PageParameters pageParameters,
             CancellationToken cancellationToken = default);
-
+     
         Task<Result<PagedList<CertificateReadAllDto>>> GetAllAsync(
             PageParameters pageParameters,
             CancellationToken cancellationToken = default);

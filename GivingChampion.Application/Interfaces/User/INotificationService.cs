@@ -7,9 +7,9 @@ namespace GivingChampion.Application.Interfaces
 {
     public interface INotificationService
     {
-        Task<Result<PagedList<NotificationDto>>> GetMyNotificationsAsync(Guid userId, bool unreadOnly = false, PageParameters pageParameters = null);
-        Task<Result> MarkAsReadAsync(Guid userId, Guid notificationId);
-        Task<Result> MarkAllAsReadAsync(Guid userId);
+        Task<Result<PagedList<NotificationDto>>> GetMyNotificationsAsync(bool unreadOnly = false, PageParameters pageParameters = null);
+        Task<Result> MarkAsReadAsync(Guid notificationId);
+        Task<Result> MarkAllAsReadAsync();
 
         // Internal method for other services to send notifications
         Task CreateNotificationAsync(Notification notification);

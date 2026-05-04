@@ -13,15 +13,15 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
         Task<Result<PendingVolunteerOrderCountDto>> GetPendingCountAsync();
         Task<VolunteerOrderDto?> GetByIdAsync(Guid id);
 
-        Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId);
+        Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto);
         //Task<VolunteerOrderDto?> UpdateAsync(Guid id, UpdateVolunteerOrderDto dto);
         Task ChangeOrderStatusAsync(Guid orderId, OrderStatus newStatus);
 
-        Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, Guid volunteerId, int progress);
+        Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, int progress);
         Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id);
         Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason);
 
-        Task<bool> DeleteAsync(Guid id, Guid volunteerId);
+        Task<bool> DeleteAsync(Guid id);
     }
 }
 

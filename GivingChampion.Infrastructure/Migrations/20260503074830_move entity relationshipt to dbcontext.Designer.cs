@@ -3,6 +3,7 @@ using System;
 using GivingChampion.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GivingChampion.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260503074830_move entity relationshipt to dbcontext")]
+    partial class moveentityrelationshipttodbcontext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1082,8 +1085,7 @@ namespace GivingChampion.Domain.Migrations
 
                     b.HasIndex("LevelId");
 
-                    b.HasIndex("ProfileId")
-                        .IsUnique();
+                    b.HasIndex("ProfileId");
 
                     b.ToTable("UserLevels");
                 });
@@ -1500,8 +1502,8 @@ namespace GivingChampion.Domain.Migrations
 
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
                 {
-                    b.HasOne("GivingChampion.Domain.Entities.Level", null)
-                        .WithMany()
+                    b.HasOne("GivingChampion.Domain.Entities.Level", "Level")
+                        .WithMany("Profiles")
                         .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1511,6 +1513,8 @@ namespace GivingChampion.Domain.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Level");
 
                     b.Navigation("User");
                 });
@@ -1607,9 +1611,9 @@ namespace GivingChampion.Domain.Migrations
                         .IsRequired();
 
                     b.HasOne("GivingChampion.Domain.Entities.Profile", "Profile")
-                        .WithOne("UserLevel")
-                        .HasForeignKey("GivingChampion.Domain.Entities.UserLevel", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Level");
@@ -1743,13 +1747,16 @@ namespace GivingChampion.Domain.Migrations
                     b.Navigation("UserBadges");
                 });
 
+            modelBuilder.Entity("GivingChampion.Domain.Entities.Level", b =>
+                {
+                    b.Navigation("Profiles");
+                });
+
             modelBuilder.Entity("GivingChampion.Domain.Entities.Profile", b =>
                 {
                     b.Navigation("Reviews");
 
                     b.Navigation("UserBadges");
-
-                    b.Navigation("UserLevel");
                 });
 #pragma warning restore 612, 618
         }

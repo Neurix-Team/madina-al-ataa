@@ -35,7 +35,6 @@ namespace GivingChampion.Domain.Entities
         [StringLength(100)]
         public string CharacterName { get; set; } = string.Empty;
 
-        [ForeignKey("Profile")]
         public Guid ProfileId { get; set; }
         public Profile Profile { get; set; }
 
