@@ -17,6 +17,7 @@ namespace GivingChampion.Application.Services
         #region Fields
 
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
+        private readonly IGenericRepository<VolunteerOrder> _genericVolunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly IVolunteerHistoryService _historyService;
         private readonly IUnitOfWork _unitOfWork;
@@ -24,16 +25,19 @@ namespace GivingChampion.Application.Services
 
         #endregion
 
+
         #region Constructor
 
         public VolunteerOrderService(
-            IVolunteerOrderRepository volunteerOrderRepository,
-            IServiceRequestRepository serviceRequestRepository,
-            IVolunteerHistoryService historyService,
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+     IVolunteerOrderRepository volunteerOrderRepository,
+     IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
+     IServiceRequestRepository serviceRequestRepository,
+     IVolunteerHistoryService historyService,
+     IUnitOfWork unitOfWork,
+     IMapper mapper)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
+            _genericVolunteerOrderRepository = genericVolunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
             _historyService = historyService;
             _unitOfWork = unitOfWork;
@@ -70,6 +74,21 @@ namespace GivingChampion.Application.Services
             );
 
             return Result<PagedList<VolunteerOrderDto>>.Success(pagedDtos);
+        }
+
+        public async Task<Result<PendingVolunteerOrderCountDto>> GetPendingCountAsync()
+        {
+            var count = await _genericVolunteerOrderRepository.CountAsync(
+                order => order.Status == OrderStatus.Pending
+            );
+
+            var dto = new PendingVolunteerOrderCountDto
+            {
+                Exists = count > 0,
+                Count = count
+            };
+
+            return Result<PendingVolunteerOrderCountDto>.Success(dto);
         }
 
         #endregion

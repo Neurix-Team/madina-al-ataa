@@ -10,6 +10,7 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
     {
         Task<Result<PagedList<VolunteerOrderDto>>> GetAllAsync(PageParameters pageParameters);
         Task<Result<PagedList<VolunteerOrderDto>>> GetPendingAsync(PageParameters pageParameters);
+        Task<Result<PendingVolunteerOrderCountDto>> GetPendingCountAsync();
         Task<VolunteerOrderDto?> GetByIdAsync(Guid id);
 
         Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId);

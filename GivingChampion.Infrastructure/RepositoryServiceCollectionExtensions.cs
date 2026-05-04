@@ -31,6 +31,7 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<ICertificateRepository, CertificateRepository>();
         services.AddScoped<IDonationRequestRepository, DonationRequestRepository>();
         services.AddScoped<IDonationOrderRepository, DonationOrderRepository>();
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
         services.AddScoped<IAvatarRepository, AvatarRepository>();
         services.AddScoped<IAdministratorRepository, AdministratorRepository>();
