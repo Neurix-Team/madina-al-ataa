@@ -56,9 +56,30 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
             }
         }
 
-        #endregion
+        [HttpGet("pending")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetPending([FromQuery] PageParameters pageParameters)
+        {
+            try
+            {
+                var result = await _volunteerOrderService.GetPendingAsync(pageParameters);
 
-        #region Get Volunteer Order By Id
+                if (!result.Succeeded)
+                    return BadRequest(result);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving pending volunteer orders.");
+
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while retrieving pending volunteer orders.",
+                    error = ex.Message
+                });
+            }
+        }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<VolunteerOrderDto>> GetById(Guid id)

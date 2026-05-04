@@ -9,6 +9,7 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
     public interface IVolunteerOrderService
     {
         Task<Result<PagedList<VolunteerOrderDto>>> GetAllAsync(PageParameters pageParameters);
+        Task<Result<PagedList<VolunteerOrderDto>>> GetPendingAsync(PageParameters pageParameters);
         Task<VolunteerOrderDto?> GetByIdAsync(Guid id);
 
         Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto, Guid volunteerId);

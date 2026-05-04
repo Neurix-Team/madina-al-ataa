@@ -27,6 +27,16 @@ namespace GivingChampion.Persistance.Repositories
                 .ToPagedListAsync(pageParameters);
         }
 
+        public async Task<PagedList<VolunteerOrder>> GetPendingAsync(PageParameters pageParameters)
+        {
+            return await _context.VolunteerOrders
+                .Include(vo => vo.ServiceRequest)
+                .Where(vo => !vo.IsDeleted && vo.Status == OrderStatus.Pending)
+                .OrderByDescending(vo => vo.CreatedAt)
+                .AsNoTracking()
+                .ToPagedListAsync(pageParameters);
+        }
+
         public async Task<VolunteerOrder?> GetByIdAsync(Guid id)
         {
             return await _context.VolunteerOrders

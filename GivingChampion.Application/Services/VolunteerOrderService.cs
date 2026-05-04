@@ -56,6 +56,22 @@ namespace GivingChampion.Application.Services
             return Result<PagedList<VolunteerOrderDto>>.Success(pagedDtos);
         }
 
+        public async Task<Result<PagedList<VolunteerOrderDto>>> GetPendingAsync(PageParameters pageParameters)
+        {
+            var volunteerOrders = await _volunteerOrderRepository.GetPendingAsync(pageParameters);
+
+            var mappedItems = _mapper.Map<IReadOnlyList<VolunteerOrderDto>>(volunteerOrders.Items);
+
+            var pagedDtos = new PagedList<VolunteerOrderDto>(
+                mappedItems,
+                volunteerOrders.PageNumber,
+                volunteerOrders.PageSize,
+                volunteerOrders.TotalCount
+            );
+
+            return Result<PagedList<VolunteerOrderDto>>.Success(pagedDtos);
+        }
+
         #endregion
 
         #region Get Volunteer Order By Id
