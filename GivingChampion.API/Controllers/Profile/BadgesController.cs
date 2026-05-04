@@ -33,6 +33,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateBadgeDto dto)
         {
             if (!ModelState.IsValid)
@@ -48,6 +49,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBadgeDto dto)
         {
             if (!ModelState.IsValid)
@@ -62,6 +64,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _badgeService.SoftDeleteAsync(id);
