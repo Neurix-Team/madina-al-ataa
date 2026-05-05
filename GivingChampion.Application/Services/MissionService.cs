@@ -9,10 +9,11 @@ using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Application.DTO.ActivityDto;
 using GivingChampion.Common.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class MissionService : IMissionService
+    public class MissionService : BaseService, IMissionService
     {
         private readonly IMissionRepository _missionRepository;
         private readonly IActivityService _activityService;
@@ -22,8 +23,9 @@ namespace GivingChampion.Application.Services
         public MissionService(
             IMissionRepository missionRepository,
             IActivityService activityService,
+            IHttpContextAccessor httpContextAccessor,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper) : base(httpContextAccessor)
         {
             _missionRepository = missionRepository;
             _activityService = activityService;
@@ -43,7 +45,7 @@ namespace GivingChampion.Application.Services
             await _activityService.AddAsync(new CreateActivityDto()
             {
                 EntityId = mission.Id,
-                UserId = Guid.Empty, // System user
+                UserId = UserId, // System user
                 Description = $"Mission '{mission.Title}' created.",
                 Action = ActivityAction.MissionCreated,
                 EntityType = ActivityEntityType.Mission
@@ -93,7 +95,7 @@ namespace GivingChampion.Application.Services
             await _activityService.AddAsync(new CreateActivityDto()
             {
                 EntityId = mission.Id,
-                UserId = Guid.Empty, // System user
+                UserId = UserId, // System user
                 Description = $"Mission '{mission.Title}' updated.",
                 Action = ActivityAction.MissionUpdated,
                 EntityType = ActivityEntityType.Mission
@@ -121,7 +123,7 @@ namespace GivingChampion.Application.Services
             await _activityService.AddAsync(new CreateActivityDto()
             {
                 EntityId = mission.Id,
-                UserId = Guid.Empty, // System user
+                UserId = UserId, // System user
                 Description = $"Mission '{mission.Title}' deleted.",
                 Action = ActivityAction.MissionDeleted,
                 EntityType = ActivityEntityType.Mission
