@@ -20,6 +20,7 @@ namespace GivingChampion.API.Repositories
         {
             var geoQuests = await _context.GeoQuests
                 .AsNoTracking()  // For read-only operation, improving performance
+                .Where(gq => !gq.IsDeleted)
                 .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize)  // Pagination logic
                 .Take(pageParameters.PageSize)  // Pagination logic
                 .ToPagedListAsync(pageParameters);

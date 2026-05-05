@@ -50,9 +50,9 @@ namespace GivingChampion.API.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
         }
-
+        [Authorize]
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGeoQuestDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromQuery] UpdateGeoQuestDto dto)
         {
             var result = await _geoQuestService.UpdateAsync(id, dto);
             if (!result.Succeeded || !result.Value)

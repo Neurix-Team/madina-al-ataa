@@ -43,7 +43,7 @@ namespace GivingChampion.Persistence.Contexts
         public DbSet<Activity> Activities { get; set; }
         public DbSet<GeoQuest> GeoQuests { get; set; }
         public DbSet<UserGeoQuest> UserGeoQuests { get; set; }
-        public DbSet<VolunteerHistories> VolunteerHistories { get; set; }
+        //public DbSet<VolunteerHistories> VolunteerHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +51,34 @@ namespace GivingChampion.Persistence.Contexts
 
             // ====================== GLOBAL SOFT DELETE FILTER ======================
             modelBuilder.ApplySoftDeleteQueryFilter();
+
+            // ====================== Activity ======================
+
+            modelBuilder.Entity<Activity>(entity =>
+            {
+                entity.HasKey(a => a.Id);
+
+                entity.Property(a => a.Description)
+                    .HasMaxLength(500)
+                    .IsRequired();
+
+                entity.Property(a => a.Action)
+                    .HasConversion<int>()
+                    .IsRequired();
+
+                entity.Property(a => a.EntityType)
+                    .HasConversion<int>()
+                    .IsRequired();
+
+                entity.HasOne(a => a.User)
+                    .WithMany()
+                    .HasForeignKey(a => a.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(a => new { a.EntityType, a.EntityId });
+
+                entity.HasIndex(a => a.UserId);
+            });
 
             // ====================== Avatar ======================
 
@@ -272,25 +300,25 @@ namespace GivingChampion.Persistence.Contexts
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ====================== VolunteerHistories ======================
+            //// ====================== VolunteerHistories ======================
 
-            modelBuilder.Entity<VolunteerHistories>(entity =>
-            {
-                entity.HasOne<ApplicationUser>()
-                    .WithMany()
-                    .HasForeignKey(vh => vh.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<VolunteerHistories>(entity =>
+            //{
+            //    entity.HasOne<ApplicationUser>()
+            //        .WithMany()
+            //        .HasForeignKey(vh => vh.UserId)
+            //        .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<ServiceRequest>()
-                    .WithMany()
-                    .HasForeignKey(vh => vh.ServiceRequestId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            //    entity.HasOne<ServiceRequest>()
+            //        .WithMany()
+            //        .HasForeignKey(vh => vh.ServiceRequestId)
+            //        .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<VolunteerOrder>()
-                    .WithMany()
-                    .HasForeignKey(vh => vh.VolunteerOrderId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+            //    entity.HasOne<VolunteerOrder>()
+            //        .WithMany()
+            //        .HasForeignKey(vh => vh.VolunteerOrderId)
+            //        .OnDelete(DeleteBehavior.Restrict);
+            //});
 
             // ====================== GeoQuest ======================
 

@@ -16,7 +16,7 @@ namespace GivingChampion.Application.DTO.VolunteerOrder
 
             public Guid VolunteerOrderId { get; set; }
 
-            public VolunteerHistoryAction Action { get; set; }
+            public ActivityAction Action { get; set; }
 
 
         }
