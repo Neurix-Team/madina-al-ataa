@@ -89,7 +89,7 @@ namespace GivingChampion.Application.Services
             {
                 EntityId = userMission.Id,
                 EntityType = ActivityEntityType.UserMission,
-                UserId = userId,
+                UserId = UserId,
                 Action = ActivityAction.MissionStarted,
                 Description = $"Started mission {mission.Title}"
             });
@@ -145,7 +145,7 @@ namespace GivingChampion.Application.Services
             {
                 EntityId = userMission.Id,
                 EntityType = ActivityEntityType.UserMission,
-                UserId = userId,
+                UserId = UserId,
                 Action = ActivityAction.UserMissionUpdated,
                 Description = $"Updated progress for mission {userMission.Mission.Title}"
             });
