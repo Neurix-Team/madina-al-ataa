@@ -14,5 +14,6 @@ namespace GivingChampion.Common.Enums
         Partner = 6,
         DonationOrder = 7,
         DonationRequest = 8,
+        UserMission = 9
     }
 }
