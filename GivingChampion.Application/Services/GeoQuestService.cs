@@ -73,8 +73,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<Result<bool>> UpdateAsync(Guid id, UpdateGeoQuestDto dto)
         {
-            if (id == Guid.Empty)
-                throw new BadRequestException("GeoQuest ID is required.");
+            //if (id == Guid.Empty)
+            //    throw new BadRequestException("GeoQuest ID is required.");
 
             if (dto == null)
                 throw new BadRequestException("GeoQuest update data is required.");
