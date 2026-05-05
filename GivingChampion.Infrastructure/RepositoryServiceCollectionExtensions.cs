@@ -46,7 +46,7 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<IGeoQuestRepository, GeoQuestRepository>();
         services.AddScoped<IUserGeoQuestRepository, UserGeoQuestRepository>();
 
-        services.AddScoped<IVolunteerHistoryRepository, VolunteerHistoryRepository>();
+        services.AddScoped<IActivityRepository, ActivityRepository>();
 
         return services;
     }

@@ -12,13 +12,12 @@ namespace GivingChampion.Application.DTO
     {
         public class ActivityDto
         {
-            [Key]
-            public Guid Id { get; set; }
-
-            public string Name { get; set; } 
-
-            public string Description { get; set; } 
-
+            public Guid EntityId { get; set; }
+            public Guid UserId { get; set; }
+            public string Description { get; set; } = string.Empty;
+            public string UserName { get; set; }
+            public string Action { get; set; }
+            public string EntityType { get; set; }
             public DateTime CreatedAt { get; set; }
         }
     }

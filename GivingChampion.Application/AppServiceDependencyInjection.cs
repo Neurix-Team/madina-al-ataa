@@ -12,7 +12,6 @@ using GivingChampion.Application.Interfaces.Partner;
 using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.Services;
 using GivingChampion.Application.Services.DonationOrderService;
@@ -57,7 +56,7 @@ public static class AppServiceDependencyInjection
         services.AddScoped<IUserLevelService, UserLevelService>();
         services.AddScoped<IReviewService, ReviewService>();
 
-        services.AddScoped<IVolunteerHistoryService, VolunteerHistoryService>();
+        services.AddScoped<IActivityService, ActivityService>();
 
         services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
         services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();

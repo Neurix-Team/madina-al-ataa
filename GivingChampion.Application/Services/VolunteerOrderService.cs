@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
-using GivingChampion.Application.Interfaces.VolunteerHistoryService;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
-using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
@@ -11,6 +11,7 @@ using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System.Diagnostics;
 
 namespace GivingChampion.Application.Services
 {
@@ -22,7 +23,7 @@ namespace GivingChampion.Application.Services
         private readonly IGenericRepository<VolunteerOrder> _genericVolunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly INotificationRepository _notificationRepository;
-        private readonly IVolunteerHistoryService _historyService;
+        private readonly IActivityService _activityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -32,18 +33,20 @@ namespace GivingChampion.Application.Services
         #region Constructor
 
         public VolunteerOrderService(
-     IVolunteerOrderRepository volunteerOrderRepository,
-     IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
-     IServiceRequestRepository serviceRequestRepository,
-     IVolunteerHistoryService historyService,
-     IUnitOfWork unitOfWork,
-     IMapper mapper)
+         IVolunteerOrderRepository volunteerOrderRepository,
+         IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
+         IServiceRequestRepository serviceRequestRepository,
+         INotificationRepository? notificationRepository,
+         IHttpContextAccessor httpContextAccessor,
+         IActivityService activityService,
+         IUnitOfWork unitOfWork,
+         IMapper mapper) : base(httpContextAccessor)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
             _genericVolunteerOrderRepository = genericVolunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
             _notificationRepository = notificationRepository;
-            _historyService = historyService;
+            _activityService = activityService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -262,41 +265,52 @@ namespace GivingChampion.Application.Services
 
             if (progress < serviceRequest.Progress)
                 throw new BadRequestException("Progress cannot be decreased.");
-
+            var activity = new CreateActivityDto();
             if (order.Status == OrderStatus.Approved)
             {
                 order.Status = OrderStatus.InProgress;
                 serviceRequest.Status = RequestStatus.InProgress;
 
-                await _historyService.AddAsync(
-                    order.UserId,
-                    serviceRequest.Id,
-                    order.Id,
-                    VolunteerHistoryAction.TaskStarted
-                );
+                activity = new CreateActivityDto()
+                {
+                    UserId = order.UserId,
+                    EntityId = order.Id,
+                    EntityType = ActivityEntityType.VolunteerOrder,
+                    Action = ActivityAction.TaskStarted,
+                    Description = $"Service request '{serviceRequest.Title}' started by volunteer '{order.UserId}'"
+                };
+
+                await _activityService.AddAsync(activity);
             }
 
             serviceRequest.Progress = progress;
 
-            await _historyService.AddAsync(
-                order.UserId,
-                serviceRequest.Id,
-                order.Id,
-                VolunteerHistoryAction.ProgressUpdated,
-                progress
-            );
+            activity = new CreateActivityDto()
+            {
+                UserId = order.UserId,
+                EntityId = order.Id,
+                EntityType = ActivityEntityType.VolunteerOrder,
+                Action = ActivityAction.ProgressUpdated,
+                Description = $"Service request '{serviceRequest.Title}' progress updated to {progress}%"
+            };
+
+            await _activityService.AddAsync(activity);
 
             if (progress == 100)
             {
                 order.Status = OrderStatus.Completed;
                 serviceRequest.Status = RequestStatus.Completed;
 
-                await _historyService.AddAsync(
-                    order.UserId,
-                    serviceRequest.Id,
-                    order.Id,
-                    VolunteerHistoryAction.TaskCompleted
-                );
+                activity = new CreateActivityDto()
+                {
+                    UserId = order.UserId,
+                    EntityId = order.Id,
+                    EntityType = ActivityEntityType.VolunteerOrder,
+                    Action = ActivityAction.ProgressUpdated,
+                    Description = $"Service request '{serviceRequest.Title}' progress updated to {progress}%"
+                };
+
+                await _activityService.AddAsync(activity);
             }
 
             order.UpdatedAt = DateTime.UtcNow;
@@ -344,20 +358,25 @@ namespace GivingChampion.Application.Services
             order.Status = OrderStatus.Approved;
             order.ApprovedAt = DateTime.UtcNow;
             order.UpdatedAt = DateTime.UtcNow;
+            var activity = new CreateActivityDto()
+            {
+                UserId = order.UserId,
+                EntityId = order.Id,
+                EntityType = ActivityEntityType.VolunteerOrder,
+                Action = ActivityAction.OrderApproved,
+                Description = $"Volunteer order for service request '{serviceRequest.Title}' approved"
+            };
+            await _activityService.AddAsync(activity);
 
-            await _historyService.AddAsync(
-                order.UserId,
-                serviceRequest.Id,
-                order.Id,
-                VolunteerHistoryAction.OrderApproved
-            );
-
-            await _historyService.AddAsync(
-                order.UserId,
-                serviceRequest.Id,
-                order.Id,
-                VolunteerHistoryAction.TaskAssigned
-            );
+            activity = new CreateActivityDto()
+            {
+                UserId = order.UserId,
+                EntityId = order.Id,
+                EntityType = ActivityEntityType.VolunteerOrder,
+                Action = ActivityAction.TaskAssigned,
+                Description = $"Volunteer order for service request '{serviceRequest.Title}' approved"
+            };
+            await _activityService.AddAsync(activity);
 
             _volunteerOrderRepository.Update(order);
 
@@ -407,12 +426,16 @@ namespace GivingChampion.Application.Services
 
             await _unitOfWork.SaveChangesAsync();
 
-            await _historyService.AddAsync(
-                order.UserId,
-                order.ServiceRequestId,
-                order.Id,
-                VolunteerHistoryAction.OrderRejected
-            );
+            var activity = new CreateActivityDto()
+            {
+                UserId = order.UserId,
+                EntityId = order.Id,
+                EntityType = ActivityEntityType.VolunteerOrder,
+                Action = ActivityAction.OrderRejected,
+                Description = $"Volunteer order for service request '{order.ServiceRequestId}' rejected. Reason: {rejectionReason}"
+            };
+
+            await _activityService.AddAsync(activity);
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }

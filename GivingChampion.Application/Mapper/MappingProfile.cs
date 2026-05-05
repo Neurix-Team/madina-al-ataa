@@ -26,6 +26,8 @@ using GivingChampion.Application.DTO;
 using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Application.DTO.UserGeoQuestDto;
+using GivingChampion.Application.DTO.GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.DTO.ActivityDto;
 
 namespace GivingChampion.Application.Mapper
 {
@@ -169,7 +171,11 @@ namespace GivingChampion.Application.Mapper
 
             #region VolunteerHistory Mappings
 
-            CreateMap<VolunteerHistories, VolunteerHistoryDto>();
+            //CreateMap<VolunteerHistories, VolunteerHistoryDto>();
+            CreateMap<Activity, ActivityDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : string.Empty))
+                .ReverseMap();
+            CreateMap<CreateActivityDto, Activity>().ReverseMap();
 
             #endregion
 

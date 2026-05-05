@@ -31,4 +31,8 @@
     <ProjectReference Include="..\GivingChampion\GivingChampion.ServiceDefaults\GivingChampion.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\VolunteerHistories\" />
+  </ItemGroup>
+
 </Project>
