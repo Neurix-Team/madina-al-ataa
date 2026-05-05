@@ -8,23 +8,27 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
+using GivingChampion.Application.DTO.ActivityDto;
 
 namespace GivingChampion.Application.Services
 {
     public class DonationRequestService : BaseService, IDonationRequestService
     {
         private readonly IDonationRequestRepository _donationRequestRepository;
+        private readonly IActivityService _activityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public DonationRequestService(
             IDonationRequestRepository donationRequestRepository,
+            IActivityService activityService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
             : base(httpContextAccessor)
         {
             _donationRequestRepository = donationRequestRepository;
+            _activityService = activityService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -95,6 +99,15 @@ namespace GivingChampion.Application.Services
             }
 
             await _donationRequestRepository.AddAsync(donationRequest);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                Action = ActivityAction.DonationRequestCreated,
+                EntityType = ActivityEntityType.DonationRequest,
+                EntityId = donationRequest.Id,
+                Description = $"Created a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
+                UserId = UserId,
+            });
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<DonationRequestDto>(donationRequest);
@@ -125,6 +138,15 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Amount remaining cannot be negative.");
 
             await _donationRequestRepository.UpdateAsync(existingRequest);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                Action = ActivityAction.DonationRequestUpdated,
+                EntityType = ActivityEntityType.DonationRequest,
+                EntityId = existingRequest.Id,
+                Description = $"Updated a donation request with title '{existingRequest.Title}' and amount {existingRequest.DonateAmount}.",
+                UserId = UserId,
+            });
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -144,6 +166,15 @@ namespace GivingChampion.Application.Services
             donationRequest.Status = RequestStatus.Approved;
 
             await _donationRequestRepository.UpdateAsync(donationRequest);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                Action = ActivityAction.DonationRequestApproved,
+                EntityType = ActivityEntityType.DonationRequest,
+                EntityId = donationRequest.Id,
+                Description = $"Approved a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
+                UserId = UserId,
+            });
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -166,6 +197,15 @@ namespace GivingChampion.Application.Services
             donationRequest.Status = RequestStatus.Cancelled;
 
             await _donationRequestRepository.UpdateAsync(donationRequest);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                Action = ActivityAction.DonationRequestRejected,
+                EntityType = ActivityEntityType.DonationRequest,
+                EntityId = donationRequest.Id,
+                Description = $"Rejected a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
+                UserId = UserId,
+            });
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -185,6 +225,15 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("You cannot delete a completed donation request.");
 
             await _donationRequestRepository.DeleteAsync(donationRequest);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                Action = ActivityAction.DonationRequestDeleted,
+                EntityType = ActivityEntityType.DonationRequest,
+                EntityId = donationRequest.Id,
+                Description = $"Deleted a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
+                UserId = UserId,
+            });
             await _unitOfWork.SaveChangesAsync();
         }
     }
