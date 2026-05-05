@@ -72,37 +72,19 @@ namespace GivingChampion.Application.Mapper
 
             #endregion
 
-            #region VolunteerOrder Mappings
             CreateMap<VolunteerOrder, VolunteerOrderDto>()
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.ServiceType,
-                    opt => opt.MapFrom(src => src.ServiceRequest.ServiceType.ToString()))
-                .ForMember(dest => dest.Status,
-             opt => opt.MapFrom(src => src.ServiceRequest.Status.ToString()))
-                .ForMember(dest => dest.Description,
-                    opt => opt.MapFrom(src => src.ServiceRequest.BriefDescription))
-                .ForMember(dest => dest.ScheduleDate,
-                    opt => opt.MapFrom(src => src.ServiceRequest.ScheduleDate));
-            // VolunteerOrder -> VolunteerOrderDto
-            CreateMap<VolunteerOrder, VolunteerOrderDto>().ReverseMap();
-               CreateMap<VolunteerOrder, VolunteerOrderDto>()
-                .ForMember(d => d.ServiceType, o => o.MapFrom(s => s.ServiceRequest.ServiceType.ToString()))
-                .ForMember(d => d.Description, o => o.MapFrom(s => s.ServiceRequest.BriefDescription))
-                .ForMember(d => d.ScheduleDate, o => o.MapFrom(s => s.ServiceRequest.ScheduleDate))
-                .ReverseMap();
-
-            CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
-                .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(d => d.Status, o => o.MapFrom(_ => OrderStatus.Pending))
-                .ForMember(d => d.CreatedAt, o => o.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(d => d.UpdatedAt, o => o.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(d => d.IsDeleted, o => o.MapFrom(_ => false))
-                .ForMember(d => d.UserId, o => o.Ignore())
-                .ForMember(d => d.DeletedAt, o => o.Ignore());
-
-            #endregion
-
+       .ForMember(dest => dest.ServiceType,
+           opt => opt.MapFrom(src => src.ServiceRequest != null
+               ? src.ServiceRequest.ServiceType.ToString()
+               : string.Empty))
+       .ForMember(dest => dest.Description,
+           opt => opt.MapFrom(src => src.ServiceRequest != null
+               ? src.ServiceRequest.BriefDescription
+               : string.Empty))
+       .ForMember(dest => dest.ScheduleDate,
+           opt => opt.MapFrom(src => src.ServiceRequest != null
+               ? src.ServiceRequest.ScheduleDate
+               : default)).ReverseMap();
             #region Partner Mappings
 
             CreateMap<CreatePartnerDto, Partner>()
@@ -417,17 +399,17 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.PartnerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Partner, opt => opt.Ignore());
 
-            // VolunteerOrder -> VolunteerOrderDto
-            CreateMap<VolunteerOrder, VolunteerOrderDto>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            //// VolunteerOrder -> VolunteerOrderDto
+            //CreateMap<VolunteerOrder, VolunteerOrderDto>()
+            //    .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
-            // CreateVolunteerOrderDto -> VolunteerOrder
-            CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
-                .ForMember(dest => dest.Status, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+            //// CreateVolunteerOrderDto -> VolunteerOrder
+            //CreateMap<CreateVolunteerOrderDto, VolunteerOrder>()
+            //    .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+            //    .ForMember(dest => dest.Status, opt => opt.Ignore())
+            //    .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            //    .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+            //    .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
 
             // Partner -> PartnerDto
