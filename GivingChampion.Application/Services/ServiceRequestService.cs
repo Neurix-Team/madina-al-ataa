@@ -8,25 +8,30 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using GivingChampion.Common.Extensions.Mapper;
-
+using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.Interfaces;
+using Microsoft.AspNetCore.Http;
 namespace GivingChampion.Application.Services
 {
-    public class ServiceRequestService : IServiceRequestService
+    public class ServiceRequestService : BaseService, IServiceRequestService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenericRepository<ServiceRequest> _serviceRequestRepository;
+        private readonly IActivityService _activityService;
         private readonly IMapper _mapper;
 
         public ServiceRequestService(
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+         IUnitOfWork unitOfWork,
+         IMapper mapper,
+         IActivityService activityService,
+         IHttpContextAccessor httpContextAccessor)
+         : base(httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _serviceRequestRepository = unitOfWork.Repository<ServiceRequest>();
             _mapper = mapper;
+            _activityService = activityService;
         }
-
-
 
         // Gets all service requests and maps them from Entity list to DTO list.
         public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
@@ -97,6 +102,15 @@ namespace GivingChampion.Application.Services
             await _serviceRequestRepository.AddAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                UserId = UserId,
+                EntityId = serviceRequest.Id,
+                EntityType = ActivityEntityType.Request,
+                Action = ActivityAction.RequestCreated,
+                Description = $"Service request '{serviceRequest.Title}' created."
+            });
+
             var createdServiceRequest = await _serviceRequestRepository.GetByIdAsync(serviceRequest.Id);
 
             if (createdServiceRequest == null)
@@ -132,6 +146,15 @@ namespace GivingChampion.Application.Services
             _serviceRequestRepository.Update(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                UserId = UserId,
+                EntityId = serviceRequest.Id,
+                EntityType = ActivityEntityType.Request,
+                Action = ActivityAction.RequestUpdated,
+                Description = $"Service request '{serviceRequest.Title}' updated."
+            });
+
             return true;
         }
 
@@ -147,8 +170,19 @@ namespace GivingChampion.Application.Services
 
             serviceRequest.IsDeleted = true;
             serviceRequest.DeletedAt = DateTime.UtcNow;
+            serviceRequest.UpdatedAt = DateTime.UtcNow;
+
             _serviceRequestRepository.Update(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
+
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                UserId = UserId,
+                EntityId = serviceRequest.Id,
+                EntityType = ActivityEntityType.Request,
+                Action = ActivityAction.RequestDeleted,
+                Description = $"Service request '{serviceRequest.Title}' deleted."
+            });
 
             return true;
         }
