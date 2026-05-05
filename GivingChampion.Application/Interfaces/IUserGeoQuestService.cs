@@ -8,8 +8,7 @@ namespace GivingChampion.Application.Interfaces
 {
     public interface IUserGeoQuestService
     {
-        Task<Result<PagedList<UserGeoQuestDto>>> GetAllAsync(
-    PageParameters pageParameters);
+        Task<Result<PagedList<UserGeoQuestDto>>> GetAllAsync(PageParameters pageParameters);
         Task<Result<UserGeoQuestDto?>> GetByIdAsync(Guid id);
         Task<Result<bool>> UpdateAsync(Guid id, UpdateUserGeoQuestDto dto , bool isSuccess = false);
         Task<Result<bool>> SoftDeleteAsync(Guid id);

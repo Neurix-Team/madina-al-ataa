@@ -9,6 +9,7 @@ namespace GivingChampion.Application.DTO.GeoQuestDto
     {
         [Key]
         public Guid Id { get; set; }
+        public string? Title { get; set; }
         public Guid LocationId { get; set; }
 
     }
