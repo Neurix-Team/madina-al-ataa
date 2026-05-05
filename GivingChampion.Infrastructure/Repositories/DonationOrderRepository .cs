@@ -58,7 +58,8 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.DonationOrders
                 .AsNoTracking()
-                                 .Include(d => d.Donor)
+                .Include(d => d.Donor)
+                .Include(d => d.DonationRequest)
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
                     !d.IsDeleted);
