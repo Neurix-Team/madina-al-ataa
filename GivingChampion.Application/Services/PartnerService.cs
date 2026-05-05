@@ -7,23 +7,31 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using GivingChampion.API.Interfaces;
+using GivingChampion.Application.Interfaces;
+using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Common.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class PartnerService : IPartnerService
+    public class PartnerService : BaseService, IPartnerService
     {
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenericRepository<Partner> _partnerRepository;
         private readonly IMapper _mapper;
+        private readonly IActivityService _activityService;
 
 
         // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
-        public PartnerService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PartnerService(IHttpContextAccessor httpContextAccessor, IUnitOfWork unitOfWork, IMapper mapper, IActivityService activityService) : base(httpContextAccessor)
         {
+            _httpContextAccessor = httpContextAccessor;
             _unitOfWork = unitOfWork;
             _partnerRepository = unitOfWork.Repository<Partner>();
             _mapper = mapper;
+            _activityService = activityService;
         }
 
 
@@ -55,6 +63,15 @@ namespace GivingChampion.Application.Services
             await _partnerRepository.AddAsync(partner);
             await _unitOfWork.SaveChangesAsync();
 
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                EntityId = partner.Id,
+                EntityType = ActivityEntityType.Partner,
+                UserId = UserId,
+                Action = ActivityAction.PartnerCreated,
+                Description = $"Created partner {partner.OrgName}"
+            });
+
             return _mapper.Map<PartnerDto>(partner);
         }
 
@@ -71,6 +88,15 @@ namespace GivingChampion.Application.Services
 
             _partnerRepository.Update(partner);
 
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                EntityId = partner.Id,
+                EntityType = ActivityEntityType.Partner,
+                UserId = UserId,
+                Action = ActivityAction.PartnerUpdated,
+                Description = $"Updated partner {partner.OrgName}"
+            });
+
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<PartnerDto>(partner);
@@ -86,6 +112,15 @@ namespace GivingChampion.Application.Services
             partner.IsDeleted = true;
             partner.DeletedAt = DateTime.UtcNow;
             _partnerRepository.Update(partner);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                EntityId = partner.Id,
+                EntityType = ActivityEntityType.Partner,
+                UserId = UserId,
+                Action = ActivityAction.PartnerDeleted,
+                Description = $"Deleted partner {partner.OrgName}"
+            });
 
             await _unitOfWork.SaveChangesAsync();
 

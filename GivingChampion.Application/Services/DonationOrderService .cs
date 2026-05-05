@@ -11,6 +11,7 @@ using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
+using GivingChampion.Application.DTO.ActivityDto;
 
 namespace GivingChampion.Application.Services.DonationOrderService
 {
@@ -20,6 +21,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
         private readonly IDonationRequestRepository _donationRequestRepository;
         private readonly IDonorRepository _donorRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IActivityService _activityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -28,6 +30,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             IDonationRequestRepository donationRequestRepository,
             IDonorRepository donorRepository,
             INotificationRepository notificationRepository,
+            IActivityService activityService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
@@ -37,6 +40,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             _donationRequestRepository = donationRequestRepository;
             _donorRepository = donorRepository;
             _notificationRepository = notificationRepository;
+            _activityService = activityService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -109,6 +113,16 @@ namespace GivingChampion.Application.Services.DonationOrderService
             donationOrder.Status = OrderStatus.Pending;
 
             await _donationOrderRepository.CreateAsync(donationOrder);
+
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                EntityId = donationOrder.Id,
+                UserId = UserId,
+                EntityType = ActivityEntityType.DonationOrder,
+                Action = ActivityAction.DonationOrderCreated,
+                Description = $"Created a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
+            });
+
             await _unitOfWork.SaveChangesAsync();
 
             var createdOrder = await _donationOrderRepository.GetByIdAsync(donationOrder.Id)
@@ -155,6 +169,16 @@ namespace GivingChampion.Application.Services.DonationOrderService
             _mapper.Map(dto, donationOrder);
 
             await _donationOrderRepository.UpdateAsync(donationOrder);
+
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                EntityId = donationOrder.Id,
+                UserId = UserId,
+                EntityType = ActivityEntityType.DonationOrder,
+                Action = ActivityAction.DonationOrderUpdated,
+                Description = $"Updated a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
+            });
+
             await _unitOfWork.SaveChangesAsync();
 
             var updatedDto = _mapper.Map<UpdateDonationOrderDTO>(donationOrder);
@@ -213,6 +237,15 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 "Your donation order has been approved.",
                 NotificationType.Information);
 
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                EntityId = donationOrder.Id,
+                UserId = UserId,
+                EntityType = ActivityEntityType.DonationOrder,
+                Action = ActivityAction.DonationOrderApproved,
+                Description = $"Approved a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
+            });
+
             await _unitOfWork.SaveChangesAsync();
 
             var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
@@ -243,6 +276,15 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 "Donation order rejected",
                 "Your donation order has been rejected.",
                 NotificationType.Warning);
+
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                EntityId = donationOrder.Id,
+                UserId = UserId,
+                EntityType = ActivityEntityType.DonationOrder,
+                Action = ActivityAction.DonationOrderRejected,
+                Description = $"Rejected a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationOrder.DonationRequest.Title}'.",
+            });
 
             await _unitOfWork.SaveChangesAsync();
 
