@@ -119,7 +119,7 @@ namespace GivingChampion.Application.Services
         }
 
         public async Task<VolunteerOrderDto> CreateAsync(
-            CreateVolunteerOrderDto dto)
+       CreateVolunteerOrderDto dto)
         {
             var volunteerId = UserId;
 
@@ -158,6 +158,15 @@ namespace GivingChampion.Application.Services
 
             await _unitOfWork.SaveChangesAsync();
 
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                UserId = UserId,
+                EntityId = volunteerOrder.Id,
+                EntityType = ActivityEntityType.VolunteerOrder,
+                Action = ActivityAction.OrderCreated,
+                Description = $"Volunteer order created for service request '{serviceRequest.Title}'."
+            });
+
             var createdOrder = await _volunteerOrderRepository.GetByIdAsync(volunteerOrder.Id);
 
             if (createdOrder == null)
@@ -165,7 +174,6 @@ namespace GivingChampion.Application.Services
 
             return _mapper.Map<VolunteerOrderDto>(createdOrder);
         }
-
         public async Task ChangeOrderStatusAsync(
             Guid orderId,
             OrderStatus newStatus)
@@ -190,6 +198,10 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository.Update(order);
 
             await _unitOfWork.SaveChangesAsync();
+           
+
+
+
         }
 
         public async Task<bool> DeleteAsync(
@@ -221,7 +233,14 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository.Update(existingVolunteerOrder);
 
             await _unitOfWork.SaveChangesAsync();
-
+            await _activityService.AddAsync(new CreateActivityDto
+            {
+                UserId = volunteerId,
+                EntityId = existingVolunteerOrder.Id,
+                EntityType = ActivityEntityType.VolunteerOrder,
+                Action = ActivityAction.OrderCancelled,
+                Description = $"Volunteer order cancelled by volunteer '{volunteerId}'."
+            });
             return true;
         }
 
@@ -364,7 +383,7 @@ namespace GivingChampion.Application.Services
                 EntityId = order.Id,
                 EntityType = ActivityEntityType.VolunteerOrder,
                 Action = ActivityAction.OrderApproved,
-                Description = $"Volunteer order for service request '{serviceRequest.Title}' approved"
+                Description = $"Volunteer order for service request '{serviceRequest.Title}' approved for volunteer '{order.UserId}'."
             };
             await _activityService.AddAsync(activity);
 
@@ -374,7 +393,7 @@ namespace GivingChampion.Application.Services
                 EntityId = order.Id,
                 EntityType = ActivityEntityType.VolunteerOrder,
                 Action = ActivityAction.TaskAssigned,
-                Description = $"Volunteer order for service request '{serviceRequest.Title}' approved"
+                Description = $"Service request '{serviceRequest.Title}' assigned to volunteer '{order.UserId}'."
             };
             await _activityService.AddAsync(activity);
 

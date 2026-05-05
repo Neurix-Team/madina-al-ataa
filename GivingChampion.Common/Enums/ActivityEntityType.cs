@@ -10,6 +10,6 @@ namespace GivingChampion.Common.Enums
         Request = 2,
         Order = 3,
         VolunteerOrder = 4,
-        mission = 4,
+        mission = 5,
     }
 }
