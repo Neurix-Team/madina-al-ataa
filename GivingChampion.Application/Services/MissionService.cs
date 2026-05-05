@@ -7,21 +7,26 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Common.Enums;
 
 namespace GivingChampion.Application.Services
 {
     public class MissionService : IMissionService
     {
         private readonly IMissionRepository _missionRepository;
+        private readonly IActivityService _activityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public MissionService(
             IMissionRepository missionRepository,
+            IActivityService activityService,
             IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _missionRepository = missionRepository;
+            _activityService = activityService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -34,6 +39,15 @@ namespace GivingChampion.Application.Services
             var mission = _mapper.Map<Mission>(dto);
 
             await _missionRepository.CreateAsync(mission);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                EntityId = mission.Id,
+                UserId = Guid.Empty, // System user
+                Description = $"Mission '{mission.Title}' created.",
+                Action = ActivityAction.MissionCreated,
+                EntityType = ActivityEntityType.Mission
+            });
             await _unitOfWork.SaveChangesAsync();
 
             var createdDto = _mapper.Map<MissionDto>(mission);
@@ -75,6 +89,15 @@ namespace GivingChampion.Application.Services
             _mapper.Map(dto, mission);
 
             await _missionRepository.UpdateAsync(mission);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                EntityId = mission.Id,
+                UserId = Guid.Empty, // System user
+                Description = $"Mission '{mission.Title}' updated.",
+                Action = ActivityAction.MissionUpdated,
+                EntityType = ActivityEntityType.Mission
+            });
             await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
@@ -94,6 +117,15 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Mission is already deleted.");
 
             await _missionRepository.SoftDeleteAsync(id);
+
+            await _activityService.AddAsync(new CreateActivityDto()
+            {
+                EntityId = mission.Id,
+                UserId = Guid.Empty, // System user
+                Description = $"Mission '{mission.Title}' deleted.",
+                Action = ActivityAction.MissionDeleted,
+                EntityType = ActivityEntityType.Mission
+            });
             await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
