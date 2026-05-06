@@ -51,7 +51,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
         public async Task SoftDeleteAsync(Guid locationId)
         {
-            var location = await _context.Locations.FindAsync(locationId);
+            var location = await _context.Locations.FirstOrDefaultAsync(x => x.Id == locationId); ;
             if (location == null) return;
 
             //location.IsDeleted = true;

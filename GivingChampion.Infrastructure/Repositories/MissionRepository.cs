@@ -71,7 +71,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
         public async Task SoftDeleteAsync(Guid missionId)
         {
-            var mission = await _context.Missions.FindAsync(missionId);
+            var mission = await _context.Missions.FirstOrDefaultAsync(x => x.Id == missionId);
             if (mission == null) return;
 
             //mission.IsDeleted = true;

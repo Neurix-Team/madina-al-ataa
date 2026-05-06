@@ -1,6 +1,8 @@
-﻿namespace GivingChampion.Domain.Entities.Base
+﻿using GivingChampion.Common.Interfaces;
+
+namespace GivingChampion.Domain.Entities.Base
 {
-    public abstract class BaseEntity
+    public abstract class BaseEntity : ISoftDeletable
     {
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }

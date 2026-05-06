@@ -39,7 +39,7 @@ namespace GivingChampion.Persistence.Repositories
 
         public async Task MarkAsReadAsync(Guid userId, Guid notificationId)
         {
-            var notification = await _context.Notifications.FindAsync(notificationId);
+            var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == notificationId);
             if (notification != null)
             {
                 notification.IsRead = true;
@@ -61,7 +61,7 @@ namespace GivingChampion.Persistence.Repositories
 
         public async Task SoftDeleteAsync(Guid notificationId)
         {
-            var notification = await _context.Notifications.FindAsync(notificationId);
+            var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == notificationId);
             if (notification != null)
             {
                 _context.Notifications.Remove(notification);

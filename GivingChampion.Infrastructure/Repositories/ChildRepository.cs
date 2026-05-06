@@ -79,7 +79,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
         public async Task RejectAsync(Guid childId, string rejectionReason, Guid rejectedById)
         {
-            var child = await _context.Children.FindAsync(childId);
+            var child = await _context.Children.FirstOrDefaultAsync(x => x.Id == childId);
             if (child == null) return;
 
             child.Status = ObjectStatus.Rejected;
@@ -90,7 +90,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
         public async Task SoftDeleteAsync(Guid childId)
         {
-            var child = await _context.Children.FindAsync(childId);
+            var child = await _context.Children.FirstOrDefaultAsync(x => x.Id == childId);
             if (child == null) return;
 
             _context.Children.Remove(child);

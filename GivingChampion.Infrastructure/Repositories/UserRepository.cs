@@ -22,7 +22,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
 
         public async Task<ApplicationUser?> GetByIdAsync(Guid id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<ApplicationUser?> GetByEmailAsync(string email)

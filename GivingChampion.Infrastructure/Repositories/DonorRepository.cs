@@ -19,7 +19,6 @@ namespace GivingChampion.Persistence.Repositories
         public async Task<Donor?> GetByIdAsync(Guid id)
         {
             return await _context.Donors
-                .IgnoreQueryFilters()           // In case we need to access soft-deleted
                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
