@@ -10,8 +10,9 @@ namespace GivingChampion.Application.DTO.VolunteerOrder
           public Guid Id { get; set; }
 
             public string ServiceType { get; set; }
+           public int Progress { get; set; }
 
-            public string? Description { get; set; }
+        public string? Description { get; set; }
 
             public DateTime ScheduleDate { get; set; }
 
