@@ -16,8 +16,8 @@ namespace GivingChampion.Domain.Entities
         public NotificationType Type { get; set; }
         public string Title { get; set; }
         public string Message { get; set; }
-        public bool IsRead { get; set; }
-        public DateTime SentAt { get; set; }
+        public bool IsRead { get; set; } = false;
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
         public Guid? LinkedEntityId { get; set; }
         public string LinkedEntityType { get; set; }
         public Guid UserId { get; set; }

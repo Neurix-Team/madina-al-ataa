@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Application.DTO.VolunteerOrder;
+using GivingChampion.Application.DTO.ActivityDto;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
@@ -24,6 +25,7 @@ namespace GivingChampion.Application.Services
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IActivityService _activityService;
+        private readonly INotificationService _notificationService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -36,7 +38,8 @@ namespace GivingChampion.Application.Services
          IVolunteerOrderRepository volunteerOrderRepository,
          IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
          IServiceRequestRepository serviceRequestRepository,
-         INotificationRepository? notificationRepository,
+         INotificationService notificationService,
+
          IHttpContextAccessor httpContextAccessor,
          IActivityService activityService,
          IUnitOfWork unitOfWork,
@@ -47,6 +50,7 @@ namespace GivingChampion.Application.Services
             _serviceRequestRepository = serviceRequestRepository;
             _notificationRepository = notificationRepository;
             _activityService = activityService;
+            _notificationService = notificationService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -400,11 +404,15 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository.Update(order);
 
             await _serviceRequestRepository.UpdateAsync(serviceRequest);
-            await CreateOrderStatusNotificationAsync(
-                order,
-                "Volunteer order approved",
-                "Your volunteer order has been approved.",
-                NotificationType.Information);
+            await _notificationService.CreateNotificationAsync(new CreateNotificationDto()
+            {
+                UserId = order.UserId,
+                Title = "Volunteer order approved",
+                Message = "Your Volunteer order has been approved.",
+                Type = NotificationType.Information,
+                LinkedEntityId = order.Id,
+                LinkedEntityType = nameof(VolunteerOrder)
+            });
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -437,11 +445,15 @@ namespace GivingChampion.Application.Services
             order.UpdatedAt = DateTime.UtcNow;
 
             _volunteerOrderRepository.Update(order);
-            await CreateOrderStatusNotificationAsync(
-                order,
-                "Volunteer order rejected",
-                $"Your volunteer order has been rejected. Reason: {rejectionReason}",
-                NotificationType.Warning);
+            await _notificationService.CreateNotificationAsync(new CreateNotificationDto()
+            {
+                UserId = order.UserId,
+                Title = "Volunteer order rejected",
+                Message = $"Your Volunteer order has been rejected. Reason: {rejectionReason}",
+                Type = NotificationType.Warning,
+                LinkedEntityId = order.Id,
+                LinkedEntityType = nameof(VolunteerOrder)
+            });
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -459,26 +471,26 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<VolunteerOrderDto>(order);
         }
 
-        private async Task CreateOrderStatusNotificationAsync(
-            VolunteerOrder order,
-            string title,
-            string message,
-            NotificationType type)
-        {
-            await _notificationRepository.CreateAsync(new Notification
-            {
-                Id = Guid.NewGuid(),
-                UserId = order.UserId,
-                Type = type,
-                Title = title,
-                Message = message,
-                LinkedEntityId = order.Id,
-                LinkedEntityType = nameof(VolunteerOrder),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsDeleted = false
-            });
-        }
+        //private async Task CreateOrderStatusNotificationAsync(
+        //    VolunteerOrder order,
+        //    string title,
+        //    string message,
+        //    NotificationType type)
+        //{
+        //    await _notificationRepository.CreateAsync(new Notification
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        UserId = order.UserId,
+        //        Type = type,
+        //        Title = title,
+        //        Message = message,
+        //        LinkedEntityId = order.Id,
+        //        LinkedEntityType = nameof(VolunteerOrder),
+        //        CreatedAt = DateTime.UtcNow,
+        //        UpdatedAt = DateTime.UtcNow,
+        //        IsDeleted = false
+        //    });
+        //}
 
         #endregion
     }

@@ -11,6 +11,7 @@ using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
+using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Application.DTO.ActivityDto;
 
 namespace GivingChampion.Application.Services.DonationOrderService
@@ -20,7 +21,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
         private readonly IDonationOrderRepository _donationOrderRepository;
         private readonly IDonationRequestRepository _donationRequestRepository;
         private readonly IDonorRepository _donorRepository;
-        private readonly INotificationRepository _notificationRepository;
+        private readonly INotificationService _notificationService;
         private readonly IActivityService _activityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -29,8 +30,8 @@ namespace GivingChampion.Application.Services.DonationOrderService
             IDonationOrderRepository donationOrderRepository,
             IDonationRequestRepository donationRequestRepository,
             IDonorRepository donorRepository,
-            INotificationRepository notificationRepository,
             IActivityService activityService,
+            INotificationService notificationService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
@@ -39,8 +40,8 @@ namespace GivingChampion.Application.Services.DonationOrderService
             _donationOrderRepository = donationOrderRepository;
             _donationRequestRepository = donationRequestRepository;
             _donorRepository = donorRepository;
-            _notificationRepository = notificationRepository;
             _activityService = activityService;
+            _notificationService = notificationService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -231,11 +232,11 @@ namespace GivingChampion.Application.Services.DonationOrderService
             await _donorRepository.UpdateAsync(donor);
             await _donationOrderRepository.UpdateAsync(donationOrder);
             await _donationRequestRepository.UpdateAsync(donationRequest);
-            await CreateOrderStatusNotificationAsync(
-                donationOrder,
-                "Donation order approved",
-                "Your donation order has been approved.",
-                NotificationType.Information);
+            //await CreateOrderStatusNotificationAsync(
+            //    donationOrder,
+            //    "Donation order approved",
+            //    "Your donation order has been approved.",
+            //    NotificationType.Information);
 
             await _activityService.AddAsync(new CreateActivityDto
             {
@@ -244,6 +245,16 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 EntityType = ActivityEntityType.DonationOrder,
                 Action = ActivityAction.DonationOrderApproved,
                 Description = $"Approved a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
+            });
+
+            await _notificationService.CreateNotificationAsync(new CreateNotificationDto()
+            {
+                UserId = donationOrder.DonorId,
+                Title = "Donation order approved",
+                Message = "Your donation order has been approved.",
+                Type = NotificationType.Information,
+                LinkedEntityId = donationOrder.Id,
+                LinkedEntityType = nameof(DonationOrder)
             });
 
             await _unitOfWork.SaveChangesAsync();
@@ -271,11 +282,15 @@ namespace GivingChampion.Application.Services.DonationOrderService
             donationOrder.Status = OrderStatus.Rejected;
 
             await _donationOrderRepository.UpdateAsync(donationOrder);
-            await CreateOrderStatusNotificationAsync(
-                donationOrder,
-                "Donation order rejected",
-                "Your donation order has been rejected.",
-                NotificationType.Warning);
+            await _notificationService.CreateNotificationAsync(new CreateNotificationDto()
+            {
+                UserId = donationOrder.DonorId,
+                Title = "Donation order Rejected",
+                Message = "Your donation order has been Rejected.",
+                Type = NotificationType.Information,
+                LinkedEntityId = donationOrder.Id,
+                LinkedEntityType = nameof(DonationOrder)
+            });
 
             await _activityService.AddAsync(new CreateActivityDto
             {
@@ -298,25 +313,25 @@ namespace GivingChampion.Application.Services.DonationOrderService
             return Result<DonationOrderDetailsDto>.Success(dto);
         }
 
-        private async Task CreateOrderStatusNotificationAsync(
-            DonationOrder donationOrder,
-            string title,
-            string message,
-            NotificationType type)
-        {
-            await _notificationRepository.CreateAsync(new Notification
-            {
-                Id = Guid.NewGuid(),
-                UserId = donationOrder.DonorId,
-                Type = type,
-                Title = title,
-                Message = message,
-                LinkedEntityId = donationOrder.Id,
-                LinkedEntityType = nameof(DonationOrder),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsDeleted = false
-            });
-        }
+        //private async Task CreateOrderStatusNotificationAsync(
+        //    DonationOrder donationOrder,
+        //    string title,
+        //    string message,
+        //    NotificationType type)
+        //{
+        //    await _notificationRepository.CreateAsync(new Notification
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        UserId = donationOrder.DonorId,
+        //        Type = type,
+        //        Title = title,
+        //        Message = message,
+        //        LinkedEntityId = donationOrder.Id,
+        //        LinkedEntityType = nameof(DonationOrder),
+        //        CreatedAt = DateTime.UtcNow,
+        //        UpdatedAt = DateTime.UtcNow,
+        //        IsDeleted = false
+        //    });
+        //}
     }
 }

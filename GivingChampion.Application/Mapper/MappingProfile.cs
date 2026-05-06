@@ -328,6 +328,7 @@ namespace GivingChampion.Application.Mapper
             #region Notification Mappings
 
             CreateMap<Notification, NotificationDto>().ReverseMap();
+            CreateMap<CreateNotificationDto, Notification>().ReverseMap();
 
             #endregion
 

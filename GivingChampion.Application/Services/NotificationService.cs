@@ -74,7 +74,7 @@ namespace GivingChampion.Application.Services
             return Result.Success();
         }
 
-        public async Task CreateNotificationAsync(Notification notification)
+        public async Task CreateNotificationAsync(CreateNotificationDto notification)
         {
             if (notification == null)
                 throw new BadRequestException("Notification data is required.");
@@ -85,7 +85,11 @@ namespace GivingChampion.Application.Services
             if (string.IsNullOrWhiteSpace(notification.Title))
                 throw new BadRequestException("Notification title is required.");
 
-            await _notificationRepository.CreateAsync(notification);
+            if (string.IsNullOrWhiteSpace(notification.Message))
+                throw new BadRequestException("Notification message is required.");
+
+            var entity = _mapper.Map<Notification>(notification);
+            await _notificationRepository.CreateAsync(entity);
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation(

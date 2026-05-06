@@ -12,6 +12,6 @@ namespace GivingChampion.Application.Interfaces
         Task<Result> MarkAllAsReadAsync();
 
         // Internal method for other services to send notifications
-        Task CreateNotificationAsync(Notification notification);
+        Task CreateNotificationAsync(CreateNotificationDto notification);
     }
 }
