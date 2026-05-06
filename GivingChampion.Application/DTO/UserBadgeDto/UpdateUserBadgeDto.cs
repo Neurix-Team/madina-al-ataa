@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GivingChampion.Application.DTO.UserBadgeDto
+namespace GivingChampion.Application.DTO.UserBadge
 {
     public class UpdateUserBadgeDto
     {

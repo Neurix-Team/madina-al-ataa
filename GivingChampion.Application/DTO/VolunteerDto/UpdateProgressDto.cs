@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace GivingChampion.Application.DTO.VolunteerDto
+namespace GivingChampion.Application.DTO.Volunteer
 {
     public class UpdateProgressDto
     {

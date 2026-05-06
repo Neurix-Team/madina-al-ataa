@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
-using GivingChampion.Application.DTO.UserBadgeDto;
+using GivingChampion.Application.DTO.UserBadge;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 

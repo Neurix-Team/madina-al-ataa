@@ -1,5 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using GivingChampion.Application.DTO.Donor;
+using GivingChampion.Application.DTO.UserBadge;
+using GivingChampion.Application.DTO.Volunteer;
 
 namespace GivingChampion.Application.DTO.ProfileDto
 {
@@ -20,5 +23,8 @@ namespace GivingChampion.Application.DTO.ProfileDto
         public string? AvatarName { get; set; }
 
         public int? LevelNumber { get; set; }
+        public VolunteerDto Volunteer { get; set; }
+        public DonorDto Donor { get; set; }
+        public List<UserBadgeDto> UserBadges { get; set; }
     }
 }

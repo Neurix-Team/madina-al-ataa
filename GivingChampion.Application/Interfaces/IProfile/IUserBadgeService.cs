@@ -1,4 +1,4 @@
-﻿using GivingChampion.Application.DTO.UserBadgeDto;
+﻿using GivingChampion.Application.DTO.UserBadge;
 
 namespace GivingChampion.API.Interfaces
 {

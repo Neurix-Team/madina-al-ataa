@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using GivingChampion.API.Interfaces;
+using GivingChampion.Application.DTO.Donor;
 using GivingChampion.Application.DTO.ProfileDto;
+using GivingChampion.Application.DTO.UserBadge;
+using GivingChampion.Application.DTO.Volunteer;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Services;
 using GivingChampion.Common.Results;
@@ -17,6 +20,9 @@ namespace GivingChampion.API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenericRepository<DomainProfile> _profileRepository;
         private readonly IGenericRepository<Avatar> _avatarRepository;
+        private readonly IGenericRepository<Volunteer> _volunteerRepository;
+        private readonly IGenericRepository<Donor> _donorRepository;
+        private readonly IGenericRepository<UserBadge> _userBadgeRepository;
         private readonly IGenericRepository<UserLevel> _userLevelRepository;
         private readonly IMapper _mapper;
 
@@ -29,7 +35,9 @@ namespace GivingChampion.API.Services
             _unitOfWork = unitOfWork;
             _profileRepository = unitOfWork.Repository<DomainProfile>();
             _avatarRepository = unitOfWork.Repository<Avatar>();
-
+            _volunteerRepository = unitOfWork.Repository<Volunteer>();
+            _donorRepository = unitOfWork.Repository<Donor>();
+            _userBadgeRepository = unitOfWork.Repository<UserBadge>();
             _userLevelRepository = unitOfWork.Repository<UserLevel>();
             _mapper = mapper;
         }
@@ -64,6 +72,30 @@ namespace GivingChampion.API.Services
             {
                 profileDto.AvatarId = avatar.Id;
                 profileDto.AvatarName = avatar.CharacterName;
+            }
+
+            var volunteer = await _volunteerRepository.FirstOrDefaultAsync(v => v.UserId == profile.UserId);
+            
+            if (volunteer != null)
+            {
+                profileDto.Volunteer = _mapper.Map<VolunteerDto>(volunteer);
+            }
+
+            var donor = await _donorRepository.FirstOrDefaultAsync(d => d.UserId == profile.UserId);
+
+            if (donor != null)
+            {
+                profileDto.Donor = _mapper.Map<DonorDto>(donor);
+            }
+
+            var userBadges = await _userBadgeRepository.Query()
+                .Include(ub => ub.Badge)
+                .Where(ub => ub.ProfileId == profile.Id)
+                .ToListAsync();
+
+            if (userBadges != null && userBadges.Any())
+            {
+                profileDto.UserBadges = _mapper.Map<List<UserBadgeDto>>(userBadges);
             }
 
             return Result<ProfileDto?>.Success(profileDto);
@@ -146,6 +178,30 @@ namespace GivingChampion.API.Services
             {
                 profileDto.AvatarId = avatar.Id;
                 profileDto.AvatarName = avatar.CharacterName;
+            }
+
+            var volunteer = await _volunteerRepository.FirstOrDefaultAsync(v => v.UserId == profile.UserId);
+
+            if (volunteer != null)
+            {
+                profileDto.Volunteer = _mapper.Map<VolunteerDto>(volunteer);
+            }
+
+            var donor = await _donorRepository.FirstOrDefaultAsync(d => d.UserId == profile.UserId);
+
+            if (donor != null)
+            {
+                profileDto.Donor = _mapper.Map<DonorDto>(donor);
+            }
+
+            var userBadges = await _userBadgeRepository.Query()
+                .Include(ub => ub.Badge)
+                .Where(ub => ub.ProfileId == profile.Id)
+                .ToListAsync();
+
+            if (userBadges != null && userBadges.Any())
+            {
+                profileDto.UserBadges = _mapper.Map<List<UserBadgeDto>>(userBadges);
             }
 
             return Result<ProfileDto?>.Success(profileDto);
