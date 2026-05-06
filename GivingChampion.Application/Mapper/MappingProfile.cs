@@ -77,6 +77,10 @@ namespace GivingChampion.Application.Mapper
            opt => opt.MapFrom(src => src.ServiceRequest != null
                ? src.ServiceRequest.ServiceType.ToString()
                : string.Empty))
+        .ForMember(dest => dest.Progress,
+       opt => opt.MapFrom(src => src.ServiceRequest != null
+           ? src.ServiceRequest.Progress
+           : 0))
        .ForMember(dest => dest.Description,
            opt => opt.MapFrom(src => src.ServiceRequest != null
                ? src.ServiceRequest.BriefDescription
@@ -85,6 +89,28 @@ namespace GivingChampion.Application.Mapper
            opt => opt.MapFrom(src => src.ServiceRequest != null
                ? src.ServiceRequest.ScheduleDate
                : default)).ReverseMap();
+
+            #region Volunteer Mappings
+
+            CreateMap<Volunteer, VolunteerDto>()
+                .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(src => src.TotalHours))
+                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
+                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability));
+            // Volunteer mappings
+            CreateMap<Volunteer, VolunteerDto>().ReverseMap();
+
+            CreateMap<CreateVolunteerDto, Volunteer>().ReverseMap();
+
+            CreateMap<UpdateVolunteerDto, Volunteer>().ReverseMap();
+            // Certificate mappings
+            CreateMap<Certificate, CertificateReadAllDto>().ReverseMap();
+
+            CreateMap<UpdateVolunteerDto, Volunteer>()
+                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
+                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability))
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
+
+            #endregion
             #region Partner Mappings
 
             CreateMap<CreatePartnerDto, Partner>()
@@ -113,28 +139,6 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.ProjectsCount, opt => opt.Ignore());
             // UpdatePartnerDto -> Partner
             CreateMap<UpdatePartnerDto, Partner>().ReverseMap();
-
-            #endregion
-
-            #region Volunteer Mappings
-
-            CreateMap<Volunteer, VolunteerDto>()
-                .ForMember(dest => dest.TotalHours, opt => opt.MapFrom(src => src.TotalHours))
-                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
-                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability));
-            // Volunteer mappings
-            CreateMap<Volunteer, VolunteerDto>().ReverseMap();
-
-            CreateMap<CreateVolunteerDto, Volunteer>().ReverseMap();
-
-            CreateMap<UpdateVolunteerDto, Volunteer>().ReverseMap();
-            // Certificate mappings
-            CreateMap<Certificate, CertificateReadAllDto>().ReverseMap();
-
-            CreateMap<UpdateVolunteerDto, Volunteer>()
-                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.Skills))
-                .ForMember(dest => dest.Availability, opt => opt.MapFrom(src => src.Availability))
-                .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             #endregion
 

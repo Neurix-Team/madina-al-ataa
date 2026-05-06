@@ -38,8 +38,9 @@ namespace GivingChampion.Persistance.Repositories
                 .Where(v => !v.IsDeleted)
                 .AsNoTracking()
                 .ToPagedListAsync(pageParameters);
-        }
 
+
+        }
 
         /// <summary>
         /// Retrieves a volunteer by its unique identifier (ID), ensuring it is not soft-deleted.
