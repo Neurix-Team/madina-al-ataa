@@ -48,7 +48,6 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository = volunteerOrderRepository;
             _genericVolunteerOrderRepository = genericVolunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
-            _notificationRepository = notificationRepository;
             _activityService = activityService;
             _notificationService = notificationService;
             _unitOfWork = unitOfWork;
