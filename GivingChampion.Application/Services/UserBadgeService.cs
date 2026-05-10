@@ -2,12 +2,14 @@
 using GivingChampion.API.Interfaces;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.DTO.UserBadge;
+using GivingChampion.Application.Services;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.API.Services
 {
-    public class UserBadgeService : IUserBadgeService
+    public class UserBadgeService : BaseService, IUserBadgeService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserBadgeRepository _userBadgeRepository;
@@ -16,11 +18,20 @@ namespace GivingChampion.API.Services
         public UserBadgeService(
             IUnitOfWork unitOfWork,
             IUserBadgeRepository userBadgeRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _userBadgeRepository = userBadgeRepository;
             _mapper = mapper;
+        }
+
+        public async Task<List<UserBadgeDto>> GetAllByUserIdAsync()
+        {
+            var userBadges = await _userBadgeRepository.GetAllByUserIdAsync(UserId);
+
+            return _mapper.Map<List<UserBadgeDto>>(userBadges);
         }
 
         public async Task<List<UserBadgeDto>> GetAllByProfileIdAsync(Guid profileId)
