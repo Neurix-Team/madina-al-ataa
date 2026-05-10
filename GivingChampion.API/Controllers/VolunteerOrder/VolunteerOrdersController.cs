@@ -12,14 +12,10 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
     public class VolunteerOrdersController : ControllerBase
     {
         private readonly IVolunteerOrderService _volunteerOrderService;
-        private readonly ILogger<VolunteerOrdersController> _logger;
 
-        public VolunteerOrdersController(
-            IVolunteerOrderService volunteerOrderService,
-            ILogger<VolunteerOrdersController> logger)
+        public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService)
         {
             _volunteerOrderService = volunteerOrderService;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -32,6 +28,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
             return Ok(result);
         }
+
         [HttpGet("pending")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPending([FromQuery] PageParameters pageParameters)
@@ -73,15 +70,21 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpPatch("{id:guid}/reject")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RejectOrder(Guid id, [FromBody] RejectVolunteerOrderDto dto)
+        public async Task<IActionResult> RejectOrder(
+            Guid id,
+            [FromBody] RejectVolunteerOrderDto dto)
         {
-            var result = await _volunteerOrderService.RejectOrderAsync(id, dto.RejectionReason);
+            var result = await _volunteerOrderService.RejectOrderAsync(
+                id,
+                dto.RejectionReason);
+
             return Ok(result);
         }
 
         [HttpPost]
         [Authorize(Roles = "Volunteer")]
-        public async Task<ActionResult<VolunteerOrderDto>> Create([FromBody] CreateVolunteerOrderDto dto)
+        public async Task<ActionResult<VolunteerOrderDto>> Create(
+            [FromBody] CreateVolunteerOrderDto dto)
         {
             var createdVolunteerOrder = await _volunteerOrderService.CreateAsync(dto);
 
@@ -93,12 +96,15 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         }
 
         [HttpPut("{id:guid}/progress")]
-        [Authorize(Roles = "Volunteer, Admin")]
+        [Authorize(Roles = "Volunteer,Admin")]
         public async Task<IActionResult> UpdateProgress(
             Guid id,
             [FromBody] UpdateVolunteerOrderProgressDto dto)
         {
-            var result = await _volunteerOrderService.UpdateProgressAsync(id, dto.Progress);
+            var result = await _volunteerOrderService.UpdateProgressAsync(
+                id,
+                dto.Progress);
+
             return Ok(result);
         }
 
