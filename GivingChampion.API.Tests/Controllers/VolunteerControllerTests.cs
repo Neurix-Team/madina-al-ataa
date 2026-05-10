@@ -2,7 +2,7 @@ using GivingChampion.API.Tests.Infrastructure;
 using GivingChampion.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using GivingChampion.Application.DTO.Volunteer;
 namespace GivingChampion.API.Tests.Controllers;
 
 [Collection(DatabaseCollection.Name)]

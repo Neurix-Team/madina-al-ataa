@@ -80,8 +80,7 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
             Mapper);
 
         return new VolunteerController(
-            service,
-            NullLogger<VolunteerController>.Instance);
+            service);
     }
 
     public async Task InitializeAsync()

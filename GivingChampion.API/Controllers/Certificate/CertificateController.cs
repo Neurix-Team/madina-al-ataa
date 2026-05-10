@@ -7,91 +7,60 @@ namespace GivingChampion.API.Controllers.Certificate
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CertificateController : ControllerBase
     {
         private readonly ICertificateService _certificateService;
-        private readonly ILogger<CertificateController> _logger;
 
-        public CertificateController(
-            ICertificateService certificateService,
-            ILogger<CertificateController> logger)
+        public CertificateController(ICertificateService certificateService)
         {
             _certificateService = certificateService;
-            _logger = logger;
         }
 
-        [Authorize]
         [HttpGet("my")]
         public async Task<IActionResult> GetMyCertificates(
             [FromQuery] PageParameters pageParameters,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _certificateService.GetMyCertificatesAsync(
-                    pageParameters,
-                    cancellationToken);
+            var result = await _certificateService.GetMyCertificatesAsync(
+                pageParameters,
+                cancellationToken);
 
-                if (!result.Succeeded)
-                    return BadRequest(result);
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching current user certificates.");
-                return StatusCode(500, "Internal server error");
-            }
+            return result.Succeeded
+                ? Ok(result)
+                : BadRequest(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCertificatesByUserId(
             Guid userId,
             [FromQuery] PageParameters pageParameters,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _certificateService.GetCertificatesByIdAsync(
-                    userId,
-                    pageParameters,
-                    cancellationToken);
+            var result = await _certificateService.GetCertificatesByIdAsync(
+                userId,
+                pageParameters,
+                cancellationToken);
 
-                if (!result.Succeeded)
-                    return BadRequest(result);
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching certificates for user {UserId}.", userId);
-                return StatusCode(500, "Internal server error");
-            }
+            return result.Succeeded
+                ? Ok(result)
+                : BadRequest(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCertificates(
             [FromQuery] PageParameters pageParameters,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _certificateService.GetAllAsync(
-                    pageParameters,
-                    cancellationToken);
+            var result = await _certificateService.GetAllAsync(
+                pageParameters,
+                cancellationToken);
 
-                if (!result.Succeeded)
-                    return BadRequest(result);
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching all certificates.");
-                return StatusCode(500, "Internal server error");
-            }
+            return result.Succeeded
+                ? Ok(result)
+                : BadRequest(result);
         }
     }
 }
