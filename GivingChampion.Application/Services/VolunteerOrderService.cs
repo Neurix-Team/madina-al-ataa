@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using GivingChampion.Application.DTO.ActivityDto;
 using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Application.DTO.VolunteerOrder;
-using GivingChampion.Application.DTO.ActivityDto;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
@@ -12,6 +12,7 @@ using GivingChampion.Domain.Entities;
 using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace GivingChampion.Application.Services
@@ -19,8 +20,9 @@ namespace GivingChampion.Application.Services
     public class VolunteerOrderService : BaseService, IVolunteerOrderService
     {
         #region Fields
-
+        private readonly IGenericRepository<GivingChampion.Domain.Entities.Profile> _profileRepository;
         private readonly IVolunteerOrderRepository _volunteerOrderRepository;
+        private readonly IGenericRepository<UserLevel> _userLevelRepository;
         private readonly IGenericRepository<VolunteerOrder> _genericVolunteerOrderRepository;
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly INotificationRepository _notificationRepository;
@@ -35,15 +37,14 @@ namespace GivingChampion.Application.Services
         #region Constructor
 
         public VolunteerOrderService(
-         IVolunteerOrderRepository volunteerOrderRepository,
-         IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
-         IServiceRequestRepository serviceRequestRepository,
-         INotificationService notificationService,
-
-         IHttpContextAccessor httpContextAccessor,
-         IActivityService activityService,
-         IUnitOfWork unitOfWork,
-         IMapper mapper) : base(httpContextAccessor)
+           IVolunteerOrderRepository volunteerOrderRepository,
+           IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
+           IServiceRequestRepository serviceRequestRepository,
+           INotificationService notificationService,
+           IHttpContextAccessor httpContextAccessor,
+           IActivityService activityService,
+           IUnitOfWork unitOfWork,
+           IMapper mapper) : base(httpContextAccessor)
         {
             _volunteerOrderRepository = volunteerOrderRepository;
             _genericVolunteerOrderRepository = genericVolunteerOrderRepository;
@@ -51,11 +52,15 @@ namespace GivingChampion.Application.Services
             _activityService = activityService;
             _notificationService = notificationService;
             _unitOfWork = unitOfWork;
+            _profileRepository = unitOfWork.Repository<GivingChampion.Domain.Entities.Profile>();
+
+            _userLevelRepository = unitOfWork.Repository<UserLevel>();
             _mapper = mapper;
         }
-
         public async Task<Result<PagedList<VolunteerOrderDto>>> GetAllAsync(PageParameters pageParameters)
         {
+            EnsureLoggedIn();
+
             var volunteerOrders = await _volunteerOrderRepository.GetAllAsync(pageParameters);
 
             var mappedItems = _mapper.Map<IReadOnlyList<VolunteerOrderDto>>(volunteerOrders.Items);
@@ -72,6 +77,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<Result<PagedList<VolunteerOrderDto>>> GetPendingAsync(PageParameters pageParameters)
         {
+            EnsureLoggedIn();
+
             var volunteerOrders = await _volunteerOrderRepository.GetPendingAsync(pageParameters);
 
             var mappedItems = _mapper.Map<IReadOnlyList<VolunteerOrderDto>>(volunteerOrders.Items);
@@ -88,6 +95,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<Result<PendingVolunteerOrderCountDto>> GetPendingCountAsync()
         {
+            EnsureLoggedIn();
+
             var count = await _genericVolunteerOrderRepository.CountAsync(
                 order => order.Status == OrderStatus.Pending
             );
@@ -107,6 +116,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<VolunteerOrderDto?> GetByIdAsync(Guid id)
         {
+            EnsureLoggedIn();
+
             if (id == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
 
@@ -121,9 +132,10 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<VolunteerOrderDto>(volunteerOrder);
         }
 
-        public async Task<VolunteerOrderDto> CreateAsync(
-       CreateVolunteerOrderDto dto)
+        public async Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto)
         {
+            EnsureLoggedIn();
+
             var volunteerId = UserId;
 
             if (dto == null)
@@ -144,11 +156,43 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException(
                     $"Volunteer cannot create an order for this request because its status is {serviceRequest.Status}.");
 
+            if (serviceRequest.RequiredLevel == null)
+                throw new BadRequestException("Service request required level is not assigned.");
+
+            var userLevel = await _userLevelRepository.Query()
+                .Include(ul => ul.Level)
+                .Include(ul => ul.Profile)
+                .FirstOrDefaultAsync(ul =>
+                    ul.Profile.UserId == volunteerId &&
+                    !ul.IsDeleted);
+
+            if (userLevel == null)
+                throw new BadRequestException("Volunteer level is not assigned.");
+
+            if (userLevel.Level == null)
+                throw new BadRequestException("Volunteer level data is not found.");
+
+            if (userLevel.Level.Number < serviceRequest.RequiredLevel.Number)
+            {
+                throw new BadRequestException(
+                    $"Your level is not enough to apply for this request. Required level is {serviceRequest.RequiredLevel.Number}.");
+            }
+
             var alreadyHasActiveOrder = await _volunteerOrderRepository
                 .ExistsActiveByUserAndServiceRequestAsync(volunteerId, dto.ServiceRequestId);
 
             if (alreadyHasActiveOrder)
                 throw new ConflictException("You already have an active order for this service request.");
+
+            var currentOrdersCount = await _genericVolunteerOrderRepository.CountAsync(o =>
+                o.ServiceRequestId == dto.ServiceRequestId &&
+                !o.IsDeleted &&
+                o.Status != OrderStatus.Rejected);
+
+            if (currentOrdersCount >= serviceRequest.MaxOrders)
+            {
+                throw new ConflictException("This service request has reached the maximum number of orders.");
+            }
 
             var volunteerOrder = _mapper.Map<VolunteerOrder>(dto);
 
@@ -163,7 +207,7 @@ namespace GivingChampion.Application.Services
 
             await _activityService.AddAsync(new CreateActivityDto
             {
-                UserId = UserId,
+                UserId = volunteerId,
                 EntityId = volunteerOrder.Id,
                 EntityType = ActivityEntityType.VolunteerOrder,
                 Action = ActivityAction.OrderCreated,
@@ -181,6 +225,8 @@ namespace GivingChampion.Application.Services
             Guid orderId,
             OrderStatus newStatus)
         {
+            EnsureLoggedIn();
+
             if (orderId == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
 
@@ -204,9 +250,10 @@ namespace GivingChampion.Application.Services
           
         }
 
-        public async Task<bool> DeleteAsync(
-            Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
+            EnsureLoggedIn();
+
             var volunteerId = UserId;
 
             if (id == Guid.Empty)
@@ -226,6 +273,13 @@ namespace GivingChampion.Application.Services
             if (existingVolunteerOrder.UserId != volunteerId)
                 throw new UnauthorizedAccessException("You are not allowed to delete this order.");
 
+            if (existingVolunteerOrder.Status != OrderStatus.Pending)
+            {
+                throw new ConflictException(
+                    $"Only pending volunteer orders can be cancelled. Current status is {existingVolunteerOrder.Status}."
+                );
+            }
+
             existingVolunteerOrder.IsDeleted = true;
             existingVolunteerOrder.DeletedAt = DateTime.UtcNow;
             existingVolunteerOrder.UpdatedAt = DateTime.UtcNow;
@@ -233,6 +287,7 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository.Update(existingVolunteerOrder);
 
             await _unitOfWork.SaveChangesAsync();
+
             await _activityService.AddAsync(new CreateActivityDto
             {
                 UserId = volunteerId,
@@ -241,13 +296,15 @@ namespace GivingChampion.Application.Services
                 Action = ActivityAction.OrderCancelled,
                 Description = $"Volunteer order cancelled by volunteer '{volunteerId}'."
             });
+
             return true;
         }
-
         public async Task<VolunteerOrderDto?> UpdateProgressAsync(
             Guid orderId,
             int progress)
         {
+            EnsureLoggedIn();
+
             var volunteerId = UserId;
 
             if (orderId == Guid.Empty)
@@ -350,6 +407,8 @@ namespace GivingChampion.Application.Services
 
         public async Task<VolunteerOrderDto?> ApproveOrderAsync(Guid orderId)
         {
+            EnsureLoggedIn();
+
             if (orderId == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
 
@@ -419,6 +478,8 @@ namespace GivingChampion.Application.Services
             Guid id,
             string rejectionReason)
         {
+            EnsureLoggedIn();
+
             if (id == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
 
