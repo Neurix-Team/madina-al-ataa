@@ -7,7 +7,6 @@ namespace GivingChampion.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ActivitiesController : ControllerBase
     {
         private readonly IActivityService _activityService;
@@ -44,7 +43,7 @@ namespace GivingChampion.API.Controllers
         //}
 
         [HttpGet("entity/{entityId:guid}")]
-        [Authorize(Roles = "Volunteer,Admin")]
+        [Authorize]
         public async Task<IActionResult> GetEntityHistory(
             Guid entityId,
             [FromQuery] PageParameters pageParameters)

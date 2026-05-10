@@ -32,7 +32,7 @@ namespace GivingChampion.Api.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        [Authorize]
+        [Authorize ]
         [ProducesResponseType(typeof(GetUserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GetUserDto>> GetUserById(Guid id)

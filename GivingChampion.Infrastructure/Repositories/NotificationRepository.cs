@@ -55,6 +55,7 @@ namespace GivingChampion.Persistence.Repositories
             foreach (var notification in notifications)
             {
                 notification.IsRead = true;
+                _context.Notifications.Update(notification);
             }
 
         }
