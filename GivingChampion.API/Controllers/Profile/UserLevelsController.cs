@@ -50,15 +50,15 @@ namespace GivingChampion.API.Controllers
             return NoContent();
         }
 
-        // DELETE api/UserLevels/admin/{id}
-        // Admin soft deletes user level
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("admin/{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            await _userLevelService.SoftDeleteAsync(id);
+        //// DELETE api/UserLevels/admin/{id}
+        //// Admin soft deletes user level
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("admin/{id:guid}")]
+        //public async Task<IActionResult> Delete(Guid id)
+        //{
+        //    await _userLevelService.SoftDeleteAsync(id);
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
     }
 }

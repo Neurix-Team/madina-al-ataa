@@ -42,6 +42,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateGeoQuestDto dto)
         {
             var result = await _geoQuestService.CreateAsync(dto);
@@ -50,8 +51,8 @@ namespace GivingChampion.API.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
         }
-        [Authorize]
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromQuery] UpdateGeoQuestDto dto)
         {
             var result = await _geoQuestService.UpdateAsync(id, dto);
@@ -62,6 +63,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _geoQuestService.SoftDeleteAsync(id);
