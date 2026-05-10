@@ -5,15 +5,14 @@ namespace GivingChampion.Application.Services
 {
     public abstract class BaseService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        protected BaseService(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
        
-     
-            private readonly IHttpContextAccessor _httpContextAccessor;
-
-            protected BaseService(IHttpContextAccessor httpContextAccessor)
-            {
-                _httpContextAccessor = httpContextAccessor;
-            }
-
         protected Guid UserId
         {
             get
@@ -31,4 +30,4 @@ namespace GivingChampion.Application.Services
             }
         }
     }
-    }
+}

@@ -21,6 +21,7 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.ServiceRequests
                 .AsNoTracking()
+                .Include(sr => sr.RequiredLevel)
                 .Include(x => x.Partner)
                 .Where(x => !x.IsDeleted)
                 .OrderByDescending(x => x.Id)
@@ -30,6 +31,7 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.ServiceRequests
                 .Include(x => x.Partner)
+                .Include(sr => sr.RequiredLevel)
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
         public async Task<PagedList<ServiceRequest>> GetByStatusAsync(
