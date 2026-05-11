@@ -16,13 +16,15 @@ namespace GivingChampion.API.Repositories
         }
 
         // Get all GeoQuests with pagination
-        public async Task<PagedList<GeoQuest>> GetAllAsync(PageParameters pageParameters)
+        public async Task<PagedList<GeoQuest>> GetAllAsync(Guid userId, PageParameters pageParameters)
         {
+            var userGeoQuestIds = _context.UserGeoQuests
+                .Where(ugq => ugq.UserId == userId)  
+                .Select(ugq => ugq.GeoQuestId)
+                .ToList();
             var geoQuests = await _context.GeoQuests
                 .AsNoTracking()  // For read-only operation, improving performance
-                .Where(gq => !gq.IsDeleted)
-                .Skip((pageParameters.PageNumber - 1) * pageParameters.PageSize)  // Pagination logic
-                .Take(pageParameters.PageSize)  // Pagination logic
+                .Where(gq => !userGeoQuestIds.Contains(gq.Id) && !gq.IsDeleted)
                 .ToPagedListAsync(pageParameters);
             return geoQuests;
         }
