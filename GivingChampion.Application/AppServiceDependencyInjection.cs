@@ -1,6 +1,7 @@
 ﻿using GivingChampion.API.Interfaces;
 using GivingChampion.API.Services;
 using GivingChampion.Application;
+using GivingChampion.Application.Helpers;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Admin;
 using GivingChampion.Application.Interfaces.Auth;
@@ -40,6 +41,7 @@ public static class AppServiceDependencyInjection
         services.AddScoped<IUserGeoQuestService, UserGeoQuestService>();
 
         services.AddScoped<IServiceRequestService, ServiceRequestService>();
+        services.AddScoped<IBadgeRequirementParser, BadgeRequirementParser>();
         services.AddScoped<IRewardSystemService, RewardSystemService>();
         services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
         services.AddScoped<IPartnerService, PartnerService>();
