@@ -17,11 +17,11 @@ namespace GivingChampion.API.Controllers
             _userBadgeService = userBadgeService;
         }
 
-        // GET api/UserBadges?profileId={profileId}
+        // GET api/UserBadges
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] Guid profileId)
+        public async Task<IActionResult> GetAll()
         {
-            var userBadges = await _userBadgeService.GetAllByProfileIdAsync(profileId);
+            var userBadges = await _userBadgeService.GetAllByUserIdAsync();
             return Ok(userBadges);
         }
 
@@ -43,6 +43,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/UserBadges
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserBadgeDto dto)
         {

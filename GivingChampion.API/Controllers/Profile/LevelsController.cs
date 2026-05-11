@@ -42,7 +42,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // POST api/levels
-        [Authorize]
+        [Authorize (Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateLevelDto dto)
         {
@@ -52,7 +52,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // PUT api/levels/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateLevelDto dto)
         {
@@ -64,7 +64,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/levels/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

@@ -17,7 +17,7 @@ namespace GivingChampion.API.Controllers
             _profileService = profileService;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {

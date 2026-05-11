@@ -19,6 +19,7 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             var result = await _volunteerOrderService.GetAllAsync(pageParameters);

@@ -4,6 +4,8 @@ namespace GivingChampion.Persistance.Interfaces
 {
     public interface IUserBadgeRepository
     {
+        Task<List<UserBadge>> GetAllByUserIdAsync(Guid userId);
+
         Task<List<UserBadge>> GetAllByProfileIdAsync(Guid profileId);
 
         Task<UserBadge?> GetByIdAsync(Guid id);

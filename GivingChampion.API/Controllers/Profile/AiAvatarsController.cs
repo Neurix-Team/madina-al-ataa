@@ -50,7 +50,7 @@ namespace GivingChampion.API.Controllers
         }
 
         // DELETE api/aiavatars/{id}
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
