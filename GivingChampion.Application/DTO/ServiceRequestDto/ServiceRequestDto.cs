@@ -30,6 +30,9 @@ namespace GivingChampion.Application.DTO.ServiceRequestDto
             public string Status { get; set; } = string.Empty;
 
             public DateTime CreatedAt { get; set; }
-        }
+        public int MaxOrders { get; set; }
+
+        public Guid RequiredLevelId { get; set; }
+    }
     }
 

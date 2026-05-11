@@ -41,9 +41,12 @@ namespace GivingChampion.Domain.Entities
         // Duration in hours
         [Range(1, 1000)]
 		public int Duration { get; set; }
+        public int MaxOrders { get; set; }
 
-		// Status of the request (Pending, Approved, Completed, etc.)
-		[Required]
+        public Guid RequiredLevelId { get; set; }
+
+        public Level RequiredLevel { get; set; } = null!;
+        [Required]
 		public RequestStatus Status { get; set; }
  
         // Short description
