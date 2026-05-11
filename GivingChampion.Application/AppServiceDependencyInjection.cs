@@ -9,6 +9,7 @@ using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Interfaces.Location;
 using GivingChampion.Application.Interfaces.Mission;
 using GivingChampion.Application.Interfaces.Partner;
+using GivingChampion.Application.Interfaces.Reward;
 using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Interfaces.Volunteer;
@@ -39,6 +40,7 @@ public static class AppServiceDependencyInjection
         services.AddScoped<IUserGeoQuestService, UserGeoQuestService>();
 
         services.AddScoped<IServiceRequestService, ServiceRequestService>();
+        services.AddScoped<IRewardSystemService, RewardSystemService>();
         services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
         services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<IVolunteerService, VolunteerService>();

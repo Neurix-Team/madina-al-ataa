@@ -65,7 +65,14 @@ namespace GivingChampion.Domain.Entities
         public Guid? VolunteerUserId { get; set; }
         public ApplicationUser? Volunteer { get; set; }
 
+        [Range(0, int.MaxValue)]
+        public int XPReward { get; set; } = 0;
 
+        [Range(0, int.MaxValue)]
+        public int KPReward { get; set; } = 0;
+
+        [Range(0, int.MaxValue)]
+        public int ImpactReward { get; set; } = 0;
 
     }
 

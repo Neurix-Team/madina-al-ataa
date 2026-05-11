@@ -4,6 +4,7 @@ using GivingChampion.Application.DTO.Mission;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Mission;
+using GivingChampion.Application.Interfaces.Reward;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
@@ -20,6 +21,7 @@ namespace GivingChampion.Application.Services
         private readonly IUserMissionRepository _userMissionRepository;
         private readonly IMissionRepository _missionRepository;
         private readonly IActivityService _activityService;
+        private readonly IRewardSystemService _rewardSystemService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -27,6 +29,7 @@ namespace GivingChampion.Application.Services
             IUserMissionRepository userMissionRepository,
             IMissionRepository missionRepository,
             IActivityService activityService,
+            IRewardSystemService rewardSystemService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
@@ -35,6 +38,7 @@ namespace GivingChampion.Application.Services
             _userMissionRepository = userMissionRepository;
             _missionRepository = missionRepository;
             _activityService = activityService;
+            _rewardSystemService = rewardSystemService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -138,6 +142,9 @@ namespace GivingChampion.Application.Services
             {
                 userMission.Status = MissionStatus.Completed;
                 userMission.CompletedAt = DateTime.UtcNow;
+
+                await _rewardSystemService.RewardUserMissionCompletedAsync(
+                    userMission.Id);
             }
 
             await _userMissionRepository.UpdateAsync(userMission);
