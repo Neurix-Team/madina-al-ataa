@@ -1,14 +1,15 @@
-﻿using GivingChampion.Application.Exceptions;
+﻿using GivingChampion.Application.DTO.Volunteer;
 using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GivingChampion.API.Controllers.Volunteer
+namespace GivingChampion.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
+    [ApiExplorerSettings(GroupName = "v1")]
+    [Route("api/volunteer")]
+    [Produces("application/json")]
     public class VolunteerController : ControllerBase
     {
         private readonly IVolunteerService _volunteerService;
@@ -18,24 +19,54 @@ namespace GivingChampion.API.Controllers.Volunteer
             _volunteerService = volunteerService;
         }
 
-        [HttpGet("{id:guid}")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> GetById(Guid id)
+        /// <summary>
+        /// Gets the volunteer profile of the currently authenticated user
+        /// </summary>
+        [HttpGet("me")]
+        [Authorize]
+        [ProducesResponseType(typeof(Result<VolunteerDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<VolunteerDto>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Result<VolunteerDto>>> GetMyVolunteerProfile()
         {
-            var volunteer = await _volunteerService.GetByIdAsync(id)
-                ?? throw new NotFoundException($"Volunteer with ID {id} not found.");
-
-            return Ok(volunteer);
+            var result = await _volunteerService.GetMyVolunteerProfileAsync();
+            return Ok(result);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
+        /// <summary>
+        /// Admin gets volunteer profile by user ID
+        /// </summary>
+        [HttpGet("user/{userId:guid}")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(Result<VolunteerDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<Result<VolunteerDto>>> GetVolunteerByUserId(Guid userId)
         {
-            var result = await _volunteerService.GetAllAsync(pageParameters);
-
-            return result.Succeeded
-                ? Ok(result)
-                : BadRequest(result);
+            var result = await _volunteerService.GetVolunteerByUserIdAsync(userId);
+            return Ok(result);
         }
+
+        /// <summary>
+        /// Updates volunteer profile
+        /// </summary>
+        [HttpPut("me")]
+        [Authorize]
+        [ProducesResponseType(typeof(Result<VolunteerDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<VolunteerDto>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Result<VolunteerDto>>> UpdateMyVolunteerProfile([FromBody] UpdateVolunteerDto dto)
+        {
+            var result = await _volunteerService.UpdateVolunteerAsync(dto);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Soft deletes volunteer profile (Admin only)
+        /// </summary>
+        //[HttpDelete("{userId:guid}")]
+        //[Authorize(Roles = "Admin")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //public async Task<IActionResult> SoftDeleteVolunteer(Guid userId)
+        //{
+        //    var result = await _volunteerService.SoftDeleteVolunteerAsync(userId);
+        //    return result.Succeeded ? NoContent() : BadRequest(result);
+        //}
     }
 }

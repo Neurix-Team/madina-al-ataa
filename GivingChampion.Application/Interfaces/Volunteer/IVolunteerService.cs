@@ -9,21 +9,11 @@ namespace GivingChampion.Application.Interfaces.Volunteer
 {
     public interface IVolunteerService
     {
+        Task<Result<VolunteerDto>> GetMyVolunteerProfileAsync();
 
+        Task<Result<VolunteerDto>> GetVolunteerByUserIdAsync(Guid userId);
 
-        #region Query Methods
-
-        //#region GetAllVolunteers
-
-        //Task<List<VolunteerDto>> GetAllAsync();
-
-        #endregion
-        Task<Result<PagedList<VolunteerDto>>> GetAllAsync(PageParameters pageParameters);
-
-
-        Task<VolunteerDto?> GetByIdAsync(Guid id);
-
-        
+        Task<Result<VolunteerDto>> UpdateVolunteerAsync(UpdateVolunteerDto dto);
 
 
     }

@@ -17,7 +17,7 @@ namespace GivingChampion.Persistance.Interfaces
         #endregion
 
         #region Command Methods
-
+        void Update(Volunteer volunteer);
         Task AddAsync(Guid userId); // Add a new volunteer (Entity)
         //void Update(Volunteer volunteer); // Update existing volunteer (Entity)
 
