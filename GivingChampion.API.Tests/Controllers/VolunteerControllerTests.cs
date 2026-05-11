@@ -1,4 +1,4 @@
-using GivingChampion.API.Controllers.Volunteer;
+using GivingChampion.API.Controllers;
 using GivingChampion.Application.DTO.Volunteer;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Volunteer;
