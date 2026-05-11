@@ -51,8 +51,8 @@ namespace GivingChampion.Persistance.Repositories
                 .OrderByDescending(sr => sr.CreatedAt)
                 .ToPagedListAsync(pageParameters);
         }
-
-        public async Task<List<ServiceRequest>> GetApprovedRequestsAsync()
+        public async Task<PagedList<ServiceRequest>> GetApprovedRequestsAsync(
+         PageParameters pageParameters)
         {
             return await _context.ServiceRequests
                 .AsNoTracking()
@@ -62,7 +62,7 @@ namespace GivingChampion.Persistance.Repositories
                     sr.Status == RequestStatus.Approved &&
                     !sr.IsDeleted)
                 .OrderByDescending(sr => sr.CreatedAt)
-                .ToListAsync();
+                .ToPagedListAsync(pageParameters);
         }
 
         public async Task<List<ServiceRequest>> GetByPartnerIdAsync(Guid partnerId)
@@ -96,12 +96,9 @@ namespace GivingChampion.Persistance.Repositories
         }
 
         public Task SoftDeleteAsync(ServiceRequest serviceRequest)
-        {
-            serviceRequest.IsDeleted = true;
-            serviceRequest.DeletedAt = DateTime.UtcNow;
-            serviceRequest.UpdatedAt = DateTime.UtcNow;
-
-            _context.ServiceRequests.Update(serviceRequest);
+        { 
+            //_context.ServiceRequests.Update(serviceRequest);
+            _context.ServiceRequests.Remove(serviceRequest);
 
             return Task.CompletedTask;
         }
