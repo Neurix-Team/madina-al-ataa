@@ -62,35 +62,38 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<ServiceRequestDto>(serviceRequest);
         }
 
-        public async Task<List<ServiceRequestDto>> GetApprovedRequestsAsync()
+        public async Task<Result<PagedList<ServiceRequestDto>>> GetApprovedRequestsAsync(
+      PageParameters pageParameters)
         {
-            var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync();
+            var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync(pageParameters);
 
-            return _mapper.Map<List<ServiceRequestDto>>(approvedRequests);
-        }
-
-        public async Task<Result<PagedList<ServiceRequestDto>>> GetByStatusAsync(
-            RequestStatus status,
-            PageParameters pageParameters)
-        {
-            var filtered = await _serviceRequestRepository.GetByStatusAsync(
-                status,
-                pageParameters);
-
-            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(filtered);
+            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(approvedRequests);
 
             return Result<PagedList<ServiceRequestDto>>.Success(dtos);
         }
 
-        public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)
-        {
-            if (partnerId == Guid.Empty)
-                throw new BadRequestException("Partner ID is required.");
+        //public async Task<Result<PagedList<ServiceRequestDto>>> GetByStatusAsync(
+        //    RequestStatus status,
+        //    PageParameters pageParameters)
+        //{
+        //    var filtered = await _serviceRequestRepository.GetByStatusAsync(
+        //        status,
+        //        pageParameters);
 
-            var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
+        //    var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(filtered);
 
-            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
-        }
+        //    return Result<PagedList<ServiceRequestDto>>.Success(dtos);
+        //}
+
+        //public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)
+        //{
+        //    if (partnerId == Guid.Empty)
+        //        throw new BadRequestException("Partner ID is required.");
+
+        //    var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
+
+        //    return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
+        //}
 
         public async Task<ServiceRequestDto> CreateAsync(CreateServiceRequestDto dto)
         {

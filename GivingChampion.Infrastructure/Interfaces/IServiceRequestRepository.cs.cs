@@ -14,7 +14,7 @@ namespace GivingChampion.Persistance.Interfaces
             RequestStatus status,
             PageParameters pageParameters);
 
-        Task<List<ServiceRequest>> GetApprovedRequestsAsync();
+        Task<PagedList<ServiceRequest>> GetApprovedRequestsAsync(PageParameters pageParameters);
 
         Task<List<ServiceRequest>> GetByPartnerIdAsync(Guid partnerId);
 
