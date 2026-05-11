@@ -1,8 +1,8 @@
 ﻿using GivingChampion.Common.Enums;
-using GivingChampion.Persistence.Contexts;
 using GivingChampion.Common.Extensions.Pagination;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistence.Contexts;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,35 +22,46 @@ namespace GivingChampion.Persistance.Repositories
             return await _context.ServiceRequests
                 .AsNoTracking()
                 .Include(sr => sr.RequiredLevel)
-                .Include(x => x.Partner)
-                .Where(x => !x.IsDeleted)
-                .OrderByDescending(x => x.Id)
+                .Include(sr => sr.Partner)
+                .Where(sr => !sr.IsDeleted)
+                .OrderByDescending(sr => sr.CreatedAt)
                 .ToPagedListAsync(pageParameters);
         }
+
         public async Task<ServiceRequest?> GetByIdAsync(Guid id)
         {
             return await _context.ServiceRequests
-                .Include(x => x.Partner)
+                .AsNoTracking()
                 .Include(sr => sr.RequiredLevel)
-                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+                .Include(sr => sr.Partner)
+                .FirstOrDefaultAsync(sr => sr.Id == id && !sr.IsDeleted);
         }
+
         public async Task<PagedList<ServiceRequest>> GetByStatusAsync(
-    RequestStatus status,
-    PageParameters pageParameters)
+            RequestStatus status,
+            PageParameters pageParameters)
         {
             return await _context.ServiceRequests
                 .AsNoTracking()
-                .Include(x => x.Partner)
-                .Where(x => x.Status == status && !x.IsDeleted)
-                .OrderByDescending(x => x.Id)
+                .Include(sr => sr.RequiredLevel)
+                .Include(sr => sr.Partner)
+                .Where(sr =>
+                    sr.Status == status &&
+                    !sr.IsDeleted)
+                .OrderByDescending(sr => sr.CreatedAt)
                 .ToPagedListAsync(pageParameters);
         }
+
         public async Task<List<ServiceRequest>> GetApprovedRequestsAsync()
         {
             return await _context.ServiceRequests
                 .AsNoTracking()
-                .Include(x => x.Partner)
-                .Where(sr => sr.Status == RequestStatus.Approved && !sr.IsDeleted)
+                .Include(sr => sr.RequiredLevel)
+                .Include(sr => sr.Partner)
+                .Where(sr =>
+                    sr.Status == RequestStatus.Approved &&
+                    !sr.IsDeleted)
+                .OrderByDescending(sr => sr.CreatedAt)
                 .ToListAsync();
         }
 
@@ -58,9 +69,19 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.ServiceRequests
                 .AsNoTracking()
-                .Include(x => x.Partner)
-                .Where(x => x.PartnerId == partnerId && !x.IsDeleted)
+                .Include(sr => sr.RequiredLevel)
+                .Include(sr => sr.Partner)
+                .Where(sr =>
+                    sr.PartnerId == partnerId &&
+                    !sr.IsDeleted)
+                .OrderByDescending(sr => sr.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async Task<ServiceRequest?> GetByIdForUpdateAsync(Guid id)
+        {
+            return await _context.ServiceRequests
+                .FirstOrDefaultAsync(sr => sr.Id == id && !sr.IsDeleted);
         }
 
         public async Task AddAsync(ServiceRequest serviceRequest)
@@ -76,11 +97,11 @@ namespace GivingChampion.Persistance.Repositories
 
         public Task SoftDeleteAsync(ServiceRequest serviceRequest)
         {
-            //serviceRequest.IsDeleted = true;
-            //serviceRequest.DeletedAt = DateTime.UtcNow;
+            serviceRequest.IsDeleted = true;
+            serviceRequest.DeletedAt = DateTime.UtcNow;
+            serviceRequest.UpdatedAt = DateTime.UtcNow;
 
-            //_context.ServiceRequests.Update(serviceRequest);
-            _context.ServiceRequests.Remove(serviceRequest);
+            _context.ServiceRequests.Update(serviceRequest);
 
             return Task.CompletedTask;
         }
@@ -88,12 +109,13 @@ namespace GivingChampion.Persistance.Repositories
         public async Task UpdateProgressAsync(Guid serviceRequestId, int progress)
         {
             var serviceRequest = await _context.ServiceRequests
-                .FirstOrDefaultAsync(x => x.Id == serviceRequestId && !x.IsDeleted);
+                .FirstOrDefaultAsync(sr => sr.Id == serviceRequestId && !sr.IsDeleted);
 
             if (serviceRequest == null)
                 return;
 
             serviceRequest.Progress = progress;
+            serviceRequest.UpdatedAt = DateTime.UtcNow;
 
             _context.ServiceRequests.Update(serviceRequest);
         }

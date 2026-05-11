@@ -37,8 +37,17 @@ namespace GivingChampion.Persistance.Repositories
                 .AsNoTracking()
                 .ToPagedListAsync(pageParameters);
         }
+        public async Task<int?> GetVolunteerLevelNumberAsync(Guid volunteerUserId)
+        {
+            return await _context.UserLevels
+                .AsNoTracking()
+                .Where(ul =>
+                    ul.Profile.UserId == volunteerUserId &&
+                    !ul.IsDeleted)
+                .Select(ul => (int?)ul.Level.Number)
+                .FirstOrDefaultAsync();
+        }
 
-      
         public async Task<VolunteerOrder?> GetByIdAsync(Guid id)
         {
             return await _context.VolunteerOrders

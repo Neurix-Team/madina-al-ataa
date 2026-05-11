@@ -12,16 +12,14 @@ using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace GivingChampion.Application.Services
 {
     public class ServiceRequestService : BaseService, IServiceRequestService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IGenericRepository<ServiceRequest> _serviceRequestRepository;
+        private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly IGenericRepository<VolunteerOrder> _volunteerOrderRepository;
-        private readonly IActivityService _activityService;
         private readonly IMapper _mapper;
         private readonly ILevelRepository _levelRepository;
 
@@ -30,29 +28,21 @@ namespace GivingChampion.Application.Services
             IMapper mapper,
             IActivityService activityService,
             ILevelRepository levelRepository,
+            IServiceRequestRepository serviceRequestRepository,
             IGenericRepository<VolunteerOrder> volunteerOrderRepository,
             IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            : base(httpContextAccessor, activityService)
         {
             _unitOfWork = unitOfWork;
-            _serviceRequestRepository = unitOfWork.Repository<ServiceRequest>();
+            _serviceRequestRepository = serviceRequestRepository;
             _volunteerOrderRepository = volunteerOrderRepository;
             _mapper = mapper;
-            _activityService = activityService;
             _levelRepository = levelRepository;
         }
 
         public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
         {
-
-            var query = _serviceRequestRepository.Query()
-                .Include(sr => sr.RequiredLevel)
-                .Where(sr => !sr.IsDeleted);
-
-            var serviceRequests = await PagedList<ServiceRequest>.CreateAsync(
-                query,
-                pageParameters.PageNumber,
-                pageParameters.PageSize);
+            var serviceRequests = await _serviceRequestRepository.GetAllAsync(pageParameters);
 
             var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(serviceRequests);
 
@@ -61,13 +51,10 @@ namespace GivingChampion.Application.Services
 
         public async Task<ServiceRequestDto?> GetByIdAsync(Guid id)
         {
-
             if (id == Guid.Empty)
                 throw new BadRequestException("Service request ID is required.");
 
-            var serviceRequest = await _serviceRequestRepository.Query()
-                .Include(sr => sr.RequiredLevel)
-                .FirstOrDefaultAsync(sr => sr.Id == id && !sr.IsDeleted);
+            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
 
             if (serviceRequest == null)
                 throw new NotFoundException("Service request not found.");
@@ -77,12 +64,7 @@ namespace GivingChampion.Application.Services
 
         public async Task<List<ServiceRequestDto>> GetApprovedRequestsAsync()
         {
-            var approvedRequests = await _serviceRequestRepository.Query()
-                .Include(sr => sr.RequiredLevel)
-                .Where(sr =>
-                    sr.Status == RequestStatus.Approved &&
-                    !sr.IsDeleted)
-                .ToListAsync();
+            var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync();
 
             return _mapper.Map<List<ServiceRequestDto>>(approvedRequests);
         }
@@ -91,17 +73,9 @@ namespace GivingChampion.Application.Services
             RequestStatus status,
             PageParameters pageParameters)
         {
-
-            var query = _serviceRequestRepository.Query()
-                .Include(sr => sr.RequiredLevel)
-                .Where(sr =>
-                    sr.Status == status &&
-                    !sr.IsDeleted);
-
-            var filtered = await PagedList<ServiceRequest>.CreateAsync(
-                query,
-                pageParameters.PageNumber,
-                pageParameters.PageSize);
+            var filtered = await _serviceRequestRepository.GetByStatusAsync(
+                status,
+                pageParameters);
 
             var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(filtered);
 
@@ -113,29 +87,17 @@ namespace GivingChampion.Application.Services
             if (partnerId == Guid.Empty)
                 throw new BadRequestException("Partner ID is required.");
 
-            var serviceRequests = await _serviceRequestRepository.Query()
-                .Include(sr => sr.RequiredLevel)
-                .Where(sr =>
-                    sr.PartnerId == partnerId &&
-                    !sr.IsDeleted)
-                .ToListAsync();
+            var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
 
             return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
         }
 
         public async Task<ServiceRequestDto> CreateAsync(CreateServiceRequestDto dto)
         {
-
             if (dto == null)
                 throw new BadRequestException("Service request create data is required.");
 
-            if (dto.RequiredLevelId == Guid.Empty)
-                throw new BadRequestException("Required level is required.");
-
-            var level = await _levelRepository.GetByIdAsync(dto.RequiredLevelId);
-
-            if (level == null)
-                throw new NotFoundException("Required level not found.");
+            await ValidateRequiredLevelAsync(dto.RequiredLevelId);
 
             var serviceRequest = _mapper.Map<ServiceRequest>(dto);
 
@@ -145,18 +107,13 @@ namespace GivingChampion.Application.Services
             await _serviceRequestRepository.AddAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                UserId = UserId,
-                EntityId = serviceRequest.Id,
-                EntityType = ActivityEntityType.Request,
-                Action = ActivityAction.RequestCreated,
-                Description = $"Service request '{serviceRequest.Title}' created."
-            });
+            await AddActivityAsync(
+     serviceRequest.Id,
+     ActivityEntityType.Request,
+     ActivityAction.RequestCreated,
+     $"Service request '{serviceRequest.Title}' created.");
 
-            var createdServiceRequest = await _serviceRequestRepository.Query()
-                .Include(sr => sr.RequiredLevel)
-                .FirstOrDefaultAsync(sr => sr.Id == serviceRequest.Id && !sr.IsDeleted);
+            var createdServiceRequest = await _serviceRequestRepository.GetByIdAsync(serviceRequest.Id);
 
             if (createdServiceRequest == null)
                 throw new InvalidOperationException("Service request was created but could not be retrieved.");
@@ -166,16 +123,15 @@ namespace GivingChampion.Application.Services
 
         public async Task<bool> UpdateAsync(Guid id, UpdateServiceRequestDto dto)
         {
-
             if (id == Guid.Empty)
                 throw new BadRequestException("Service request ID is required.");
 
             if (dto == null)
                 throw new BadRequestException("Service request update data is required.");
 
-            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+            var serviceRequest = await _serviceRequestRepository.GetByIdForUpdateAsync(id);
 
-            if (serviceRequest == null || serviceRequest.IsDeleted)
+            if (serviceRequest == null)
                 throw new NotFoundException("Service request not found.");
 
             if (serviceRequest.Status is RequestStatus.Completed or RequestStatus.InProgress)
@@ -185,13 +141,7 @@ namespace GivingChampion.Application.Services
                 );
             }
 
-            if (dto.RequiredLevelId == Guid.Empty)
-                throw new BadRequestException("Required level is required.");
-
-            var level = await _levelRepository.GetByIdAsync(dto.RequiredLevelId);
-
-            if (level == null)
-                throw new NotFoundException("Required level not found.");
+            await ValidateRequiredLevelAsync(dto.RequiredLevelId);
 
             var currentOrdersCount = await _volunteerOrderRepository.CountAsync(o =>
                 o.ServiceRequestId == id &&
@@ -208,49 +158,51 @@ namespace GivingChampion.Application.Services
 
             serviceRequest.UpdatedAt = DateTime.UtcNow;
 
-            _serviceRequestRepository.Update(serviceRequest);
+            await _serviceRequestRepository.UpdateAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                UserId = UserId,
-                EntityId = serviceRequest.Id,
-                EntityType = ActivityEntityType.Request,
-                Action = ActivityAction.RequestUpdated,
-                Description = $"Service request '{serviceRequest.Title}' updated."
-            });
+            await AddActivityAsync(
+      serviceRequest.Id,
+      ActivityEntityType.Request,
+      ActivityAction.RequestUpdated,
+      $"Service request '{serviceRequest.Title}' updated.");
 
             return true;
         }
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-
             if (id == Guid.Empty)
                 throw new BadRequestException("Service request ID is required.");
 
-            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+            var serviceRequest = await _serviceRequestRepository.GetByIdForUpdateAsync(id);
 
-            if (serviceRequest == null || serviceRequest.IsDeleted)
+            if (serviceRequest == null)
                 throw new NotFoundException("Service request not found.");
 
-            serviceRequest.IsDeleted = true;
-            serviceRequest.DeletedAt = DateTime.UtcNow;
-            serviceRequest.UpdatedAt = DateTime.UtcNow;
-
-            _serviceRequestRepository.Update(serviceRequest);
+            await _serviceRequestRepository.SoftDeleteAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                UserId = UserId,
-                EntityId = serviceRequest.Id,
-                EntityType = ActivityEntityType.Request,
-                Action = ActivityAction.RequestDeleted,
-                Description = $"Service request '{serviceRequest.Title}' deleted."
-            });
+            await AddActivityAsync(
+    serviceRequest.Id,
+    ActivityEntityType.Request,
+    ActivityAction.RequestDeleted,
+    $"Service request '{serviceRequest.Title}' deleted.");
 
             return true;
         }
+
+        private async Task ValidateRequiredLevelAsync(Guid requiredLevelId)
+        {
+            if (requiredLevelId == Guid.Empty)
+                throw new BadRequestException("Required level is required.");
+
+            var level = await _levelRepository.GetByIdAsync(requiredLevelId);
+
+            if (level == null)
+                throw new NotFoundException("Required level not found.");
+        }
+
+        
+        }
     }
-}
