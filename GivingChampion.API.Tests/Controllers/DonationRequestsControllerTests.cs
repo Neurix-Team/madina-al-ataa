@@ -1,228 +1,168 @@
 using GivingChampion.API.Controllers;
-using GivingChampion.API.Tests.Infrastructure;
 using GivingChampion.Application.DTO.DonationRequest;
+using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
-using GivingChampion.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GivingChampion.API.Tests.Controllers;
 
-[Collection(DatabaseCollection.Name)]
 public class DonationRequestsControllerTests
 {
-    private readonly DatabaseTestFixture _fixture;
-
-    public DonationRequestsControllerTests(DatabaseTestFixture fixture)
+    [Fact]
+    public async Task GetAll_ReturnsPagedDonationRequestsFromService()
     {
-        _fixture = fixture;
+        var dto = CreateDonationRequestDto();
+        var page = CreatePage(dto);
+        var service = new FakeDonationRequestService
+        {
+            GetAllResult = page
+        };
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
+
+        var response = await controller.GetAll(new PageParameters { PageNumber = 1, PageSize = 100 });
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        var resultPage = Assert.IsType<PagedList<DonationRequestDto>>(okResult.Value);
+        Assert.Same(page, resultPage);
     }
 
     [Fact]
-    public async Task GetAll_ReturnsPagedDonationRequestsFromDatabase()
+    public async Task GetMyDonationRequests_UsesCurrentUserAndReturnsServiceResult()
     {
-        var seed = await SeedDonationRequestAsync(RequestStatus.Pending);
-        var donationRequestId = seed.DonationRequestId!.Value;
-        var controller = _fixture.CreateDonationRequestsController(Guid.NewGuid(), "Admin");
-
-        try
+        var dto = CreateDonationRequestDto();
+        var page = CreatePage(dto);
+        var service = new FakeDonationRequestService
         {
-            var response = await controller.GetAll(new PageParameters { PageNumber = 1, PageSize = 100 });
+            GetMyRequestsResult = page
+        };
+        var controller = CreateController(service, Guid.NewGuid(), "Donor");
 
-            var okResult = Assert.IsType<OkObjectResult>(response.Result);
-            var page = Assert.IsType<PagedList<DonationRequestDto>>(okResult.Value);
-            Assert.Contains(page.Items, item => item.Id == donationRequestId);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
+        var response = await controller.GetMyDonationRequests(new PageParameters { PageNumber = 1, PageSize = 20 });
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        var resultPage = Assert.IsType<PagedList<DonationRequestDto>>(okResult.Value);
+        Assert.Same(page, resultPage);
     }
 
     [Fact]
-    public async Task GetMyDonationRequests_UsesCurrentUserAndReturnsRequestsBackedByDatabase()
+    public async Task GetById_WhenAdmin_ReturnsDonationRequest()
     {
-        var donorId = Guid.NewGuid();
-        var seed = await SeedDonationRequestAsync(RequestStatus.Approved, donorId: donorId);
-        var donationRequestId = seed.DonationRequestId!.Value;
-        var controller = _fixture.CreateDonationRequestsController(donorId, "Parent");
-
-        try
+        var donationRequestId = Guid.NewGuid();
+        var dto = CreateDonationRequestDto(donationRequestId);
+        var service = new FakeDonationRequestService
         {
-            var response = await controller.GetMyDonationRequests(new PageParameters { PageNumber = 1, PageSize = 20 });
+            GetByIdResult = dto
+        };
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
 
-            var okResult = Assert.IsType<OkObjectResult>(response.Result);
-            var page = Assert.IsType<PagedList<DonationRequestDto>>(okResult.Value);
-            Assert.Contains(page.Items, item => item.Id == donationRequestId);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
+        var response = await controller.GetById(donationRequestId);
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        var resultDto = Assert.IsType<DonationRequestDto>(okResult.Value);
+        Assert.Same(dto, resultDto);
+        Assert.True(service.LastIsAdmin);
+        Assert.Equal(donationRequestId, service.LastGetByIdId);
     }
 
     [Fact]
-    public async Task GetById_WhenAdmin_ReturnsAnyDonationRequestFromDatabase()
+    public async Task Create_ReturnsCreatedAtAction()
     {
-        var adminId = Guid.NewGuid();
-        var seed = await SeedDonationRequestAsync(RequestStatus.Pending);
-        var donationRequestId = seed.DonationRequestId!.Value;
-        var controller = _fixture.CreateDonationRequestsController(adminId, "Admin");
-
-        try
+        var createdDto = CreateDonationRequestDto(Guid.NewGuid(), RequestStatus.Pending.ToString());
+        var service = new FakeDonationRequestService
         {
-            var response = await controller.GetById(donationRequestId);
-
-            var okResult = Assert.IsType<OkObjectResult>(response.Result);
-            var dto = Assert.IsType<DonationRequestDto>(okResult.Value);
-            Assert.Equal(donationRequestId, dto.Id);
-            Assert.Equal(seed.Title, dto.Title);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
-    }
-
-    [Fact]
-    public async Task Create_PersistsDonationRequestAndReturnsCreatedAtAction()
-    {
-        var parentId = Guid.NewGuid();
-        var seed = await SeedDonationDependenciesAsync();
-        var controller = _fixture.CreateDonationRequestsController(parentId, "Parent");
+            AddResult = createdDto
+        };
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
         var request = new CreateDonationRequestDto
         {
-            Title = $"Test create {Guid.NewGuid():N}",
-            LocationId = seed.LocationId,
+            Title = "Create request",
+            LocationId = Guid.NewGuid(),
             DonateAmount = 250,
             UrgencyLevel = UrgencyLevel.Medium,
-            BriefDescription = "Created by database-backed API test",
-            PartnerId = seed.PartnerId
+            BriefDescription = "Unit test",
+            PartnerId = Guid.NewGuid()
         };
-        Guid? createdDonationRequestId = null;
 
-        try
-        {
-            var response = await controller.Create(request);
+        var response = await controller.Create(request);
 
-            var createdResult = Assert.IsType<CreatedAtActionResult>(response.Result);
-            Assert.Equal(nameof(DonationRequestsController.GetById), createdResult.ActionName);
-            var dto = Assert.IsType<DonationRequestDto>(createdResult.Value);
-            createdDonationRequestId = dto.Id;
-            Assert.Equal(request.Title, dto.Title);
-            Assert.Equal(RequestStatus.Pending.ToString(), dto.Status);
-
-            await using var context = _fixture.CreateDbContext();
-            Assert.True(await context.DonationRequests.AnyAsync(dr => dr.Id == dto.Id));
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed with { DonationRequestId = createdDonationRequestId });
-        }
+        var createdResult = Assert.IsType<CreatedAtActionResult>(response.Result);
+        Assert.Equal(nameof(DonationRequestsController.GetById), createdResult.ActionName);
+        Assert.Same(createdDto, createdResult.Value);
+        Assert.Same(request, service.LastCreateDto);
+        Assert.True(service.LastIsAdmin);
     }
 
     [Fact]
-    public async Task Update_PersistsChangesAndReturnsNoContent()
+    public async Task Update_ReturnsNoContent()
     {
-        var seed = await SeedDonationRequestAsync(RequestStatus.Pending);
-        var controller = _fixture.CreateDonationRequestsController(Guid.NewGuid(), "Admin");
+        var donationRequestId = Guid.NewGuid();
+        var service = new FakeDonationRequestService();
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
         var update = new UpdateDonationRequestDto
         {
-            Title = $"Updated {Guid.NewGuid():N}",
+            Title = "Updated title",
             DonateAmount = 500
         };
 
-        try
-        {
-            var response = await controller.Update(seed.DonationRequestId!.Value, update);
+        var response = await controller.Update(donationRequestId, update);
 
-            Assert.IsType<NoContentResult>(response);
-
-            await using var context = _fixture.CreateDbContext();
-            var entity = await context.DonationRequests.AsNoTracking().SingleAsync(dr => dr.Id == seed.DonationRequestId);
-            Assert.Equal(update.Title, entity.Title);
-            Assert.Equal(update.DonateAmount, entity.DonateAmount);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
+        Assert.IsType<NoContentResult>(response);
+        Assert.Equal(donationRequestId, service.LastUpdatedId);
+        Assert.Same(update, service.LastUpdateDto);
+        Assert.True(service.LastIsAdmin);
     }
 
     [Fact]
-    public async Task Delete_SoftDeletesDonationRequestAndReturnsNoContent()
+    public async Task Delete_ReturnsNoContent()
     {
-        var seed = await SeedDonationRequestAsync(RequestStatus.Pending);
-        var controller = _fixture.CreateDonationRequestsController(Guid.NewGuid(), "Parent");
+        var donationRequestId = Guid.NewGuid();
+        var service = new FakeDonationRequestService();
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
 
-        try
-        {
-            var response = await controller.Delete(seed.DonationRequestId!.Value);
+        var response = await controller.Delete(donationRequestId);
 
-            Assert.IsType<NoContentResult>(response);
-
-            await using var context = _fixture.CreateDbContext();
-            var exists = await context.DonationRequests
-                .IgnoreQueryFilters()
-                .AsNoTracking()
-                .AnyAsync(dr => dr.Id == seed.DonationRequestId);
-            Assert.False(exists);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
+        Assert.IsType<NoContentResult>(response);
+        Assert.Equal(donationRequestId, service.LastDeletedId);
+        Assert.True(service.LastIsAdmin);
     }
 
     [Fact]
-    public async Task Approve_PersistsApprovedStatusAndReturnsNoContent()
+    public async Task Approve_ReturnsNoContent()
     {
-        var seed = await SeedDonationRequestAsync(RequestStatus.Pending);
-        var controller = _fixture.CreateDonationRequestsController(Guid.NewGuid(), "Admin");
+        var donationRequestId = Guid.NewGuid();
+        var service = new FakeDonationRequestService();
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
 
-        try
-        {
-            var response = await controller.Approve(seed.DonationRequestId!.Value);
+        var response = await controller.Approve(donationRequestId);
 
-            Assert.IsType<NoContentResult>(response);
-
-            await using var context = _fixture.CreateDbContext();
-            var entity = await context.DonationRequests.AsNoTracking().SingleAsync(dr => dr.Id == seed.DonationRequestId);
-            Assert.Equal(RequestStatus.Approved, entity.Status);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
+        Assert.IsType<NoContentResult>(response);
+        Assert.Equal(donationRequestId, service.LastApprovedId);
     }
 
     [Fact]
-    public async Task Reject_PersistsCancelledStatusAndReturnsNoContent()
+    public async Task Reject_ReturnsNoContent()
     {
-        var seed = await SeedDonationRequestAsync(RequestStatus.Pending);
-        var controller = _fixture.CreateDonationRequestsController(Guid.NewGuid(), "Admin");
+        var donationRequestId = Guid.NewGuid();
+        var service = new FakeDonationRequestService();
+        var controller = CreateController(service, Guid.NewGuid(), "Admin");
 
-        try
-        {
-            var response = await controller.Reject(seed.DonationRequestId!.Value);
+        var response = await controller.Reject(donationRequestId);
 
-            Assert.IsType<NoContentResult>(response);
-
-            await using var context = _fixture.CreateDbContext();
-            var entity = await context.DonationRequests.AsNoTracking().SingleAsync(dr => dr.Id == seed.DonationRequestId);
-            Assert.Equal(RequestStatus.Cancelled, entity.Status);
-        }
-        finally
-        {
-            await DeleteDonationSeedAsync(seed);
-        }
+        Assert.IsType<NoContentResult>(response);
+        Assert.Equal(donationRequestId, service.LastRejectedId);
     }
 
     [Fact]
-    public async Task GetMyDonationRequests_WhenTokenHasNoUserId_ThrowsUnauthorizedAccessException()
+    public async Task GetMyDonationRequests_WhenServiceThrowsUnauthorized_PropagatesException()
     {
-        var controller = _fixture.CreateDonationRequestsController();
+        var service = new FakeDonationRequestService
+        {
+            GetMyRequestsException = new UnauthorizedAccessException("User ID was not found in token.")
+        };
+        var controller = CreateController(service);
 
         var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => controller.GetMyDonationRequests(new PageParameters()));
@@ -230,112 +170,129 @@ public class DonationRequestsControllerTests
         Assert.Equal("User ID was not found in token.", exception.Message);
     }
 
-    private async Task<DonationSeed> SeedDonationRequestAsync(RequestStatus status, Guid? donorId = null)
+    private static DonationRequestsController CreateController(
+        IDonationRequestService service,
+        Guid? userId = null,
+        params string[] roles)
     {
-        var seed = await SeedDonationDependenciesAsync(donorId);
-        var donationRequestId = Guid.NewGuid();
-        var title = $"Test donation request {donationRequestId:N}";
-
-        await using var context = _fixture.CreateDbContext();
-        context.DonationRequests.Add(new DonationRequest
+        var controller = new DonationRequestsController(service)
         {
-            Id = donationRequestId,
-            Title = title,
-            LocationId = seed.LocationId,
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(
+                        new ClaimsIdentity(
+                            BuildClaims(userId, roles),
+                            "TestAuth"))
+                }
+            }
+        };
+
+        return controller;
+    }
+
+    private static List<Claim> BuildClaims(Guid? userId, string[] roles)
+    {
+        var claims = new List<Claim>();
+
+        if (userId.HasValue)
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()));
+
+        foreach (var role in roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
+
+        return claims;
+    }
+
+    private static DonationRequestDto CreateDonationRequestDto(
+        Guid? id = null,
+        string status = "Pending")
+    {
+        return new DonationRequestDto
+        {
+            Id = id ?? Guid.NewGuid(),
+            Title = "Donation request",
+            Status = status,
             DonateAmount = 100,
             AmountRemaining = 100,
-            Status = status,
-            UrgencyLevel = UrgencyLevel.Medium,
-            BriefDescription = "Seeded by database-backed API test",
-            PartnerId = seed.PartnerId,
-            CreatedAt = DateTime.UtcNow
-        });
-
-        if (donorId.HasValue)
-        {
-            context.DonationOrders.Add(new DonationOrder
-            {
-                Id = Guid.NewGuid(),
-                Amount = 25,
-                Currency = "EGP",
-                PaymentMethod = "Card",
-                Category = "Education",
-                DonorId = donorId.Value,
-                DonationRequestId = donationRequestId,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
-
-        await context.SaveChangesAsync();
-        return seed with { DonationRequestId = donationRequestId, Title = title };
+            BriefDescription = "Test"
+        };
     }
 
-    private async Task<DonationSeed> SeedDonationDependenciesAsync(Guid? donorId = null)
+    private static PagedList<DonationRequestDto> CreatePage(params DonationRequestDto[] items)
+        => new(items, 1, items.Length == 0 ? 10 : items.Length, items.Length);
+
+    private sealed class FakeDonationRequestService : IDonationRequestService
     {
-        var partnerId = Guid.NewGuid();
-        var locationId = Guid.NewGuid();
+        public PagedList<DonationRequestDto>? GetAllResult { get; set; }
+        public PagedList<DonationRequestDto>? GetApprovedResult { get; set; }
+        public PagedList<DonationRequestDto>? GetMyRequestsResult { get; set; }
+        public DonationRequestDto? GetByIdResult { get; set; }
+        public DonationRequestDto? AddResult { get; set; }
+        public Exception? GetMyRequestsException { get; set; }
+        public Guid LastGetByIdId { get; private set; }
+        public bool LastIsAdmin { get; private set; }
+        public CreateDonationRequestDto? LastCreateDto { get; private set; }
+        public Guid LastUpdatedId { get; private set; }
+        public UpdateDonationRequestDto? LastUpdateDto { get; private set; }
+        public Guid LastApprovedId { get; private set; }
+        public Guid LastRejectedId { get; private set; }
+        public Guid LastDeletedId { get; private set; }
 
-        await using var context = _fixture.CreateDbContext();
-        context.Partners.Add(new Partner
-        {
-            Id = partnerId,
-            OrgName = $"Test partner {partnerId:N}",
-            OrgType = OrgType.Foundation,
-            CreatedAt = DateTime.UtcNow
-        });
-        context.Locations.Add(new Location
-        {
-            Id = locationId,
-            Name = $"Test location {locationId:N}",
-            RequiredLevel = 1,
-            Latitude = "30.0444",
-            Longitude = "31.2357",
-            CreatedAt = DateTime.UtcNow
-        });
+        public Task<PagedList<DonationRequestDto>> GetAllAsync(PageParameters paginationParams)
+            => Task.FromResult(GetAllResult ?? CreatePage());
 
-        if (donorId.HasValue)
+        public Task<PagedList<DonationRequestDto>> GetApprovedAsync(PageParameters paginationParams)
+            => Task.FromResult(GetApprovedResult ?? CreatePage());
+
+        public Task<PagedList<DonationRequestDto>> GetMyRequestsAsync(PageParameters paginationParams)
         {
-            context.Users.Add(new ApplicationUser
-            {
-                Id = donorId.Value,
-                UserName = $"donor-{donorId.Value:N}@tests.local",
-                NormalizedUserName = $"DONOR-{donorId.Value:N}@TESTS.LOCAL",
-                Email = $"donor-{donorId.Value:N}@tests.local",
-                NormalizedEmail = $"DONOR-{donorId.Value:N}@TESTS.LOCAL",
-                EmailConfirmed = true
-            });
+            if (GetMyRequestsException != null)
+                throw GetMyRequestsException;
+
+            return Task.FromResult(GetMyRequestsResult ?? CreatePage());
         }
 
-        await context.SaveChangesAsync();
-        return new DonationSeed(partnerId, locationId, null, donorId, null);
-    }
-
-    private async Task DeleteDonationSeedAsync(DonationSeed seed)
-    {
-        await using var context = _fixture.CreateDbContext();
-
-        if (seed.DonationRequestId.HasValue)
+        public Task<DonationRequestDto> GetByIdAsync(Guid id, bool isAdmin)
         {
-            await context.DonationOrders
-                .Where(order => order.DonationRequestId == seed.DonationRequestId.Value)
-                .ExecuteDeleteAsync();
-            await context.DonationRequests
-                .IgnoreQueryFilters()
-                .Where(request => request.Id == seed.DonationRequestId.Value)
-                .ExecuteDeleteAsync();
+            LastGetByIdId = id;
+            LastIsAdmin = isAdmin;
+            return Task.FromResult(GetByIdResult!);
         }
 
-        await context.Partners.Where(partner => partner.Id == seed.PartnerId).ExecuteDeleteAsync();
-        await context.Locations.Where(location => location.Id == seed.LocationId).ExecuteDeleteAsync();
+        public Task<DonationRequestDto> AddAsync(CreateDonationRequestDto dto, bool isAdmin = false)
+        {
+            LastCreateDto = dto;
+            LastIsAdmin = isAdmin;
+            return Task.FromResult(AddResult!);
+        }
 
-        if (seed.DonorId.HasValue)
-            await context.Users.Where(user => user.Id == seed.DonorId.Value).ExecuteDeleteAsync();
+        public Task UpdateAsync(Guid id, UpdateDonationRequestDto dto, bool isAdmin = false)
+        {
+            LastUpdatedId = id;
+            LastUpdateDto = dto;
+            LastIsAdmin = isAdmin;
+            return Task.CompletedTask;
+        }
+
+        public Task ApproveAsync(Guid id)
+        {
+            LastApprovedId = id;
+            return Task.CompletedTask;
+        }
+
+        public Task RejectAsync(Guid id)
+        {
+            LastRejectedId = id;
+            return Task.CompletedTask;
+        }
+
+        public Task SoftDeleteAsync(Guid id, bool isAdmin)
+        {
+            LastDeletedId = id;
+            LastIsAdmin = isAdmin;
+            return Task.CompletedTask;
+        }
     }
-
-    private sealed record DonationSeed(
-        Guid PartnerId,
-        Guid LocationId,
-        Guid? DonationRequestId,
-        Guid? DonorId,
-        string? Title);
 }
