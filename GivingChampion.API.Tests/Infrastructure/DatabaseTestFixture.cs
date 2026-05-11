@@ -64,6 +64,11 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
 
         IDonationRequestService service = new DonationRequestService(
             new DonationRequestRepository(context),
+            new ActivityService(
+                new ActivityRepository(context),
+                new UnitOfWork(context),
+                Mapper,
+                httpContextAccessor),
             new UnitOfWork(context),
             Mapper,
             httpContextAccessor);

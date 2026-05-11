@@ -25,6 +25,7 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<IUserMissionRepository, UserMissionRepository>();
         services.AddScoped<ILocationRepository, LocationRepository>();
         services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
+        services.AddScoped<IRewardSystemRepository, RewardSystemRepository>();
         services.AddScoped<IVolunteerOrderRepository, VolunteerOrderRepository>();
         services.AddScoped<IPartnerRepository, PartnerRepository>();
         services.AddScoped<IVolunteerRepository, VolunteerRepository>();

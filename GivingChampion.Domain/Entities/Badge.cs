@@ -17,7 +17,7 @@ namespace GivingChampion.Domain.Entities
         [StringLength(500)]
         public string? Description { get; set; }
 
-        [StringLength(300)]
+        [StringLength(1000)]
         public string? Requirement { get; set; }
 
         [Required]
