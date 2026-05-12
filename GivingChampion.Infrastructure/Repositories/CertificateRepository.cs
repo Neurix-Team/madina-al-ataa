@@ -18,13 +18,13 @@ namespace GivingChampion.Persistance.Repositories
         }
 
         public async Task<PagedList<CertificateEntity>> GetCertificateByIdAsync(
-            Guid userId,
+            Guid volunteerId,
             PageParameters pageParameters,
             CancellationToken cancellationToken = default)
         {
             return await _context.Certificates
                 .AsNoTracking()
-                .Where(c => c.IssuedTo == userId)
+                .Where(c => c.IssuedTo == volunteerId)
                 .OrderByDescending(c => c.IssuedDate)
                 .ToPagedListAsync(pageParameters, cancellationToken);
         }

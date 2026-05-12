@@ -6,7 +6,7 @@ namespace GivingChampion.Persistance.Interfaces
     public interface ICertificateRepository
     {
         Task<PagedList<CertificateEntity>> GetCertificateByIdAsync(
-            Guid userId,
+            Guid volunteerId,
             PageParameters pageParameters,
             CancellationToken cancellationToken = default);
 
