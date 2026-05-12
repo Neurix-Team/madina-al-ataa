@@ -29,6 +29,8 @@ public static class AppServiceDependencyInjection
     public static IServiceCollection AddGivingChampionServices(
         this IServiceCollection services)
     {
+        services.AddScoped<IActivityService, ActivityService>();
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDonorService, DonorService>();
@@ -59,8 +61,6 @@ public static class AppServiceDependencyInjection
         services.AddScoped<IUserBadgeService, UserBadgeService>();
         services.AddScoped<IUserLevelService, UserLevelService>();
         services.AddScoped<IReviewService, ReviewService>();
-
-        services.AddScoped<IActivityService, ActivityService>();
 
         services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
         services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();
