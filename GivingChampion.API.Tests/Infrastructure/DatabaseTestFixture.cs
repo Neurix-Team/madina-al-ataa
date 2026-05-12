@@ -1,13 +1,10 @@
 using AutoMapper;
 using GivingChampion.API.Controllers;
 using GivingChampion.Application.Interfaces;
-using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Persistence.Contexts;
 using GivingChampion.Persistance.Repositories;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -57,12 +54,8 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     {
         var context = CreateDbContext();
 
-        var controllerContext = CreateControllerContext(userId, roles);
-
-        var httpContextAccessor = new HttpContextAccessor
-        {
-            HttpContext = controllerContext.HttpContext
-        };
+        var controllerContext = TestAuthContextFactory.CreateControllerContext(userId, roles);
+        var httpContextAccessor = TestAuthContextFactory.CreateHttpContextAccessor(userId, roles);
 
         IDonationRequestService service = new DonationRequestService(
             new DonationRequestRepository(context),
@@ -119,24 +112,5 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     public Task DisposeAsync()
     {
         return Task.CompletedTask;
-    }
-
-    private static ControllerContext CreateControllerContext(Guid? userId, string[] roles)
-    {
-        var claims = new List<Claim>();
-
-        if (userId.HasValue)
-            claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()));
-
-        foreach (var role in roles)
-            claims.Add(new Claim(ClaimTypes.Role, role));
-
-        return new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"))
-            }
-        };
     }
 }

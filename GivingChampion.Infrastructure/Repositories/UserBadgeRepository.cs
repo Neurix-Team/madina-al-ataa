@@ -20,7 +20,7 @@ namespace GivingChampion.API.Repositories
                 .AsNoTracking()
                 .Include(ub => ub.Badge)
                 .Include(ub => ub.Profile)
-                .Where(ub => ub.Profile.UserId == userId && !ub.IsDeleted)
+                .Where(ub => ub.Profile.UserId == userId)
                 .ToListAsync();
         }
 
@@ -29,7 +29,6 @@ namespace GivingChampion.API.Repositories
             return await _context.UserBadges
                 .AsNoTracking()
                 .Include(ub => ub.Badge)
-                .Include(ub => ub.Profile)
                 .Where(ub => ub.ProfileId == profileId && !ub.IsDeleted)
                 .ToListAsync();
         }

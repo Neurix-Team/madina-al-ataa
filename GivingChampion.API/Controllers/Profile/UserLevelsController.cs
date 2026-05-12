@@ -27,13 +27,13 @@ namespace GivingChampion.API.Controllers
             return Ok(userLevel);
         }
 
-        // GET api/UserLevels/admin/profile/{profileId}
-        // Admin gets level by profile id
+        // GET api/UserLevels/admin/user/{userId}
+        // Admin gets level by user id
         [Authorize(Roles = "Admin")]
-        [HttpGet("admin/profile/{profileId:guid}")]
-        public async Task<IActionResult> GetByProfileIdForAdmin(Guid profileId)
+        [HttpGet("admin/user/{userId:guid}")]
+        public async Task<IActionResult> GetByUserIdForAdmin(Guid userId)
         {
-            var userLevel = await _userLevelService.GetByProfileIdAsync(profileId);
+            var userLevel = await _userLevelService.GetByUserIdAsync(userId);
 
             return Ok(userLevel);
         }

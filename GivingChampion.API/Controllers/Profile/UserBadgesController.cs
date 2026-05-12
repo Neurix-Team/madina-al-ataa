@@ -33,12 +33,12 @@ namespace GivingChampion.API.Controllers
             return Ok(userBadge);
         }
 
-        // GET api/UserBadges/profile/{profileId}
+        // GET api/UserBadges/profile/{userId}
         [Authorize(Roles = "Admin")]
-        [HttpGet("profile/{profileId:guid}")]
-        public async Task<IActionResult> GetByProfileId(Guid profileId)
+        [HttpGet("profile/{userId:guid}")]
+        public async Task<IActionResult> GetByUserId(Guid userId)
         {
-            var userBadges = await _userBadgeService.GetAllByProfileIdAsync(profileId);
+            var userBadges = await _userBadgeService.GetAllByUserIdAsync(userId);
             return Ok(userBadges);
         }
 

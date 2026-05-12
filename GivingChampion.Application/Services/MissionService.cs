@@ -42,14 +42,12 @@ namespace GivingChampion.Application.Services
 
             await _missionRepository.CreateAsync(mission);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = mission.Id,
-                UserId = UserId, // System user
-                Description = $"Mission '{mission.Title}' created.",
-                Action = ActivityAction.MissionCreated,
-                EntityType = ActivityEntityType.Mission
-            });
+            await AddActivityAsync(
+                mission.Id,
+                ActivityEntityType.Mission,
+                ActivityAction.MissionCreated,
+                $"Mission '{mission.Title}' created."
+            );
             await _unitOfWork.SaveChangesAsync();
 
             var createdDto = _mapper.Map<MissionDto>(mission);
@@ -92,14 +90,12 @@ namespace GivingChampion.Application.Services
 
             await _missionRepository.UpdateAsync(mission);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = mission.Id,
-                UserId = UserId, // System user
-                Description = $"Mission '{mission.Title}' updated.",
-                Action = ActivityAction.MissionUpdated,
-                EntityType = ActivityEntityType.Mission
-            });
+            await AddActivityAsync(
+                mission.Id,
+                ActivityEntityType.Mission,
+                ActivityAction.MissionUpdated,
+                $"Mission '{mission.Title}' updated."
+            );
             await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
@@ -120,14 +116,12 @@ namespace GivingChampion.Application.Services
 
             await _missionRepository.SoftDeleteAsync(id);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = mission.Id,
-                UserId = UserId, // System user
-                Description = $"Mission '{mission.Title}' deleted.",
-                Action = ActivityAction.MissionDeleted,
-                EntityType = ActivityEntityType.Mission
-            });
+            await AddActivityAsync(
+                mission.Id,
+                ActivityEntityType.Mission,
+                ActivityAction.MissionDeleted,
+                $"Mission '{mission.Title}' deleted."
+            );
             await _unitOfWork.SaveChangesAsync();
 
             return Result.Success();
