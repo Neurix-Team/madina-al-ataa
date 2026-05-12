@@ -33,7 +33,7 @@ namespace GivingChampion.Application.Services
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            : base(httpContextAccessor, activityService)
         {
             _userMissionRepository = userMissionRepository;
             _missionRepository = missionRepository;
@@ -89,14 +89,12 @@ namespace GivingChampion.Application.Services
 
             await _userMissionRepository.CreateAsync(userMission);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = userMission.Id,
-                EntityType = ActivityEntityType.UserMission,
-                UserId = UserId,
-                Action = ActivityAction.MissionStarted,
-                Description = $"Started mission {mission.Title}"
-            });
+            await AddActivityAsync(
+                userMission.Id,
+                ActivityEntityType.UserMission,
+                ActivityAction.MissionStarted,
+                $"Started mission {mission.Title}"
+            );
             await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<UserMissionDto>(userMission);
@@ -148,14 +146,13 @@ namespace GivingChampion.Application.Services
             }
 
             await _userMissionRepository.UpdateAsync(userMission);
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = userMission.Id,
-                EntityType = ActivityEntityType.UserMission,
-                UserId = UserId,
-                Action = ActivityAction.UserMissionUpdated,
-                Description = $"Updated progress for mission {userMission.Mission.Title}"
-            });
+
+            await AddActivityAsync(
+                userMission.Id,
+                ActivityEntityType.UserMission,
+                ActivityAction.UserMissionUpdated,
+                $"Updated progress for mission {userMission.Mission?.Title ?? "Unknown Mission"}"
+            );
             await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<UserMissionDto>(userMission);

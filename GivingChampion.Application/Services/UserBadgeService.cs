@@ -13,33 +13,43 @@ namespace GivingChampion.API.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserBadgeRepository _userBadgeRepository;
+        private readonly IProfileRepository _profileRepository;
         private readonly IMapper _mapper;
 
         public UserBadgeService(
             IUnitOfWork unitOfWork,
             IUserBadgeRepository userBadgeRepository,
+            IProfileRepository profileRepository,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
             : base(httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _userBadgeRepository = userBadgeRepository;
+            _profileRepository = profileRepository;
             _mapper = mapper;
         }
 
         public async Task<List<UserBadgeDto>> GetAllByUserIdAsync()
         {
-            var userBadges = await _userBadgeRepository.GetAllByUserIdAsync(UserId);
+            if (UserId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
+            var profile = await _profileRepository.GetByUserIdAsync(UserId);
+
+            if (profile == null)
+                throw new NotFoundException($"Profile for user with ID {UserId} was not found.");
+
+            var userBadges = await _userBadgeRepository.GetAllByProfileIdAsync(profile.Id);
 
             return _mapper.Map<List<UserBadgeDto>>(userBadges);
         }
 
-        public async Task<List<UserBadgeDto>> GetAllByProfileIdAsync(Guid profileId)
+        public async Task<List<UserBadgeDto>> GetAllByUserIdAsync(Guid userId)
         {
-            if (profileId == Guid.Empty)
-                throw new BadRequestException("Profile ID is required.");
+            if (userId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
 
-            var userBadges = await _userBadgeRepository.GetAllByProfileIdAsync(profileId);
+            var userBadges = await _userBadgeRepository.GetAllByUserIdAsync(userId);
 
             return _mapper.Map<List<UserBadgeDto>>(userBadges);
         }
