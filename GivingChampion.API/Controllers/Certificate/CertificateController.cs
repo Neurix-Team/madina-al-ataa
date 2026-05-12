@@ -32,7 +32,7 @@ namespace GivingChampion.API.Controllers.Certificate
         }
 
         [HttpGet("user/{userId:guid}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCertificatesByUserId(
             Guid userId,
             [FromQuery] PageParameters pageParameters,
