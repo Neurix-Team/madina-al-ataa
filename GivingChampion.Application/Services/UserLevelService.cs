@@ -74,9 +74,11 @@ namespace GivingChampion.API.Services
             if (profile == null)
                 throw new NotFoundException($"Profile for user with ID {UserId} was not found.");
 
-            var userLevel = await _userLevelRepository.FirstOrDefaultAsync(
-                level => level.ProfileId == profile.Id
-            );
+            //var userLevel = await _userLevelRepository.FirstOrDefaultAsync(
+            //    level => level.ProfileId == profile.Id
+            //);
+
+            var userLevel = await _customUserLevelRepository.GetByProfileIdAsync(profile.Id);
 
             if (userLevel == null)
                 throw new NotFoundException($"User level for User ID {profile.UserId} was not found.");
