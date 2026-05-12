@@ -28,7 +28,7 @@ namespace GivingChampion.API.Controllers
 
             return Ok(result);
         }
-        [HttpGet]
+        [HttpGet("approved")]
         [Authorize(Roles = "Volunteer")]
         public async Task<IActionResult> GetApproved([FromQuery] PageParameters pageParameters)
         {
@@ -37,30 +37,13 @@ namespace GivingChampion.API.Controllers
             return Ok(result);
         }
 
-
-
         [Authorize(Roles = "Volunteer,Admin")]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var serviceRequest = await _serviceRequestService.GetByIdAsync(id)
-                ?? throw new NotFoundException("Service request not found.");
-
+            var serviceRequest = await _serviceRequestService.GetByIdAsync(id);
             return Ok(serviceRequest);
         }
-
-        //[HttpGet("filter")]
-        //[Authorize(Roles = "Volunteer,Admin")]
-        //public async Task<IActionResult> GetByStatus(
-        //    [FromQuery] RequestStatus status,
-        //    [FromQuery] PageParameters pageParameters)
-        //{
-        //    var result = await _serviceRequestService.GetByStatusAsync(
-        //        status,
-        //        pageParameters);
-
-        //    return Ok(result);
-        //}
 
         [HttpPost]
         [Authorize(Roles = "Admin")]

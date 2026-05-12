@@ -1,8 +1,6 @@
 using GivingChampion.API.Controllers;
 using GivingChampion.Application.DTO.Volunteer;
-using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces.Volunteer;
-using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,46 +9,7 @@ namespace GivingChampion.API.Tests.Controllers;
 public class VolunteerControllerTests
 {
     [Fact]
-    public async Task GetById_WhenVolunteerExists_ReturnsOkWithVolunteer()
-    {
-        var volunteerId = Guid.NewGuid();
-        var dto = new VolunteerDto
-        {
-            Id = volunteerId,
-            UserId = Guid.NewGuid(),
-            Skills = "Teaching",
-            Availability = "Weekends",
-            TotalHours = 12
-        };
-        var service = new FakeVolunteerService
-        {
-            Volunteer = dto
-        };
-        var controller = new VolunteerController(service);
-
-        var result = await controller.GetById(volunteerId);
-
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var volunteer = Assert.IsType<VolunteerDto>(okResult.Value);
-        Assert.Same(dto, volunteer);
-        Assert.Equal(volunteerId, service.LastRequestedId);
-    }
-
-    [Fact]
-    public async Task GetById_WhenVolunteerDoesNotExist_ThrowsNotFoundException()
-    {
-        var service = new FakeVolunteerService();
-        var controller = new VolunteerController(service);
-        var volunteerId = Guid.NewGuid();
-
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => controller.GetById(volunteerId));
-
-        Assert.Equal($"Volunteer with ID {volunteerId} not found.", exception.Message);
-    }
-
-    [Fact]
-    public async Task GetAll_WhenServiceSucceeds_ReturnsOk()
+    public async Task GetMyVolunteerProfile_ReturnsOkWithServiceResult()
     {
         var dto = new VolunteerDto
         {
@@ -60,47 +19,96 @@ public class VolunteerControllerTests
             Availability = "Weekends",
             TotalHours = 12
         };
-        var page = new PagedList<VolunteerDto>([dto], 1, 10, 1);
+        var expected = Result<VolunteerDto>.Success(dto);
         var service = new FakeVolunteerService
         {
-            GetAllResult = Result<PagedList<VolunteerDto>>.Success(page)
+            GetMyVolunteerProfileResult = expected
         };
         var controller = new VolunteerController(service);
 
-        var result = await controller.GetAll(new PageParameters { PageNumber = 1, PageSize = 10 });
+        var response = await controller.GetMyVolunteerProfile();
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Same(service.GetAllResult, okResult.Value);
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Same(expected, okResult.Value);
     }
 
     [Fact]
-    public async Task GetAll_WhenServiceFails_ReturnsBadRequest()
+    public async Task GetVolunteerByUserId_ReturnsOkWithServiceResult()
     {
+        var userId = Guid.NewGuid();
+        var dto = new VolunteerDto
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Skills = "Teaching",
+            Availability = "Weekends",
+            TotalHours = 12
+        };
+        var expected = Result<VolunteerDto>.Success(dto);
         var service = new FakeVolunteerService
         {
-            GetAllResult = Result<PagedList<VolunteerDto>>.Failure("failed")
+            GetVolunteerByUserIdResult = expected
         };
         var controller = new VolunteerController(service);
 
-        var result = await controller.GetAll(new PageParameters { PageNumber = 1, PageSize = 10 });
+        var response = await controller.GetVolunteerByUserId(userId);
 
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Same(service.GetAllResult, badRequest.Value);
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Same(expected, okResult.Value);
+        Assert.Equal(userId, service.LastUserId);
+    }
+
+    [Fact]
+    public async Task UpdateMyVolunteerProfile_ReturnsOkWithServiceResult()
+    {
+        var request = new UpdateVolunteerDto
+        {
+            Skills = "Teaching",
+            Availability = "Weekdays"
+        };
+        var dto = new VolunteerDto
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Skills = request.Skills,
+            Availability = request.Availability,
+            TotalHours = 12
+        };
+        var expected = Result<VolunteerDto>.Success(dto);
+        var service = new FakeVolunteerService
+        {
+            UpdateVolunteerResult = expected
+        };
+        var controller = new VolunteerController(service);
+
+        var response = await controller.UpdateMyVolunteerProfile(request);
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Same(expected, okResult.Value);
+        Assert.Same(request, service.LastUpdateDto);
     }
 
     private sealed class FakeVolunteerService : IVolunteerService
     {
-        public VolunteerDto? Volunteer { get; set; }
-        public Result<PagedList<VolunteerDto>>? GetAllResult { get; set; }
-        public Guid LastRequestedId { get; private set; }
+        public Result<VolunteerDto>? GetMyVolunteerProfileResult { get; set; }
+        public Result<VolunteerDto>? GetVolunteerByUserIdResult { get; set; }
+        public Result<VolunteerDto>? UpdateVolunteerResult { get; set; }
+        public Guid LastUserId { get; private set; }
+        public UpdateVolunteerDto? LastUpdateDto { get; private set; }
 
-        public Task<Result<PagedList<VolunteerDto>>> GetAllAsync(PageParameters pageParameters)
-            => Task.FromResult(GetAllResult!);
+        public Task<Result<VolunteerDto>> GetMyVolunteerProfileAsync()
+            => Task.FromResult(GetMyVolunteerProfileResult!);
 
-        public Task<VolunteerDto?> GetByIdAsync(Guid id)
+        public Task<Result<VolunteerDto>> GetVolunteerByUserIdAsync(Guid userId)
         {
-            LastRequestedId = id;
-            return Task.FromResult(Volunteer);
+            LastUserId = userId;
+            return Task.FromResult(GetVolunteerByUserIdResult!);
+        }
+
+        public Task<Result<VolunteerDto>> UpdateVolunteerAsync(UpdateVolunteerDto dto)
+        {
+            LastUpdateDto = dto;
+            return Task.FromResult(UpdateVolunteerResult!);
         }
     }
 }

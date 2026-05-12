@@ -72,29 +72,6 @@ namespace GivingChampion.Application.Services
             return Result<PagedList<ServiceRequestDto>>.Success(dtos);
         }
 
-        //public async Task<Result<PagedList<ServiceRequestDto>>> GetByStatusAsync(
-        //    RequestStatus status,
-        //    PageParameters pageParameters)
-        //{
-        //    var filtered = await _serviceRequestRepository.GetByStatusAsync(
-        //        status,
-        //        pageParameters);
-
-        //    var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(filtered);
-
-        //    return Result<PagedList<ServiceRequestDto>>.Success(dtos);
-        //}
-
-        //public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)
-        //{
-        //    if (partnerId == Guid.Empty)
-        //        throw new BadRequestException("Partner ID is required.");
-
-        //    var serviceRequests = await _serviceRequestRepository.GetByPartnerIdAsync(partnerId);
-
-        //    return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
-        //}
-
         public async Task<ServiceRequestDto> CreateAsync(CreateServiceRequestDto dto)
         {
             if (dto == null)

@@ -1,6 +1,5 @@
 using AutoMapper;
 using GivingChampion.API.Controllers;
-using GivingChampion.API.Controllers.Volunteer;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Mapper;
@@ -13,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Npgsql;
 using System.Security.Claims;
 
 namespace GivingChampion.API.Tests.Infrastructure;
@@ -35,7 +35,7 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
         _dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly("GivingChampion.Domain"))
+            .UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly("GivingChampion.Persistance"))
             .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
             .Options;
 
@@ -45,6 +45,8 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     }
 
     public IMapper Mapper { get; }
+    public bool IsDatabaseAvailable { get; private set; } = true;
+    public string? DatabaseUnavailableReason { get; private set; }
 
     public AppDbContext CreateDbContext()
     {
@@ -80,18 +82,38 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     }
     public VolunteerController CreateVolunteerController()
     {
-        IVolunteerService service = new VolunteerService(
-            new VolunteerRepository(CreateDbContext()),
-            Mapper);
+        var context = CreateDbContext();
+        var controllerContext = CreateControllerContext(null, []);
 
-        return new VolunteerController(
-            service);
+        var httpContextAccessor = new HttpContextAccessor
+        {
+            HttpContext = controllerContext.HttpContext
+        };
+
+        IVolunteerService service = new VolunteerService(
+            new VolunteerRepository(context),
+            new UnitOfWork(context),
+            Mapper,
+            httpContextAccessor);
+
+        return new VolunteerController(service)
+        {
+            ControllerContext = controllerContext
+        };
     }
 
     public async Task InitializeAsync()
     {
-        await using var context = CreateDbContext();
-        await context.Database.MigrateAsync();
+        try
+        {
+            await using var context = CreateDbContext();
+            await context.Database.MigrateAsync();
+        }
+        catch (NpgsqlException exception)
+        {
+            IsDatabaseAvailable = false;
+            DatabaseUnavailableReason = exception.Message;
+        }
     }
 
     public Task DisposeAsync()
