@@ -1,11 +1,10 @@
 using GivingChampion.API.Controllers;
+using GivingChampion.API.Tests.Infrastructure;
 using GivingChampion.Application.DTO.DonationRequest;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Pagination;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace GivingChampion.API.Tests.Controllers;
 
@@ -177,32 +176,10 @@ public class DonationRequestsControllerTests
     {
         var controller = new DonationRequestsController(service)
         {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = new ClaimsPrincipal(
-                        new ClaimsIdentity(
-                            BuildClaims(userId, roles),
-                            "TestAuth"))
-                }
-            }
+            ControllerContext = TestAuthContextFactory.CreateControllerContext(userId, roles)
         };
 
         return controller;
-    }
-
-    private static List<Claim> BuildClaims(Guid? userId, string[] roles)
-    {
-        var claims = new List<Claim>();
-
-        if (userId.HasValue)
-            claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()));
-
-        foreach (var role in roles)
-            claims.Add(new Claim(ClaimTypes.Role, role));
-
-        return claims;
     }
 
     private static DonationRequestDto CreateDonationRequestDto(
@@ -221,7 +198,7 @@ public class DonationRequestsControllerTests
     }
 
     private static PagedList<DonationRequestDto> CreatePage(params DonationRequestDto[] items)
-        => new(items, 1, items.Length == 0 ? 10 : items.Length, items.Length);
+        => TestPaging.CreatePage(items);
 
     private sealed class FakeDonationRequestService : IDonationRequestService
     {
