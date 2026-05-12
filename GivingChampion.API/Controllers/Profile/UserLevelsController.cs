@@ -30,7 +30,7 @@ namespace GivingChampion.API.Controllers
         // GET api/UserLevels/admin/profile/{profileId}
         // Admin gets level by profile id
         [Authorize(Roles = "Admin")]
-        [HttpGet("admin/profile/{userId:guid}")]
+        [HttpGet("admin/user/{userId:guid}")]
         public async Task<IActionResult> GetByUserIdForAdmin(Guid userId)
         {
             var userLevel = await _userLevelService.GetByUserIdAsync(userId);
