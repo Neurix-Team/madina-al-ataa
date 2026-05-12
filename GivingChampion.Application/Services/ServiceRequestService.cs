@@ -81,12 +81,7 @@ namespace GivingChampion.Application.Services
 
             var serviceRequest = _mapper.Map<ServiceRequest>(dto);
 
-            if (serviceRequest.Id == Guid.Empty)
-                serviceRequest.Id = Guid.NewGuid();
-
             serviceRequest.Status = RequestStatus.Approved;
-            serviceRequest.CreatedAt = DateTime.UtcNow;
-            serviceRequest.IsDeleted = false;
 
             await _serviceRequestRepository.AddAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
