@@ -82,23 +82,17 @@ namespace GivingChampion.Application.Services
             var serviceRequest = _mapper.Map<ServiceRequest>(dto);
 
             serviceRequest.Status = RequestStatus.Approved;
-            serviceRequest.CreatedAt = DateTime.UtcNow;
 
             await _serviceRequestRepository.AddAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
             await AddActivityAsync(
-     serviceRequest.Id,
-     ActivityEntityType.Request,
-     ActivityAction.RequestCreated,
-     $"Service request '{serviceRequest.Title}' created.");
+                serviceRequest.Id,
+                ActivityEntityType.Request,
+                ActivityAction.RequestCreated,
+                $"Service request '{serviceRequest.Title}' created.");
 
-            var createdServiceRequest = await _serviceRequestRepository.GetByIdAsync(serviceRequest.Id);
-
-            if (createdServiceRequest == null)
-                throw new InvalidOperationException("Service request was created but could not be retrieved.");
-
-            return _mapper.Map<ServiceRequestDto>(createdServiceRequest);
+            return _mapper.Map<ServiceRequestDto>(serviceRequest);
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateServiceRequestDto dto)
