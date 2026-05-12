@@ -4,6 +4,7 @@ using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Application.DTO.VolunteerOrder;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
+using GivingChampion.Application.Interfaces.Reward;
 using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Mapper;
@@ -14,7 +15,6 @@ using GivingChampion.Domain.Enums;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-
 namespace GivingChampion.Application.Services
 {
     public class VolunteerOrderService : BaseService, IVolunteerOrderService
@@ -26,6 +26,7 @@ namespace GivingChampion.Application.Services
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly INotificationService _notificationService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IRewardSystemService _rewardSystemService;
         private readonly IMapper _mapper;
 
         #endregion
@@ -37,6 +38,7 @@ namespace GivingChampion.Application.Services
             IGenericRepository<VolunteerOrder> genericVolunteerOrderRepository,
             IServiceRequestRepository serviceRequestRepository,
             INotificationService notificationService,
+            IRewardSystemService rewardSystemService,
             IHttpContextAccessor httpContextAccessor,
             IActivityService activityService,
             IUnitOfWork unitOfWork,
@@ -47,6 +49,7 @@ namespace GivingChampion.Application.Services
             _genericVolunteerOrderRepository = genericVolunteerOrderRepository;
             _serviceRequestRepository = serviceRequestRepository;
             _notificationService = notificationService;
+            _rewardSystemService = rewardSystemService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -161,28 +164,6 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<VolunteerOrderDto>(createdOrder);
         }
 
-        public async Task ChangeOrderStatusAsync(
-     Guid orderId,
-     OrderStatus newStatus)
-        {
-            if (orderId == Guid.Empty)
-                throw new BadRequestException("Volunteer order ID is required.");
-
-            if (!Enum.IsDefined(typeof(OrderStatus), newStatus))
-                throw new BadRequestException("Order status is invalid.");
-
-            var order = await _volunteerOrderRepository.GetByIdAsync(orderId)
-                ?? throw new NotFoundException($"Volunteer order with ID {orderId} was not found.");
-
-            if (order.IsDeleted)
-                throw new BadRequestException("Cannot change status for a deleted volunteer order.");
-
-            order.Status = newStatus;
-            order.UpdatedAt = DateTime.UtcNow;
-
-            _volunteerOrderRepository.Update(order);
-            await _unitOfWork.SaveChangesAsync();
-        }
         public async Task<bool> DeleteAsync(Guid id)
         {
             var volunteerId = UserId;
@@ -257,6 +238,11 @@ namespace GivingChampion.Application.Services
             if (progress < serviceRequest.Progress)
                 throw new BadRequestException("Progress cannot be decreased.");
 
+            if (progress == serviceRequest.Progress)
+                throw new BadRequestException("Progress value is already the current progress.");
+
+            var shouldRewardVolunteer = false;
+
             if (order.Status == OrderStatus.Approved)
             {
                 order.Status = OrderStatus.InProgress;
@@ -281,6 +267,7 @@ namespace GivingChampion.Application.Services
             {
                 order.Status = OrderStatus.Completed;
                 serviceRequest.Status = RequestStatus.Completed;
+                shouldRewardVolunteer = true;
 
                 await AddActivityAsync(
                     order.Id,
@@ -296,6 +283,11 @@ namespace GivingChampion.Application.Services
             _volunteerOrderRepository.Update(order);
 
             await _unitOfWork.SaveChangesAsync();
+
+            if (shouldRewardVolunteer)
+            {
+                await _rewardSystemService.RewardVolunteerOrderCompletedAsync(order.Id);
+            }
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }
@@ -323,7 +315,30 @@ namespace GivingChampion.Application.Services
             var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId)
                 ?? throw new NotFoundException($"Service request with ID {order.ServiceRequestId} was not found.");
 
-            serviceRequest.VolunteerUserId = order.UserId;
+            if (serviceRequest.IsDeleted)
+                throw new BadRequestException("Cannot approve an order for a deleted service request.");
+
+            if (serviceRequest.Status is not (RequestStatus.Approved or RequestStatus.Assigned))
+            {
+                throw new ConflictException(
+                    $"Cannot approve this volunteer order because the service request status is {serviceRequest.Status}.");
+            }
+
+            var approvedOrdersCount = await _genericVolunteerOrderRepository.CountAsync(o =>
+                o.ServiceRequestId == order.ServiceRequestId &&
+                !o.IsDeleted &&
+                (
+                    o.Status == OrderStatus.Approved ||
+                    o.Status == OrderStatus.InProgress ||
+                    o.Status == OrderStatus.Completed
+                ));
+
+            if (approvedOrdersCount >= serviceRequest.MaxOrders)
+            {
+                throw new ConflictException(
+                    "This service request has reached the maximum number of approved volunteer orders.");
+            }
+
             serviceRequest.Status = RequestStatus.Assigned;
             serviceRequest.UpdatedAt = DateTime.UtcNow;
 
@@ -360,10 +375,7 @@ namespace GivingChampion.Application.Services
 
             return _mapper.Map<VolunteerOrderDto>(order);
         }
-
-        public async Task<VolunteerOrderDto?> RejectOrderAsync(
-         Guid id,
-         string rejectionReason)
+        public async Task<VolunteerOrderDto?> RejectOrderAsync(Guid id, string rejectionReason)
         {
             if (id == Guid.Empty)
                 throw new BadRequestException("Volunteer order ID is required.");
@@ -371,14 +383,16 @@ namespace GivingChampion.Application.Services
             if (string.IsNullOrWhiteSpace(rejectionReason))
                 throw new BadRequestException("Rejection reason is required.");
 
+            rejectionReason = rejectionReason.Trim();
+
             var order = await _volunteerOrderRepository.GetByIdAsync(id)
                 ?? throw new NotFoundException($"Volunteer order with ID {id} was not found.");
 
             if (order.IsDeleted)
                 throw new BadRequestException("Cannot reject a deleted volunteer order.");
 
-            if (order.Status is OrderStatus.Approved or OrderStatus.Completed)
-                throw new BadRequestException("Approved or completed orders cannot be rejected.");
+            if (order.Status != OrderStatus.Pending)
+                throw new BadRequestException($"Only pending orders can be rejected. Current status is {order.Status}.");
 
             order.Status = OrderStatus.Rejected;
             order.RejectionReason = rejectionReason;
@@ -390,7 +404,7 @@ namespace GivingChampion.Application.Services
             {
                 UserId = order.UserId,
                 Title = "Volunteer order rejected",
-                Message = $"Your Volunteer order has been rejected. Reason: {rejectionReason}",
+                Message = $"Your volunteer order has been rejected. Reason: {rejectionReason}",
                 Type = NotificationType.Warning,
                 LinkedEntityId = order.Id,
                 LinkedEntityType = nameof(VolunteerOrder)
@@ -400,7 +414,7 @@ namespace GivingChampion.Application.Services
                 order.Id,
                 ActivityEntityType.VolunteerOrder,
                 ActivityAction.OrderRejected,
-                $"Volunteer order for service request '{order.ServiceRequestId}' rejected. Reason: {rejectionReason}");
+                $"Volunteer order rejected. Reason: {rejectionReason}");
 
             await _unitOfWork.SaveChangesAsync();
 
