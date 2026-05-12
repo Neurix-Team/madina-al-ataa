@@ -46,17 +46,17 @@ namespace GivingChampion.API.Controllers
         //    return NoContent();
         //}
 
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var result = await _userGeoQuestService.SoftDeleteAsync(id);
+        //[Authorize(Roles = "Admin")]
+        //[HttpDelete("{id:guid}")]
+        //public async Task<IActionResult> Delete(Guid id)
+        //{
+        //    var result = await _userGeoQuestService.SoftDeleteAsync(id);
 
-            if (!result.Succeeded || !result.Value)
-                return BadRequest(result);
+        //    if (!result.Succeeded || !result.Value)
+        //        return BadRequest(result);
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id:guid}/status")]
