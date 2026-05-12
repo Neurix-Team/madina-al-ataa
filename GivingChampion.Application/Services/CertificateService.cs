@@ -80,7 +80,7 @@ namespace GivingChampion.Application.Services
             PageParameters pageParameters,
             CancellationToken cancellationToken = default)
         {
-            var volunteer = await _volunteerRepository.GetByUserIdAsync(UserId);
+            var volunteer = await _volunteerRepository.GetByUserIdAsync(userId);
 
             var certificates = await _certificateRepository.GetCertificateByIdAsync(
                 volunteer.Id,
