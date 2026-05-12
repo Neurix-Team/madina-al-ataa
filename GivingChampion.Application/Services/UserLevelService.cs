@@ -13,17 +13,23 @@ namespace GivingChampion.API.Services
     public class UserLevelService : BaseService, IUserLevelService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IProfileRepository _customProfileRepository;
+        private readonly IUserLevelRepository _customUserLevelRepository;
         private readonly IGenericRepository<UserLevel> _userLevelRepository;
         private readonly IGenericRepository<DomainProfile> _profileRepository;
         private readonly IMapper _mapper;
 
         public UserLevelService(
             IUnitOfWork unitOfWork,
+            IProfileRepository customProfileRepository,
+            IUserLevelRepository customUserLevelRepository,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
             : base(httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
+            _customProfileRepository = customProfileRepository;
+            _customUserLevelRepository = customUserLevelRepository;
             _userLevelRepository = unitOfWork.Repository<UserLevel>();
             _profileRepository = unitOfWork.Repository<DomainProfile>();
             _mapper = mapper;
@@ -44,33 +50,38 @@ namespace GivingChampion.API.Services
             if (profile.IsDeleted)
                 throw new NotFoundException($"Profile with User ID {UserId} was not found.");
 
+            //var userLevel = await _userLevelRepository.FirstOrDefaultAsync(
+            //    level => level.ProfileId == profile.Id
+            //);
+
+            var userLevel = await _customUserLevelRepository.GetByProfileIdAsync(profile.Id);
+
+            if (userLevel == null)
+                throw new NotFoundException($"User level for User ID {profile.UserId} was not found.");
+
+            if (userLevel.IsDeleted)
+                throw new NotFoundException($"User level for User ID {profile.UserId} was not found.");
+
+            return _mapper.Map<UserLevelDto>(userLevel);
+        }
+
+        public async Task<UserLevelDto?> GetByUserIdAsync(Guid UserId)
+        {
+            if (UserId == Guid.Empty)
+                throw new BadRequestException("User ID is required.");
+            
+            var profile = await _customProfileRepository.GetByUserIdAsync(UserId);
+            if (profile == null)
+                throw new NotFoundException($"Profile for user with ID {UserId} was not found.");
+
             var userLevel = await _userLevelRepository.FirstOrDefaultAsync(
                 level => level.ProfileId == profile.Id
             );
 
             if (userLevel == null)
-                throw new NotFoundException($"User level for profile ID {profile.Id} was not found.");
-
+                throw new NotFoundException($"User level for User ID {profile.UserId} was not found.");
             if (userLevel.IsDeleted)
-                throw new NotFoundException($"User level for profile ID {profile.Id} was not found.");
-
-            return _mapper.Map<UserLevelDto>(userLevel);
-        }
-
-        public async Task<UserLevelDto?> GetByProfileIdAsync(Guid profileId)
-        {
-            if (profileId == Guid.Empty)
-                throw new BadRequestException("Profile ID is required.");
-
-            var userLevel = await _userLevelRepository.FirstOrDefaultAsync(
-                level => level.ProfileId == profileId
-            );
-
-            if (userLevel == null)
-                throw new NotFoundException($"User level for profile ID {profileId} was not found.");
-
-            if (userLevel.IsDeleted)
-                throw new NotFoundException($"User level for profile ID {profileId} was not found.");
+                throw new NotFoundException($"User level for User ID {profile.UserId} was not found.");
 
             return _mapper.Map<UserLevelDto>(userLevel);
         }

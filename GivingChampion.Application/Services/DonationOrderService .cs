@@ -115,14 +115,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             await _donationOrderRepository.CreateAsync(donationOrder);
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                EntityId = donationOrder.Id,
-                UserId = UserId,
-                EntityType = ActivityEntityType.DonationOrder,
-                Action = ActivityAction.DonationOrderCreated,
-                Description = $"Created a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
-            });
+            await AddActivityAsync(donationOrder.Id, ActivityEntityType.DonationOrder, ActivityAction.DonationOrderCreated, $"Created a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.");
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -171,14 +164,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             await _donationOrderRepository.UpdateAsync(donationOrder);
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                EntityId = donationOrder.Id,
-                UserId = UserId,
-                EntityType = ActivityEntityType.DonationOrder,
-                Action = ActivityAction.DonationOrderUpdated,
-                Description = $"Updated a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
-            });
+            await AddActivityAsync(donationOrder.Id, ActivityEntityType.DonationOrder, ActivityAction.DonationOrderUpdated, $"Updated a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.");
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -232,20 +218,8 @@ namespace GivingChampion.Application.Services.DonationOrderService
             await _donorRepository.UpdateAsync(donor);
             await _donationOrderRepository.UpdateAsync(donationOrder);
             await _donationRequestRepository.UpdateAsync(donationRequest);
-            //await CreateOrderStatusNotificationAsync(
-            //    donationOrder,
-            //    "Donation order approved",
-            //    "Your donation order has been approved.",
-            //    NotificationType.Information);
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                EntityId = donationOrder.Id,
-                UserId = UserId,
-                EntityType = ActivityEntityType.DonationOrder,
-                Action = ActivityAction.DonationOrderApproved,
-                Description = $"Approved a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.",
-            });
+            await AddActivityAsync(donationOrder.Id, ActivityEntityType.DonationOrder, ActivityAction.DonationOrderApproved, $"Approved a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.");
 
             await _notificationService.CreateNotificationAsync(new CreateNotificationDto()
             {
@@ -292,14 +266,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 LinkedEntityType = nameof(DonationOrder)
             });
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                EntityId = donationOrder.Id,
-                UserId = UserId,
-                EntityType = ActivityEntityType.DonationOrder,
-                Action = ActivityAction.DonationOrderRejected,
-                Description = $"Rejected a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationOrder.DonationRequest.Title}'.",
-            });
+            await AddActivityAsync(donationOrder.Id, ActivityEntityType.DonationOrder, ActivityAction.DonationOrderRejected, $"Rejected a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationOrder.DonationRequest.Title}'.");
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -312,26 +279,5 @@ namespace GivingChampion.Application.Services.DonationOrderService
 
             return Result<DonationOrderDetailsDto>.Success(dto);
         }
-
-        //private async Task CreateOrderStatusNotificationAsync(
-        //    DonationOrder donationOrder,
-        //    string title,
-        //    string message,
-        //    NotificationType type)
-        //{
-        //    await _notificationRepository.CreateAsync(new Notification
-        //    {
-        //        Id = Guid.NewGuid(),
-        //        UserId = donationOrder.DonorId,
-        //        Type = type,
-        //        Title = title,
-        //        Message = message,
-        //        LinkedEntityId = donationOrder.Id,
-        //        LinkedEntityType = nameof(DonationOrder),
-        //        CreatedAt = DateTime.UtcNow,
-        //        UpdatedAt = DateTime.UtcNow,
-        //        IsDeleted = false
-        //    });
-        //}
     }
 }
