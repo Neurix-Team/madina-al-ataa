@@ -15,7 +15,6 @@ namespace GivingChampion.Application.Interfaces.VolunteerOrderService
 
         Task<VolunteerOrderDto> CreateAsync(CreateVolunteerOrderDto dto);
         //Task<VolunteerOrderDto?> UpdateAsync(Guid id, UpdateVolunteerOrderDto dto);
-        Task ChangeOrderStatusAsync(Guid orderId, OrderStatus newStatus);
 
         Task<VolunteerOrderDto?> UpdateProgressAsync(Guid orderId, int progress);
         Task<VolunteerOrderDto?> ApproveOrderAsync(Guid id);
