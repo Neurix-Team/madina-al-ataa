@@ -13,17 +13,20 @@ namespace GivingChampion.Application.Services
     public class CertificateService : BaseService, ICertificateService
     {
         private readonly ICertificateRepository _certificateRepository;
+        private readonly IVolunteerRepository _volunteerRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public CertificateService(
             ICertificateRepository certificateRepository,
+            IVolunteerRepository volunteerRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
             : base(httpContextAccessor)
         {
             _certificateRepository = certificateRepository ?? throw new ArgumentNullException(nameof(certificateRepository));
+            _volunteerRepository = volunteerRepository;
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
@@ -60,8 +63,10 @@ namespace GivingChampion.Application.Services
             PageParameters pageParameters,
             CancellationToken cancellationToken = default)
         {
+            var volunteer = await _volunteerRepository.GetByUserIdAsync(UserId);
+
             var certificates = await _certificateRepository.GetCertificateByIdAsync(
-                UserId,
+                volunteer.Id,
                 pageParameters,
                 cancellationToken);
 
