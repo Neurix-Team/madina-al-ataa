@@ -58,7 +58,7 @@ namespace GivingChampion.API.Controllers
         //    return NoContent();
         //}
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet("{id:guid}/status")]
         public async Task<IActionResult> CheckGeoQuestStatus(Guid id)
         {
