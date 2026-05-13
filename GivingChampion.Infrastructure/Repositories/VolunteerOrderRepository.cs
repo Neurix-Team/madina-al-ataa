@@ -55,6 +55,17 @@ namespace GivingChampion.Persistance.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(vo => vo.Id == id && !vo.IsDeleted);
         }
+        public async Task<PagedList<VolunteerOrder>> GetByVolunteerIdAsync(
+     Guid volunteerId,
+     PageParameters pageParameters)
+        {
+            return await _context.VolunteerOrders
+                .Include(vo => vo.ServiceRequest)
+                .Where(vo => vo.UserId == volunteerId)
+                .OrderByDescending(vo => vo.CreatedAt)
+                .AsNoTracking()
+                .ToPagedListAsync(pageParameters);
+        }
         public async Task<bool> ExistsActiveByUserAndServiceRequestAsync(Guid userId, Guid serviceRequestId)
         {
             return await _context.VolunteerOrders
@@ -78,5 +89,6 @@ namespace GivingChampion.Persistance.Repositories
         {
             _context.Entry(volunteerOrder).State = EntityState.Modified;
         }
+
     }
 }

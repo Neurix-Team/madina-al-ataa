@@ -14,7 +14,7 @@ jobs:
   deploy:
     name: Deploy to server
     runs-on: ubuntu-latest
-    environment: Publish
+    environment: production
     timeout-minutes: 30
 
     steps:
@@ -86,6 +86,10 @@ jobs:
             exit 1
           fi
 
+          PROJECT_PATH_B64="$(printf '%s' "$PROJECT_PATH" | base64 -w 0)"
+          DEPLOY_SHA_B64="$(printf '%s' "$GITHUB_SHA" | base64 -w 0)"
+          SERVER_PASSWORD_B64="$(printf '%s' "$SERVER_PASSWORD" | base64 -w 0)"
+
           echo "Connecting to $SERVER_USER@$SERVER_HOST on port $SERVER_PORT"
           echo "Project path: $PROJECT_PATH"
 
@@ -96,8 +100,27 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -p "$SERVER_PORT" \
             "$SERVER_USER@$SERVER_HOST" \
-            "PROJECT_PATH='$PROJECT_PATH' DEPLOY_SHA='$GITHUB_SHA' bash -s" <<'EOF'
+            "PROJECT_PATH_B64='$PROJECT_PATH_B64' DEPLOY_SHA_B64='$DEPLOY_SHA_B64' SERVER_PASSWORD_B64='$SERVER_PASSWORD_B64' bash -s" <<'EOF'
           set -Eeuo pipefail
+
+          PROJECT_PATH="$(printf '%s' "$PROJECT_PATH_B64" | base64 -d)"
+          DEPLOY_SHA="$(printf '%s' "$DEPLOY_SHA_B64" | base64 -d)"
+          SERVER_PASSWORD="$(printf '%s' "$SERVER_PASSWORD_B64" | base64 -d)"
+
+          export PROJECT_PATH
+          export DEPLOY_SHA
+
+          echo "Logged in as: $(whoami)"
+          echo "Validating sudo password..."
+
+          echo "$SERVER_PASSWORD" | sudo -S -p '' -v
+
+          echo "Switching to root using sudo -s..."
+
+          sudo -E -s <<'ROOT_EOF'
+          set -Eeuo pipefail
+
+          echo "Running as: $(whoami)"
           echo "Deploying commit: $DEPLOY_SHA"
           cd "$PROJECT_PATH"
           echo "Fetching latest main..."
@@ -106,8 +129,9 @@ jobs:
           git pull
           echo "Building Docker Images..."
           aspire do prepare-compose --environment production
-          echo "ReDepolying Docker Containers..."
-          docker compose --env-file .env.production down
+
+          echo "Redepolying Docker Containers..."
           docker compose --env-file .env.production up -d
           echo "Deployment completed."
+          ROOT_EOF
           EOF
