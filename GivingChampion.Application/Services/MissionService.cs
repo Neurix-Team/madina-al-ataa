@@ -25,7 +25,7 @@ namespace GivingChampion.Application.Services
             IActivityService activityService,
             IHttpContextAccessor httpContextAccessor,
             IUnitOfWork unitOfWork,
-            IMapper mapper) : base(httpContextAccessor)
+            IMapper mapper) : base(httpContextAccessor, activityService)
         {
             _missionRepository = missionRepository;
             _activityService = activityService;
