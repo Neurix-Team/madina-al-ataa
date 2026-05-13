@@ -35,7 +35,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            : base(httpContextAccessor, activityService)
         {
             _donationOrderRepository = donationOrderRepository;
             _donationRequestRepository = donationRequestRepository;

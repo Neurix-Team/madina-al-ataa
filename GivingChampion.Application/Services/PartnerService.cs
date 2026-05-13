@@ -25,7 +25,7 @@ namespace GivingChampion.Application.Services
 
 
         // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
-        public PartnerService(IHttpContextAccessor httpContextAccessor, IUnitOfWork unitOfWork, IMapper mapper, IActivityService activityService) : base(httpContextAccessor)
+        public PartnerService(IHttpContextAccessor httpContextAccessor, IUnitOfWork unitOfWork, IMapper mapper, IActivityService activityService) : base(httpContextAccessor, activityService)
         {
             _httpContextAccessor = httpContextAccessor;
             _unitOfWork = unitOfWork;
