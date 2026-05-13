@@ -13,7 +13,8 @@ namespace GivingChampion.Application.DTO.ServiceRequestDto
         [Required(ErrorMessage = "Required skill is required")]
         [MaxLength(150, ErrorMessage = "Required skill cannot exceed 150 characters")]
         public string RequiredSkill { get; set; } = string.Empty;
-
+        [Required, MaxLength(100)]
+        public string ServiceType { get; set; } = string.Empty;
         [Required(ErrorMessage = "Urgency level is required")]
         public UrgencyLevel UrgencyLevel { get; set; }
 
