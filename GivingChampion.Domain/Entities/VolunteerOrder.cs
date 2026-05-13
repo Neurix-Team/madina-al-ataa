@@ -35,7 +35,6 @@ namespace GivingChampion.Domain.Entities
         /// Foreign key to Volunteer
         /// </summary>
         public Guid UserId { get; set; } // Identity User (Volunteer)
-
         public ApplicationUser? User { get; set; }  // Navigation property to the related Application User
         public DateTime? RejectedAt { get; set; } 
         public DateTime? ApprovedAt { get; set; } 
