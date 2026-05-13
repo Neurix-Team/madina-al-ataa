@@ -10,10 +10,18 @@ namespace GivingChampion.API.Controllers
     [ApiExplorerSettings(GroupName = "v1")]
     [Route("api/volunteer")]
     [Produces("application/json")]
+    /// <summary>
+    /// Handles HTTP requests for Volunteer.
+    /// </summary>
     public class VolunteerController : ControllerBase
     {
         private readonly IVolunteerService _volunteerService;
 
+        /// <summary>
+        /// Performs the VolunteerController operation.
+        /// </summary>
+        /// <param name="volunteerService">Provides the volunteerService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public VolunteerController(IVolunteerService volunteerService)
         {
             _volunteerService = volunteerService;

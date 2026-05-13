@@ -8,10 +8,18 @@ namespace GivingChampion.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Handles HTTP requests for AiAvatars.
+    /// </summary>
     public class AiAvatarsController : ControllerBase
     {
         private readonly IAiAvatarService _aiAvatarService;
 
+        /// <summary>
+        /// Performs the AiAvatarsController operation.
+        /// </summary>
+        /// <param name="aiAvatarService">Provides the aiAvatarService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public AiAvatarsController(IAiAvatarService aiAvatarService)
         {
             _aiAvatarService = aiAvatarService;
@@ -20,6 +28,11 @@ namespace GivingChampion.API.Controllers
         // GET api/aiavatars/{id}
         [Authorize]
         [HttpGet("{id}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<ActionResult<AiAvatarDto>> GetById(Guid id)
         {
             var aiAvatar = await _aiAvatarService.GetByIdAsync(id);
@@ -31,6 +44,11 @@ namespace GivingChampion.API.Controllers
         // POST api/aiavatars
         [Authorize]
         [HttpPost]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<ActionResult<AiAvatarDto>> Create([FromBody] CreateAiAvatarDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -41,6 +59,12 @@ namespace GivingChampion.API.Controllers
         // PUT api/aiavatars/{id}
         [Authorize]
         [HttpPut("{id}")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAiAvatarDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -52,6 +76,11 @@ namespace GivingChampion.API.Controllers
         // DELETE api/aiavatars/{id}
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _aiAvatarService.SoftDeleteAsync(id);

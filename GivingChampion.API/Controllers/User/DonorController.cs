@@ -12,10 +12,18 @@ namespace GivingChampion.API.Controllers
     [ApiExplorerSettings(GroupName = "v1")]
     [Route("api/donor")]
     [Produces("application/json")]
+    /// <summary>
+    /// Handles HTTP requests for Donor.
+    /// </summary>
     public class DonorController : ControllerBase
     {
         private readonly IDonorService _donorService;
 
+        /// <summary>
+        /// Performs the DonorController operation.
+        /// </summary>
+        /// <param name="donorService">Provides the donorService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public DonorController(IDonorService donorService)
         {
             _donorService = donorService;

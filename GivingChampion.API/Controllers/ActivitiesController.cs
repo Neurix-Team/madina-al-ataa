@@ -1,4 +1,4 @@
-using GivingChampion.Application.Interfaces;
+﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,11 +7,20 @@ namespace GivingChampion.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    /// <summary>
+    /// Handles HTTP requests for Activities.
+    /// </summary>
     public class ActivitiesController : ControllerBase
     {
         private readonly IActivityService _activityService;
         private readonly ILogger<ActivitiesController> _logger;
 
+        /// <summary>
+        /// Performs the ActivitiesController operation.
+        /// </summary>
+        /// <param name="activityService">Provides the activityService value required by the operation.</param>
+        /// <param name="logger">Provides the logger value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public ActivitiesController(
             IActivityService activityService,
             ILogger<ActivitiesController> logger)
@@ -44,6 +53,12 @@ namespace GivingChampion.API.Controllers
 
         [HttpGet("entity/{entityId:guid}")]
         [Authorize]
+        /// <summary>
+        /// Performs the GetEntityHistory operation.
+        /// </summary>
+        /// <param name="entityId">Provides the entityId value required by the operation.</param>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetEntityHistory(
             Guid entityId,
             [FromQuery] PageParameters pageParameters)

@@ -8,10 +8,18 @@ namespace GivingChampion.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Handles HTTP requests for UserBadges.
+    /// </summary>
     public class UserBadgesController : ControllerBase
     {
         private readonly IUserBadgeService _userBadgeService;
 
+        /// <summary>
+        /// Performs the UserBadgesController operation.
+        /// </summary>
+        /// <param name="userBadgeService">Provides the userBadgeService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public UserBadgesController(IUserBadgeService userBadgeService)
         {
             _userBadgeService = userBadgeService;
@@ -19,6 +27,10 @@ namespace GivingChampion.API.Controllers
 
         // GET api/UserBadges
         [HttpGet]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll()
         {
             var userBadges = await _userBadgeService.GetAllByUserIdAsync();
@@ -27,6 +39,11 @@ namespace GivingChampion.API.Controllers
 
         // GET api/UserBadges/{id}
         [HttpGet("{id:guid}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             var userBadge = await _userBadgeService.GetByIdAsync(id);
@@ -36,6 +53,11 @@ namespace GivingChampion.API.Controllers
         // GET api/UserBadges/profile/{userId}
         [Authorize(Roles = "Admin")]
         [HttpGet("profile/{userId:guid}")]
+        /// <summary>
+        /// Performs the GetByUserId operation.
+        /// </summary>
+        /// <param name="userId">Provides the userId value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetByUserId(Guid userId)
         {
             var userBadges = await _userBadgeService.GetAllByUserIdAsync(userId);
