@@ -1,8 +1,9 @@
-using GivingChampion.Application.Interfaces.VolunteerOrderService;
 using GivingChampion.Application.DTO.VolunteerOrder;
+using GivingChampion.Application.Interfaces.VolunteerOrderService;
+using GivingChampion.Common.Pagination;
+using GivingChampion.Common.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GivingChampion.Common.Pagination;
 
 namespace GivingChampion.API.Controllers.VolunteerOrder
 {
@@ -29,7 +30,14 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
             return Ok(result);
         }
-
+        [HttpGet("my-orders")]
+        [Authorize(Roles = "Volunteer")]
+        public async Task<ActionResult<Result<PagedList<VolunteerOrderDto>>>> GetMyOrders(
+    [FromQuery] PageParameters pageParameters)
+        {
+            var result = await _volunteerOrderService.GetMyOrdersAsync(pageParameters);
+            return Ok(result);
+        }
         [HttpGet("pending")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPending([FromQuery] PageParameters pageParameters)

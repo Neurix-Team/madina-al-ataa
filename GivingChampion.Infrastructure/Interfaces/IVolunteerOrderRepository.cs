@@ -9,6 +9,9 @@ namespace GivingChampion.Persistance.Interfaces
         Task<PagedList<VolunteerOrder>> GetPendingAsync(PageParameters pageParameters);
         Task<VolunteerOrder?> GetByIdAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);
+        Task<PagedList<VolunteerOrder>> GetByVolunteerIdAsync(
+     Guid volunteerId,
+     PageParameters pageParameters);
         Task<int?> GetVolunteerLevelNumberAsync(Guid volunteerUserId);
         Task AddAsync(VolunteerOrder volunteerOrder);
         void Update(VolunteerOrder volunteerOrder);
