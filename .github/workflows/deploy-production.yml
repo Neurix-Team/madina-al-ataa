@@ -134,12 +134,7 @@ jobs:
           export DOTNET_NOLOGO=1
           export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-          aspire publish \
-            --apphost ../GivingChampion.AppHost.csproj \
-            --non-interactive \
-            --nologo \
-            -l Information \
-            --pipeline-log-level information
+          aspire do prepare-compose --environment production --non-interactive --nologo -l Information --pipeline-log-level information
 
           echo "Redepolying Docker Containers..."
           docker compose --env-file .env.production up -d
