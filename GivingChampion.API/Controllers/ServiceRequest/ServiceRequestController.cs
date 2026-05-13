@@ -21,38 +21,28 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Volunteer")]
-        public async Task<IActionResult> GetAll(
-            [FromQuery] PageParameters pageParameters,
-            [FromQuery] RequestStatus? status)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
-            var result = status.HasValue
-                ? await _serviceRequestService.GetByStatusAsync(status.Value, pageParameters)
-                : await _serviceRequestService.GetAllAsync(pageParameters);
+            var result = await _serviceRequestService.GetAllAsync(pageParameters);
+
+            return Ok(result);
+        }
+        [HttpGet("approved")]
+        [Authorize(Roles = "Volunteer")]
+        public async Task<IActionResult> GetApproved([FromQuery] PageParameters pageParameters)
+        {
+            var result = await _serviceRequestService.GetApprovedRequestsAsync(pageParameters);
 
             return Ok(result);
         }
 
+        [Authorize(Roles = "Volunteer,Admin")]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var serviceRequest = await _serviceRequestService.GetByIdAsync(id)
-                ?? throw new NotFoundException("Service request not found.");
-
+            var serviceRequest = await _serviceRequestService.GetByIdAsync(id);
             return Ok(serviceRequest);
-        }
-
-        [HttpGet("filter")]
-        [Authorize(Roles = "Volunteer,Admin")]
-        public async Task<IActionResult> GetByStatus(
-            [FromQuery] RequestStatus status,
-            [FromQuery] PageParameters pageParameters)
-        {
-            var result = await _serviceRequestService.GetByStatusAsync(
-                status,
-                pageParameters);
-
-            return Ok(result);
         }
 
         [HttpPost]

@@ -25,7 +25,7 @@ namespace GivingChampion.Application.Services
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            : base(httpContextAccessor, activityService)
         {
             _donationRequestRepository = donationRequestRepository;
             _activityService = activityService;
@@ -100,14 +100,11 @@ namespace GivingChampion.Application.Services
 
             await _donationRequestRepository.AddAsync(donationRequest);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                Action = ActivityAction.DonationRequestCreated,
-                EntityType = ActivityEntityType.DonationRequest,
-                EntityId = donationRequest.Id,
-                Description = $"Created a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
-                UserId = UserId,
-            });
+            await AddActivityAsync(
+                donationRequest.Id,
+                ActivityEntityType.DonationRequest,
+                ActivityAction.DonationRequestCreated,
+                $"Created a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.");
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<DonationRequestDto>(donationRequest);
@@ -139,14 +136,11 @@ namespace GivingChampion.Application.Services
 
             await _donationRequestRepository.UpdateAsync(existingRequest);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                Action = ActivityAction.DonationRequestUpdated,
-                EntityType = ActivityEntityType.DonationRequest,
-                EntityId = existingRequest.Id,
-                Description = $"Updated a donation request with title '{existingRequest.Title}' and amount {existingRequest.DonateAmount}.",
-                UserId = UserId,
-            });
+            await AddActivityAsync(
+                existingRequest.Id,
+                ActivityEntityType.DonationRequest,
+                ActivityAction.DonationRequestUpdated,
+                $"Updated a donation request with title '{existingRequest.Title}' and amount {existingRequest.DonateAmount}.");
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -167,14 +161,11 @@ namespace GivingChampion.Application.Services
 
             await _donationRequestRepository.UpdateAsync(donationRequest);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                Action = ActivityAction.DonationRequestApproved,
-                EntityType = ActivityEntityType.DonationRequest,
-                EntityId = donationRequest.Id,
-                Description = $"Approved a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
-                UserId = UserId,
-            });
+            await AddActivityAsync(
+                donationRequest.Id,
+                ActivityEntityType.DonationRequest,
+                ActivityAction.DonationRequestApproved,
+                $"Approved a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.");
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -198,14 +189,11 @@ namespace GivingChampion.Application.Services
 
             await _donationRequestRepository.UpdateAsync(donationRequest);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                Action = ActivityAction.DonationRequestRejected,
-                EntityType = ActivityEntityType.DonationRequest,
-                EntityId = donationRequest.Id,
-                Description = $"Rejected a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
-                UserId = UserId,
-            });
+            await AddActivityAsync(
+                donationRequest.Id,
+                ActivityEntityType.DonationRequest,
+                ActivityAction.DonationRequestRejected,
+                $"Rejected a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.");
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -226,14 +214,11 @@ namespace GivingChampion.Application.Services
 
             await _donationRequestRepository.DeleteAsync(donationRequest);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                Action = ActivityAction.DonationRequestDeleted,
-                EntityType = ActivityEntityType.DonationRequest,
-                EntityId = donationRequest.Id,
-                Description = $"Deleted a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.",
-                UserId = UserId,
-            });
+            await AddActivityAsync(
+                donationRequest.Id,
+                ActivityEntityType.DonationRequest,
+                ActivityAction.DonationRequestDeleted,
+                $"Deleted a donation request with title '{donationRequest.Title}' and amount {donationRequest.DonateAmount}.");
             await _unitOfWork.SaveChangesAsync();
         }
     }

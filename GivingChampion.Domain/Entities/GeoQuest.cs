@@ -13,6 +13,13 @@ namespace GivingChampion.Domain.Entities
         public string Title { get; set; }
         public Guid LocationId { get; set; }
         public Location Location { get; set; }
+        [Range(0, int.MaxValue)]
+        public int XPReward { get; set; } = 0;
 
+        [Range(0, int.MaxValue)]
+        public int KPReward { get; set; } = 0;
+
+        [Range(0, int.MaxValue)]
+        public int ImpactReward { get; set; } = 0;
     }
 }

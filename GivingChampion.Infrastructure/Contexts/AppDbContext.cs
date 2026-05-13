@@ -44,6 +44,7 @@ namespace GivingChampion.Persistence.Contexts
         public DbSet<GeoQuest> GeoQuests { get; set; }
         public DbSet<UserGeoQuest> UserGeoQuests { get; set; }
         //public DbSet<VolunteerHistories> VolunteerHistories { get; set; }
+        public DbSet<RewardTransaction> RewardTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -384,6 +385,26 @@ namespace GivingChampion.Persistence.Contexts
                     .WithMany()
                     .HasForeignKey(n => n.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<RewardTransaction>(entity =>
+            {
+                entity.HasKey(rt => rt.Id);
+
+                entity.HasOne(rt => rt.Profile)
+                    .WithMany()
+                    .HasForeignKey(rt => rt.ProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(rt => new
+                {
+                    rt.ProfileId,
+                    rt.SourceType,
+                    rt.ActionEntityId
+                }).IsUnique();
+
+                entity.Property(rt => rt.Reason)
+                    .HasMaxLength(300);
             });
         }
         // ====================== SOFT DELETE HANDLING ======================

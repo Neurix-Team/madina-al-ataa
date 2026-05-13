@@ -51,6 +51,8 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.RequiredLevelId, opt => opt.Ignore())
+                .ForMember(dest => dest.MaxOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.Partner, opt => opt.Ignore())
                 .ForMember(dest => dest.VolunteerUserId, opt => opt.Ignore());
             // CreateServiceRequestDto -> ServiceRequest
@@ -64,6 +66,8 @@ namespace GivingChampion.Application.Mapper
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.RequiredLevelId, opt => opt.Ignore())
+                .ForMember(dest => dest.MaxOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.PartnerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Partner, opt => opt.Ignore());
@@ -261,8 +265,9 @@ namespace GivingChampion.Application.Mapper
             #region UserLevel Mappings
 
             CreateMap<UserLevel, UserLevelDto>()
-                .ForMember(dest => dest.LevelId,
-                    opt => opt.MapFrom(src => src.Level.Id))
+                .ForMember(dest => dest.LevelId, opt => opt.MapFrom(src => src.Level.Id))
+                .ForMember(dest => dest.LevelNumber, opt => opt.MapFrom(src => src.Level.Number))
+                .ForMember(dest => dest.LevelMaxXp, opt => opt.MapFrom(src => src.Level.MaxXp))
                 .ReverseMap();
 
             CreateMap<CreateUserLevelDto, UserLevel>().ReverseMap();

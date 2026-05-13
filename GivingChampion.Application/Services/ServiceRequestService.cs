@@ -1,39 +1,45 @@
 ﻿using AutoMapper;
-using GivingChampion.Application.Exceptions;
-using GivingChampion.Application.Interfaces.ServiceRequestService;
+using GivingChampion.API.Repositories;
+using GivingChampion.Application.DTO.ActivityDto;
 using GivingChampion.Application.DTO.ServiceRequestDto;
+using GivingChampion.Application.Exceptions;
+using GivingChampion.Application.Interfaces;
+using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Common.Enums;
+using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
-using GivingChampion.Common.Extensions.Mapper;
-using GivingChampion.Application.DTO.ActivityDto;
-using GivingChampion.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
+
 namespace GivingChampion.Application.Services
 {
     public class ServiceRequestService : BaseService, IServiceRequestService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IGenericRepository<ServiceRequest> _serviceRequestRepository;
-        private readonly IActivityService _activityService;
+        private readonly IServiceRequestRepository _serviceRequestRepository;
+        private readonly IGenericRepository<VolunteerOrder> _volunteerOrderRepository;
         private readonly IMapper _mapper;
+        private readonly ILevelRepository _levelRepository;
 
         public ServiceRequestService(
-         IUnitOfWork unitOfWork,
-         IMapper mapper,
-         IActivityService activityService,
-         IHttpContextAccessor httpContextAccessor)
-         : base(httpContextAccessor)
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IActivityService activityService,
+            ILevelRepository levelRepository,
+            IServiceRequestRepository serviceRequestRepository,
+            IGenericRepository<VolunteerOrder> volunteerOrderRepository,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor, activityService)
         {
             _unitOfWork = unitOfWork;
-            _serviceRequestRepository = unitOfWork.Repository<ServiceRequest>();
+            _serviceRequestRepository = serviceRequestRepository;
+            _volunteerOrderRepository = volunteerOrderRepository;
             _mapper = mapper;
-            _activityService = activityService;
+            _levelRepository = levelRepository;
         }
 
-        // Gets all service requests and maps them from Entity list to DTO list.
         public async Task<Result<PagedList<ServiceRequestDto>>> GetAllAsync(PageParameters pageParameters)
         {
             var serviceRequests = await _serviceRequestRepository.GetAllAsync(pageParameters);
@@ -56,37 +62,14 @@ namespace GivingChampion.Application.Services
             return _mapper.Map<ServiceRequestDto>(serviceRequest);
         }
 
-        public async Task<List<ServiceRequestDto>> GetApprovedRequestsAsync()
+        public async Task<Result<PagedList<ServiceRequestDto>>> GetApprovedRequestsAsync(
+      PageParameters pageParameters)
         {
-            var approvedRequests = await _serviceRequestRepository.ListAsync(
-                serviceRequest => serviceRequest.Status == RequestStatus.Approved);
+            var approvedRequests = await _serviceRequestRepository.GetApprovedRequestsAsync(pageParameters);
 
-            return _mapper.Map<List<ServiceRequestDto>>(approvedRequests);
-        }
-        // Gets all service requests filtered by specific status
-        public async Task<Result<PagedList<ServiceRequestDto>>> GetByStatusAsync(
-        RequestStatus status,
-        PageParameters pageParameters)
-        {
-            var filtered = await PagedList<ServiceRequest>.CreateAsync(
-                _serviceRequestRepository.Query().Where(serviceRequest => serviceRequest.Status == status),
-                pageParameters.PageNumber,
-                pageParameters.PageSize);
-
-            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(filtered);
+            var dtos = _mapper.MapPagedList<ServiceRequest, ServiceRequestDto>(approvedRequests);
 
             return Result<PagedList<ServiceRequestDto>>.Success(dtos);
-        }
-
-        public async Task<List<ServiceRequestDto>> GetByPartnerIdAsync(Guid partnerId)
-        {
-            if (partnerId == Guid.Empty)
-                throw new BadRequestException("Partner ID is required.");
-
-            var serviceRequests = await _serviceRequestRepository.ListAsync(
-                serviceRequest => serviceRequest.PartnerId == partnerId);
-
-            return _mapper.Map<List<ServiceRequestDto>>(serviceRequests);
         }
 
         public async Task<ServiceRequestDto> CreateAsync(CreateServiceRequestDto dto)
@@ -94,29 +77,22 @@ namespace GivingChampion.Application.Services
             if (dto == null)
                 throw new BadRequestException("Service request create data is required.");
 
+            await ValidateRequiredLevelAsync(dto.RequiredLevelId);
+
             var serviceRequest = _mapper.Map<ServiceRequest>(dto);
 
             serviceRequest.Status = RequestStatus.Approved;
-            serviceRequest.CreatedAt = DateTime.UtcNow;
 
             await _serviceRequestRepository.AddAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                UserId = UserId,
-                EntityId = serviceRequest.Id,
-                EntityType = ActivityEntityType.Request,
-                Action = ActivityAction.RequestCreated,
-                Description = $"Service request '{serviceRequest.Title}' created."
-            });
+            await AddActivityAsync(
+                serviceRequest.Id,
+                ActivityEntityType.Request,
+                ActivityAction.RequestCreated,
+                $"Service request '{serviceRequest.Title}' created.");
 
-            var createdServiceRequest = await _serviceRequestRepository.GetByIdAsync(serviceRequest.Id);
-
-            if (createdServiceRequest == null)
-                throw new InvalidOperationException("Service request was created but could not be retrieved.");
-
-            return _mapper.Map<ServiceRequestDto>(createdServiceRequest);
+            return _mapper.Map<ServiceRequestDto>(serviceRequest);
         }
 
         public async Task<bool> UpdateAsync(Guid id, UpdateServiceRequestDto dto)
@@ -127,7 +103,7 @@ namespace GivingChampion.Application.Services
             if (dto == null)
                 throw new BadRequestException("Service request update data is required.");
 
-            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+            var serviceRequest = await _serviceRequestRepository.GetByIdForUpdateAsync(id);
 
             if (serviceRequest == null)
                 throw new NotFoundException("Service request not found.");
@@ -139,21 +115,31 @@ namespace GivingChampion.Application.Services
                 );
             }
 
+            await ValidateRequiredLevelAsync(dto.RequiredLevelId);
+
+            var currentOrdersCount = await _volunteerOrderRepository.CountAsync(o =>
+                o.ServiceRequestId == id &&
+                !o.IsDeleted);
+
+            if (dto.MaxOrders < currentOrdersCount)
+            {
+                throw new BadRequestException(
+                    $"Max orders cannot be less than current active orders count ({currentOrdersCount})."
+                );
+            }
+
             _mapper.Map(dto, serviceRequest);
 
             serviceRequest.UpdatedAt = DateTime.UtcNow;
 
-            _serviceRequestRepository.Update(serviceRequest);
+            await _serviceRequestRepository.UpdateAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                UserId = UserId,
-                EntityId = serviceRequest.Id,
-                EntityType = ActivityEntityType.Request,
-                Action = ActivityAction.RequestUpdated,
-                Description = $"Service request '{serviceRequest.Title}' updated."
-            });
+            await AddActivityAsync(
+      serviceRequest.Id,
+      ActivityEntityType.Request,
+      ActivityAction.RequestUpdated,
+      $"Service request '{serviceRequest.Title}' updated.");
 
             return true;
         }
@@ -163,28 +149,34 @@ namespace GivingChampion.Application.Services
             if (id == Guid.Empty)
                 throw new BadRequestException("Service request ID is required.");
 
-            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(id);
+            var serviceRequest = await _serviceRequestRepository.GetByIdForUpdateAsync(id);
 
             if (serviceRequest == null)
                 throw new NotFoundException("Service request not found.");
 
-            serviceRequest.IsDeleted = true;
-            serviceRequest.DeletedAt = DateTime.UtcNow;
-            serviceRequest.UpdatedAt = DateTime.UtcNow;
-
-            _serviceRequestRepository.Update(serviceRequest);
+            await _serviceRequestRepository.SoftDeleteAsync(serviceRequest);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto
-            {
-                UserId = UserId,
-                EntityId = serviceRequest.Id,
-                EntityType = ActivityEntityType.Request,
-                Action = ActivityAction.RequestDeleted,
-                Description = $"Service request '{serviceRequest.Title}' deleted."
-            });
+            await AddActivityAsync(
+    serviceRequest.Id,
+    ActivityEntityType.Request,
+    ActivityAction.RequestDeleted,
+    $"Service request '{serviceRequest.Title}' deleted.");
 
             return true;
         }
+
+        private async Task ValidateRequiredLevelAsync(Guid requiredLevelId)
+        {
+            if (requiredLevelId == Guid.Empty)
+                throw new BadRequestException("Required level is required.");
+
+            var level = await _levelRepository.GetByIdAsync(requiredLevelId);
+
+            if (level == null)
+                throw new NotFoundException("Required level not found.");
+        }
+
+        
+        }
     }
-}

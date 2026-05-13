@@ -1,6 +1,7 @@
 ﻿using GivingChampion.API.Interfaces;
 using GivingChampion.API.Services;
 using GivingChampion.Application;
+using GivingChampion.Application.Helpers;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Admin;
 using GivingChampion.Application.Interfaces.Auth;
@@ -9,6 +10,7 @@ using GivingChampion.Application.Interfaces.DonationOrderService;
 using GivingChampion.Application.Interfaces.Location;
 using GivingChampion.Application.Interfaces.Mission;
 using GivingChampion.Application.Interfaces.Partner;
+using GivingChampion.Application.Interfaces.Reward;
 using GivingChampion.Application.Interfaces.ServiceRequestService;
 using GivingChampion.Application.Interfaces.User;
 using GivingChampion.Application.Interfaces.Volunteer;
@@ -27,6 +29,8 @@ public static class AppServiceDependencyInjection
     public static IServiceCollection AddGivingChampionServices(
         this IServiceCollection services)
     {
+        services.AddScoped<IActivityService, ActivityService>();
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDonorService, DonorService>();
@@ -39,6 +43,8 @@ public static class AppServiceDependencyInjection
         services.AddScoped<IUserGeoQuestService, UserGeoQuestService>();
 
         services.AddScoped<IServiceRequestService, ServiceRequestService>();
+        services.AddScoped<IBadgeRequirementParser, BadgeRequirementParser>();
+        services.AddScoped<IRewardSystemService, RewardSystemService>();
         services.AddScoped<IVolunteerOrderService, VolunteerOrderService>();
         services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<IVolunteerService, VolunteerService>();
@@ -55,8 +61,6 @@ public static class AppServiceDependencyInjection
         services.AddScoped<IUserBadgeService, UserBadgeService>();
         services.AddScoped<IUserLevelService, UserLevelService>();
         services.AddScoped<IReviewService, ReviewService>();
-
-        services.AddScoped<IActivityService, ActivityService>();
 
         services.AddScoped<IJwtTokenFactory, JwtTokenFactory>();
         services.AddSingleton<IExternalLoginCodeStore, InMemoryExternalLoginCodeStore>();

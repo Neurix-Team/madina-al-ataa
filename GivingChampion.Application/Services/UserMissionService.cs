@@ -4,6 +4,7 @@ using GivingChampion.Application.DTO.Mission;
 using GivingChampion.Application.Exceptions;
 using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.Interfaces.Mission;
+using GivingChampion.Application.Interfaces.Reward;
 using GivingChampion.Common.Enums;
 using GivingChampion.Common.Extensions.Mapper;
 using GivingChampion.Common.Pagination;
@@ -20,6 +21,7 @@ namespace GivingChampion.Application.Services
         private readonly IUserMissionRepository _userMissionRepository;
         private readonly IMissionRepository _missionRepository;
         private readonly IActivityService _activityService;
+        private readonly IRewardSystemService _rewardSystemService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -27,14 +29,16 @@ namespace GivingChampion.Application.Services
             IUserMissionRepository userMissionRepository,
             IMissionRepository missionRepository,
             IActivityService activityService,
+            IRewardSystemService rewardSystemService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            : base(httpContextAccessor, activityService)
         {
             _userMissionRepository = userMissionRepository;
             _missionRepository = missionRepository;
             _activityService = activityService;
+            _rewardSystemService = rewardSystemService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -85,14 +89,12 @@ namespace GivingChampion.Application.Services
 
             await _userMissionRepository.CreateAsync(userMission);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = userMission.Id,
-                EntityType = ActivityEntityType.UserMission,
-                UserId = UserId,
-                Action = ActivityAction.MissionStarted,
-                Description = $"Started mission {mission.Title}"
-            });
+            await AddActivityAsync(
+                userMission.Id,
+                ActivityEntityType.UserMission,
+                ActivityAction.MissionStarted,
+                $"Started mission {mission.Title}"
+            );
             await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<UserMissionDto>(userMission);
@@ -138,17 +140,19 @@ namespace GivingChampion.Application.Services
             {
                 userMission.Status = MissionStatus.Completed;
                 userMission.CompletedAt = DateTime.UtcNow;
+
+                await _rewardSystemService.RewardUserMissionCompletedAsync(
+                    userMission.Id);
             }
 
             await _userMissionRepository.UpdateAsync(userMission);
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = userMission.Id,
-                EntityType = ActivityEntityType.UserMission,
-                UserId = UserId,
-                Action = ActivityAction.UserMissionUpdated,
-                Description = $"Updated progress for mission {userMission.Mission.Title}"
-            });
+
+            await AddActivityAsync(
+                userMission.Id,
+                ActivityEntityType.UserMission,
+                ActivityAction.UserMissionUpdated,
+                $"Updated progress for mission {userMission.Mission?.Title ?? "Unknown Mission"}"
+            );
             await _unitOfWork.SaveChangesAsync();
 
             var resultDto = _mapper.Map<UserMissionDto>(userMission);

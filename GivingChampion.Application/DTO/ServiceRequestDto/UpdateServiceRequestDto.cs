@@ -27,5 +27,10 @@ namespace GivingChampion.Application.DTO.ServiceRequestDto
         public string BriefDescription { get; set; } = string.Empty;
         [Required(ErrorMessage = "Location id is required")]
         public Guid LocationId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Max orders must be greater than zero.")]
+        public int MaxOrders { get; set; }
+
+        [Required(ErrorMessage = "Required level id is required")]
+        public Guid RequiredLevelId { get; set; }
     }
 }

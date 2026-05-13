@@ -8,20 +8,25 @@ using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace GivingChampion.Application.Services
 {
-    public class GeoQuestService : IGeoQuestService
+    public class GeoQuestService : BaseService, IGeoQuestService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IGeoQuestRepository _customGeoQuestRepository;
         private readonly IGenericRepository<GeoQuest> _geoQuestRepository;
         private readonly IMapper _mapper;
 
         public GeoQuestService(
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IGeoQuestRepository geoQuestRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IMapper mapper) : base(httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
+            _customGeoQuestRepository = geoQuestRepository;
             _geoQuestRepository = unitOfWork.Repository<GeoQuest>();
             _mapper = mapper;
         }
@@ -31,7 +36,7 @@ namespace GivingChampion.Application.Services
             if (pageParameters == null)
                 throw new BadRequestException("Page parameters are required.");
 
-            var geoQuests = await _geoQuestRepository.GetAllAsync(pageParameters);
+            var geoQuests = await _customGeoQuestRepository.GetAllAsync(UserId, pageParameters);
 
             var geoQuestDtos = _mapper.MapPagedList<GeoQuest, GeoQuestDto>(geoQuests);
 

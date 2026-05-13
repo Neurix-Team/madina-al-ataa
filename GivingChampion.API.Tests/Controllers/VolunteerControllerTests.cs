@@ -1,87 +1,114 @@
-using GivingChampion.API.Tests.Infrastructure;
-using GivingChampion.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using GivingChampion.API.Controllers;
 using GivingChampion.Application.DTO.Volunteer;
+using GivingChampion.Application.Interfaces.Volunteer;
+using GivingChampion.Common.Results;
+using Microsoft.AspNetCore.Mvc;
+
 namespace GivingChampion.API.Tests.Controllers;
 
-[Collection(DatabaseCollection.Name)]
 public class VolunteerControllerTests
 {
-    private readonly DatabaseTestFixture _fixture;
-
-    public VolunteerControllerTests(DatabaseTestFixture fixture)
+    [Fact]
+    public async Task GetMyVolunteerProfile_ReturnsOkWithServiceResult()
     {
-        _fixture = fixture;
+        var dto = new VolunteerDto
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Skills = "Teaching",
+            Availability = "Weekends",
+            TotalHours = 12
+        };
+        var expected = Result<VolunteerDto>.Success(dto);
+        var service = new FakeVolunteerService
+        {
+            GetMyVolunteerProfileResult = expected
+        };
+        var controller = new VolunteerController(service);
+
+        var response = await controller.GetMyVolunteerProfile();
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Same(expected, okResult.Value);
     }
 
     [Fact]
-    public async Task GetById_WhenVolunteerExists_ReturnsOkWithVolunteerFromDatabase()
+    public async Task GetVolunteerByUserId_ReturnsOkWithServiceResult()
     {
         var userId = Guid.NewGuid();
-        var volunteerId = Guid.NewGuid();
-        await SeedVolunteerAsync(userId, volunteerId);
-        var controller = _fixture.CreateVolunteerController();
-
-        try
+        var dto = new VolunteerDto
         {
-            var result = await controller.GetById(volunteerId);
-
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var volunteer = Assert.IsType<Application.DTO.VolunteerDto.VolunteerDto>(okResult.Value);
-            Assert.Equal(volunteerId, volunteer.Id);
-            Assert.Equal(userId, volunteer.UserId);
-            Assert.Equal("Teaching", volunteer.Skills);
-            Assert.Equal("Weekends", volunteer.Availability);
-            Assert.Equal(12, volunteer.TotalHours);
-        }
-        finally
-        {
-            await DeleteVolunteerSeedAsync(userId, volunteerId);
-        }
-    }
-
-    [Fact]
-    public async Task GetById_WhenVolunteerDoesNotExist_ReturnsInternalServerErrorFromServiceException()
-    {
-        var controller = _fixture.CreateVolunteerController();
-
-        var result = await controller.GetById(Guid.NewGuid());
-
-        var objectResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(500, objectResult.StatusCode);
-        Assert.Equal("Internal server error", objectResult.Value);
-    }
-
-    private async Task SeedVolunteerAsync(Guid userId, Guid volunteerId)
-    {
-        await using var context = _fixture.CreateDbContext();
-        context.Users.Add(new ApplicationUser
-        {
-            Id = userId,
-            UserName = $"volunteer-{userId:N}@tests.local",
-            NormalizedUserName = $"VOLUNTEER-{userId:N}@TESTS.LOCAL",
-            Email = $"volunteer-{userId:N}@tests.local",
-            NormalizedEmail = $"VOLUNTEER-{userId:N}@TESTS.LOCAL",
-            EmailConfirmed = true
-        });
-        context.Volunteers.Add(new Volunteer
-        {
-            Id = volunteerId,
+            Id = Guid.NewGuid(),
             UserId = userId,
             Skills = "Teaching",
             Availability = "Weekends",
-            TotalHours = 12,
-            CreatedAt = DateTime.UtcNow
-        });
+            TotalHours = 12
+        };
+        var expected = Result<VolunteerDto>.Success(dto);
+        var service = new FakeVolunteerService
+        {
+            GetVolunteerByUserIdResult = expected
+        };
+        var controller = new VolunteerController(service);
 
-        await context.SaveChangesAsync();
+        var response = await controller.GetVolunteerByUserId(userId);
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Same(expected, okResult.Value);
+        Assert.Equal(userId, service.LastUserId);
     }
 
-    private async Task DeleteVolunteerSeedAsync(Guid userId, Guid volunteerId)
+    [Fact]
+    public async Task UpdateMyVolunteerProfile_ReturnsOkWithServiceResult()
     {
-        await using var context = _fixture.CreateDbContext();
-        await context.Volunteers.Where(v => v.Id == volunteerId).ExecuteDeleteAsync();
-        await context.Users.Where(u => u.Id == userId).ExecuteDeleteAsync();
+        var request = new UpdateVolunteerDto
+        {
+            Skills = "Teaching",
+            Availability = "Weekdays"
+        };
+        var dto = new VolunteerDto
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Skills = request.Skills,
+            Availability = request.Availability,
+            TotalHours = 12
+        };
+        var expected = Result<VolunteerDto>.Success(dto);
+        var service = new FakeVolunteerService
+        {
+            UpdateVolunteerResult = expected
+        };
+        var controller = new VolunteerController(service);
+
+        var response = await controller.UpdateMyVolunteerProfile(request);
+
+        var okResult = Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Same(expected, okResult.Value);
+        Assert.Same(request, service.LastUpdateDto);
+    }
+
+    private sealed class FakeVolunteerService : IVolunteerService
+    {
+        public Result<VolunteerDto>? GetMyVolunteerProfileResult { get; set; }
+        public Result<VolunteerDto>? GetVolunteerByUserIdResult { get; set; }
+        public Result<VolunteerDto>? UpdateVolunteerResult { get; set; }
+        public Guid LastUserId { get; private set; }
+        public UpdateVolunteerDto? LastUpdateDto { get; private set; }
+
+        public Task<Result<VolunteerDto>> GetMyVolunteerProfileAsync()
+            => Task.FromResult(GetMyVolunteerProfileResult!);
+
+        public Task<Result<VolunteerDto>> GetVolunteerByUserIdAsync(Guid userId)
+        {
+            LastUserId = userId;
+            return Task.FromResult(GetVolunteerByUserIdResult!);
+        }
+
+        public Task<Result<VolunteerDto>> UpdateVolunteerAsync(UpdateVolunteerDto dto)
+        {
+            LastUpdateDto = dto;
+            return Task.FromResult(UpdateVolunteerResult!);
+        }
     }
 }

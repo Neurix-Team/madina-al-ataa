@@ -25,7 +25,7 @@ namespace GivingChampion.Application.Services
 
 
         // Constructor to initialize dependencies (PartnerRepository and AutoMapper)
-        public PartnerService(IHttpContextAccessor httpContextAccessor, IUnitOfWork unitOfWork, IMapper mapper, IActivityService activityService) : base(httpContextAccessor)
+        public PartnerService(IHttpContextAccessor httpContextAccessor, IUnitOfWork unitOfWork, IMapper mapper, IActivityService activityService) : base(httpContextAccessor, activityService)
         {
             _httpContextAccessor = httpContextAccessor;
             _unitOfWork = unitOfWork;
@@ -63,14 +63,7 @@ namespace GivingChampion.Application.Services
             await _partnerRepository.AddAsync(partner);
             await _unitOfWork.SaveChangesAsync();
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = partner.Id,
-                EntityType = ActivityEntityType.Partner,
-                UserId = UserId,
-                Action = ActivityAction.PartnerCreated,
-                Description = $"Created partner {partner.OrgName}"
-            });
+            await AddActivityAsync(partner.Id, ActivityEntityType.Partner, ActivityAction.PartnerCreated, $"Created partner {partner.OrgName}");
 
             return _mapper.Map<PartnerDto>(partner);
         }
@@ -88,14 +81,7 @@ namespace GivingChampion.Application.Services
 
             _partnerRepository.Update(partner);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = partner.Id,
-                EntityType = ActivityEntityType.Partner,
-                UserId = UserId,
-                Action = ActivityAction.PartnerUpdated,
-                Description = $"Updated partner {partner.OrgName}"
-            });
+            await AddActivityAsync(partner.Id, ActivityEntityType.Partner, ActivityAction.PartnerUpdated, $"Updated partner {partner.OrgName}");
 
             await _unitOfWork.SaveChangesAsync();
 
@@ -113,14 +99,7 @@ namespace GivingChampion.Application.Services
             partner.DeletedAt = DateTime.UtcNow;
             _partnerRepository.Update(partner);
 
-            await _activityService.AddAsync(new CreateActivityDto()
-            {
-                EntityId = partner.Id,
-                EntityType = ActivityEntityType.Partner,
-                UserId = UserId,
-                Action = ActivityAction.PartnerDeleted,
-                Description = $"Deleted partner {partner.OrgName}"
-            });
+            await AddActivityAsync(partner.Id, ActivityEntityType.Partner, ActivityAction.PartnerDeleted, $"Deleted partner {partner.OrgName}");
 
             await _unitOfWork.SaveChangesAsync();
 

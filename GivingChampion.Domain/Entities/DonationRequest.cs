@@ -74,6 +74,14 @@ namespace GivingChampion.Domain.Entities
 
 		public Partner Partner { get; set; } = null!;
 
+        [Range(0, int.MaxValue)]
+        public int XPReward { get; set; } = 0;
 
-	}
+        [Range(0, int.MaxValue)]
+        public int KPReward { get; set; } = 0;
+
+        [Range(0, int.MaxValue)]
+        public int ImpactReward { get; set; } = 0;
+
+    }
 }

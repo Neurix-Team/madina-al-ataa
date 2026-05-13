@@ -31,5 +31,10 @@ namespace GivingChampion.Application.DTO.ServiceRequestDto
         [Required(ErrorMessage = "Partner id is required")]
         public Guid PartnerId { get; set; }
         public Guid LocationId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Max orders must be greater than zero.")]
+        public int MaxOrders { get; set; }
+
+        [Required(ErrorMessage = "Required level id is required")]
+        public Guid RequiredLevelId { get; set; }
     }
 }

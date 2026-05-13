@@ -14,12 +14,21 @@ namespace GivingChampion.API.Repositories
             _context = context;
         }
 
-        public async Task<List<UserBadge>> GetAllByProfileIdAsync(Guid profileId)
+        public async Task<List<UserBadge>> GetAllByUserIdAsync(Guid userId)
         {
             return await _context.UserBadges
                 .AsNoTracking()
                 .Include(ub => ub.Badge)
                 .Include(ub => ub.Profile)
+                .Where(ub => ub.Profile.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<List<UserBadge>> GetAllByProfileIdAsync(Guid profileId)
+        {
+            return await _context.UserBadges
+                .AsNoTracking()
+                .Include(ub => ub.Badge)
                 .Where(ub => ub.ProfileId == profileId && !ub.IsDeleted)
                 .ToListAsync();
         }
