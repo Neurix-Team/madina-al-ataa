@@ -1,4 +1,4 @@
-using GivingChampion.Application.Auth;
+﻿using GivingChampion.Application.Auth;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.Interfaces.Auth;
 using GivingChampion.Application.DTO.Auth;
@@ -16,11 +16,20 @@ namespace GivingChampion.API.Controllers.Auth
     [ApiExplorerSettings(GroupName = "v1")]
     [Route("api/auth")]
     [Produces("application/json")]
+    /// <summary>
+    /// Handles HTTP requests for Auth.
+    /// </summary>
     public sealed class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
 
+        /// <summary>
+        /// Performs the AuthController operation.
+        /// </summary>
+        /// <param name="authService">Provides the authService value required by the operation.</param>
+        /// <param name="configuration">Provides the configuration value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public AuthController(
             IAuthService authService,
             IConfiguration configuration)
@@ -33,6 +42,12 @@ namespace GivingChampion.API.Controllers.Auth
         [AllowAnonymous]
         [ProducesResponseType(typeof(Result<TokenResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        /// <summary>
+        /// Performs the Register operation.
+        /// </summary>
+        /// <param name="request">Provides the request value required by the operation.</param>
+        /// <param name="cancellationToken">Provides the cancellationToken value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Register(
             [FromBody] RegisterRequest request,
             CancellationToken cancellationToken)
@@ -51,6 +66,12 @@ namespace GivingChampion.API.Controllers.Auth
         [Authorize]
         [ProducesResponseType(typeof(Result<TokenResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        /// <summary>
+        /// Performs the ContinueRegistration operation.
+        /// </summary>
+        /// <param name="request">Provides the request value required by the operation.</param>
+        /// <param name="cancellationToken">Provides the cancellationToken value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> ContinueRegistration(
             [FromBody] CompleteSocialRegistrationRequest request,
             CancellationToken cancellationToken)
@@ -69,6 +90,12 @@ namespace GivingChampion.API.Controllers.Auth
         [AllowAnonymous]
         [ProducesResponseType(typeof(Result<TokenResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status401Unauthorized)]
+        /// <summary>
+        /// Performs the Login operation.
+        /// </summary>
+        /// <param name="request">Provides the request value required by the operation.</param>
+        /// <param name="cancellationToken">Provides the cancellationToken value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Login(
             LoginRequest request,
             CancellationToken cancellationToken)
@@ -85,6 +112,10 @@ namespace GivingChampion.API.Controllers.Auth
 
         [HttpGet("google/login")]
         [AllowAnonymous]
+        /// <summary>
+        /// Performs the GoogleLogin operation.
+        /// </summary>
+        /// <returns>The result produced by the operation.</returns>
         public IActionResult GoogleLogin()
         {
             var callbackUrl = Url.ActionLink(nameof(GoogleCallback));
@@ -104,6 +135,12 @@ namespace GivingChampion.API.Controllers.Auth
 
         [HttpGet("google/callback")]
         [AllowAnonymous]
+        /// <summary>
+        /// Performs the GoogleCallback operation.
+        /// </summary>
+        /// <param name="remoteError">Provides the remoteError value required by the operation.</param>
+        /// <param name="cancellationToken">Provides the cancellationToken value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GoogleCallback(
             [FromQuery] string? remoteError = null,
             CancellationToken cancellationToken = default)
@@ -159,6 +196,12 @@ namespace GivingChampion.API.Controllers.Auth
         [AllowAnonymous]
         [ProducesResponseType(typeof(Result<TokenResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        /// <summary>
+        /// Performs the ExchangeGoogleCode operation.
+        /// </summary>
+        /// <param name="request">Provides the request value required by the operation.</param>
+        /// <param name="cancellationToken">Provides the cancellationToken value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> ExchangeGoogleCode(
             [FromBody] ExchangeCodeRequest request,
             CancellationToken cancellationToken)

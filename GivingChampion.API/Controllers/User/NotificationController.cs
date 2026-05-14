@@ -11,10 +11,18 @@ namespace GivingChampion.API.Controllers
     [Route("api/notification")]
     [Produces("application/json")]
     [Authorize]
+    /// <summary>
+    /// Handles HTTP requests for Notifications.
+    /// </summary>
     public class NotificationsController : ControllerBase
     {
         private readonly INotificationService _notificationService;
 
+        /// <summary>
+        /// Performs the NotificationsController operation.
+        /// </summary>
+        /// <param name="notificationService">Provides the notificationService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public NotificationsController(INotificationService notificationService)
         {
             _notificationService = notificationService;

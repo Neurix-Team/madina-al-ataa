@@ -11,10 +11,18 @@ namespace GivingChampion.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    /// <summary>
+    /// Handles HTTP requests for ServiceRequests.
+    /// </summary>
     public class ServiceRequestsController : ControllerBase
     {
         private readonly IServiceRequestService _serviceRequestService;
 
+        /// <summary>
+        /// Performs the ServiceRequestsController operation.
+        /// </summary>
+        /// <param name="serviceRequestService">Provides the serviceRequestService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public ServiceRequestsController(IServiceRequestService serviceRequestService)
         {
             _serviceRequestService = serviceRequestService;
@@ -22,6 +30,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             var result = await _serviceRequestService.GetAllAsync(pageParameters);
@@ -30,6 +43,11 @@ namespace GivingChampion.API.Controllers
         }
         [HttpGet("approved")]
         [Authorize(Roles = "Volunteer")]
+        /// <summary>
+        /// Retrieves approved records that are visible to the requesting role.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetApproved([FromQuery] PageParameters pageParameters)
         {
             var result = await _serviceRequestService.GetApprovedRequestsAsync(pageParameters);
@@ -39,6 +57,11 @@ namespace GivingChampion.API.Controllers
 
         [Authorize(Roles = "Volunteer,Admin")]
         [HttpGet("{id:guid}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             var serviceRequest = await _serviceRequestService.GetByIdAsync(id);
@@ -47,6 +70,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Create([FromBody] CreateServiceRequestDto dto)
         {
             var createdServiceRequest = await _serviceRequestService.CreateAsync(dto);
@@ -60,6 +88,12 @@ namespace GivingChampion.API.Controllers
 
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(
             Guid id,
             [FromBody] UpdateServiceRequestDto dto)
@@ -72,6 +106,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             if (!await _serviceRequestService.DeleteAsync(id))

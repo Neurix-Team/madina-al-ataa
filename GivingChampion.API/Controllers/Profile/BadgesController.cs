@@ -9,16 +9,29 @@ namespace GivingChampion.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Handles HTTP requests for Badges.
+    /// </summary>
     public class BadgesController : ControllerBase
     {
         private readonly IBadgeService _badgeService;
 
+        /// <summary>
+        /// Performs the BadgesController operation.
+        /// </summary>
+        /// <param name="badgeService">Provides the badgeService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public BadgesController(IBadgeService badgeService)
         {
             _badgeService = badgeService;
         }
 
         [HttpGet]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             var badges = await _badgeService.GetAllAsync(pageParameters);
@@ -26,6 +39,11 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             var badge = await _badgeService.GetByIdAsync(id);
@@ -34,6 +52,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Create([FromBody] CreateBadgeDto dto)
         {
             if (!ModelState.IsValid)
@@ -50,6 +73,12 @@ namespace GivingChampion.API.Controllers
 
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBadgeDto dto)
         {
             if (!ModelState.IsValid)
@@ -65,6 +94,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _badgeService.SoftDeleteAsync(id);

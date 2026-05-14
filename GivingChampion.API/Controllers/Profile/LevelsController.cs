@@ -9,10 +9,18 @@ namespace GivingChampion.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Handles HTTP requests for Levels.
+    /// </summary>
     public class LevelsController : ControllerBase
     {
         private readonly ILevelService _levelService;
 
+        /// <summary>
+        /// Performs the LevelsController operation.
+        /// </summary>
+        /// <param name="levelService">Provides the levelService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public LevelsController(ILevelService levelService)
         {
             _levelService = levelService;
@@ -21,6 +29,11 @@ namespace GivingChampion.API.Controllers
         // GET api/levels
         [Authorize]
         [HttpGet]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             // Call service method to get all levels with pagination
@@ -31,6 +44,11 @@ namespace GivingChampion.API.Controllers
         // GET api/levels/{id}
         [Authorize]
         [HttpGet("{id}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             // Call service method to get a level by id
@@ -44,6 +62,11 @@ namespace GivingChampion.API.Controllers
         // POST api/levels
         [Authorize (Roles = "Admin")]
         [HttpPost]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Create([FromBody] CreateLevelDto dto)
         {
             // Call service method to create a level
@@ -54,6 +77,12 @@ namespace GivingChampion.API.Controllers
         // PUT api/levels/{id}
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateLevelDto dto)
         {
             // Call service method to update a level
@@ -66,6 +95,11 @@ namespace GivingChampion.API.Controllers
         // DELETE api/levels/{id}
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             // Call service method to soft delete a level
