@@ -8,10 +8,18 @@ namespace GivingChampion.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Handles HTTP requests for Avatars.
+    /// </summary>
     public class AvatarsController : ControllerBase
     {
         private readonly IAvatarService _avatarService;
 
+        /// <summary>
+        /// Performs the AvatarsController operation.
+        /// </summary>
+        /// <param name="avatarService">Provides the avatarService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public AvatarsController(IAvatarService avatarService)
         {
             _avatarService = avatarService;
@@ -20,6 +28,11 @@ namespace GivingChampion.API.Controllers
         // GET api/avatars/{id}
         [Authorize]
         [HttpGet("{id}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             var avatar = await _avatarService.GetByIdAsync(id);
@@ -33,6 +46,12 @@ namespace GivingChampion.API.Controllers
         // PUT api/avatars/{id}
         [Authorize]
         [HttpPut("{id}")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAvatarDto dto)
         {
             var updated = await _avatarService.UpdateAsync(id, dto);
