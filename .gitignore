@@ -59,3 +59,4 @@ nunit-*.xml
 /.nuget-packages
 /.dotnet/.nuget/packages
 /.dotnet/.dotnet
+*.secrets
