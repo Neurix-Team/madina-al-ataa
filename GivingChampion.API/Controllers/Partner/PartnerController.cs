@@ -10,16 +10,29 @@ namespace GivingChampion.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    /// <summary>
+    /// Handles HTTP requests for Partners.
+    /// </summary>
     public class PartnersController : ControllerBase
     {
         private readonly IPartnerService _partnerService;
 
+        /// <summary>
+        /// Performs the PartnersController operation.
+        /// </summary>
+        /// <param name="partnerService">Provides the partnerService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public PartnersController(IPartnerService partnerService)
         {
             _partnerService = partnerService;
         }
 
         [HttpGet("{id:guid}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             var partner = await _partnerService.GetByIdAsync(id)
@@ -29,6 +42,11 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             var result = await _partnerService.GetAllAsync(pageParameters);
@@ -40,6 +58,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Create([FromBody] CreatePartnerDto dto)
         {
             var partner = await _partnerService.CreateAsync(dto);
@@ -53,6 +76,12 @@ namespace GivingChampion.API.Controllers
 
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePartnerDto dto)
         {
             var partner = await _partnerService.UpdateAsync(id, dto)
@@ -63,6 +92,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             if (!await _partnerService.DeleteAsync(id))

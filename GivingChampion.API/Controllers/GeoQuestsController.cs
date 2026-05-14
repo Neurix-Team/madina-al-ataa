@@ -1,4 +1,4 @@
-using GivingChampion.Application.Interfaces;
+﻿using GivingChampion.Application.Interfaces;
 using GivingChampion.Application.DTO;
 using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Common.Pagination;
@@ -10,11 +10,20 @@ namespace GivingChampion.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Handles HTTP requests for GeoQuests.
+    /// </summary>
     public class GeoQuestsController : ControllerBase
     {
         private readonly IGeoQuestService _geoQuestService;
         private readonly IUserGeoQuestService _userGeoQuestService;
 
+        /// <summary>
+        /// Performs the GeoQuestsController operation.
+        /// </summary>
+        /// <param name="geoQuestService">Provides the geoQuestService value required by the operation.</param>
+        /// <param name="userGeoQuestService">Provides the userGeoQuestService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public GeoQuestsController(IGeoQuestService geoQuestService, IUserGeoQuestService userGeoQuestService)
         {
             _geoQuestService = geoQuestService;
@@ -22,6 +31,11 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             var result = await _geoQuestService.GetAllAsync(pageParameters);
@@ -32,6 +46,11 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _geoQuestService.GetByIdAsync(id);
@@ -43,6 +62,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Create([FromBody] CreateGeoQuestDto dto)
         {
             var result = await _geoQuestService.CreateAsync(dto);
@@ -53,6 +77,12 @@ namespace GivingChampion.API.Controllers
         }
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Update(Guid id, [FromQuery] UpdateGeoQuestDto dto)
         {
             var result = await _geoQuestService.UpdateAsync(id, dto);
@@ -64,6 +94,11 @@ namespace GivingChampion.API.Controllers
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _geoQuestService.SoftDeleteAsync(id);
@@ -74,6 +109,11 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpPost("{geoQuestId:guid}/start")]
+        /// <summary>
+        /// Starts the requested activity for the current user.
+        /// </summary>
+        /// <param name="geoQuestId">Provides the geoQuestId value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> StartGeoQuest(Guid geoQuestId)
         {
             var result = await _userGeoQuestService.StartAsync(geoQuestId);

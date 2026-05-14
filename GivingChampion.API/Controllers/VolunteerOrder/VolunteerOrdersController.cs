@@ -10,10 +10,18 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    /// <summary>
+    /// Handles HTTP requests for VolunteerOrders.
+    /// </summary>
     public class VolunteerOrdersController : ControllerBase
     {
         private readonly IVolunteerOrderService _volunteerOrderService;
 
+        /// <summary>
+        /// Performs the VolunteerOrdersController operation.
+        /// </summary>
+        /// <param name="volunteerOrderService">Provides the volunteerOrderService value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public VolunteerOrdersController(IVolunteerOrderService volunteerOrderService)
         {
             _volunteerOrderService = volunteerOrderService;
@@ -21,6 +29,11 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Retrieves a paged collection of records that match the request.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetAll([FromQuery] PageParameters pageParameters)
         {
             var result = await _volunteerOrderService.GetAllAsync(pageParameters);
@@ -40,6 +53,11 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         }
         [HttpGet("pending")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Performs the GetPending operation.
+        /// </summary>
+        /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetPending([FromQuery] PageParameters pageParameters)
         {
             var result = await _volunteerOrderService.GetPendingAsync(pageParameters);
@@ -52,6 +70,10 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpGet("pending/count")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Performs the GetPendingCount operation.
+        /// </summary>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> GetPendingCount()
         {
             var result = await _volunteerOrderService.GetPendingCountAsync();
@@ -63,6 +85,11 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
         }
 
         [HttpGet("{id:guid}")]
+        /// <summary>
+        /// Retrieves a single record by its identifier.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<ActionResult<VolunteerOrderDto>> GetById(Guid id)
         {
             var volunteerOrder = await _volunteerOrderService.GetByIdAsync(id);
@@ -71,6 +98,11 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpPatch("{id:guid}/approve")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Approves the specified record for the next workflow step.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> ApproveOrder(Guid id)
         {
             var result = await _volunteerOrderService.ApproveOrderAsync(id);
@@ -79,6 +111,12 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpPatch("{id:guid}/reject")]
         [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Rejects the specified record according to administrative rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> RejectOrder(
             Guid id,
             [FromBody] RejectVolunteerOrderDto dto)
@@ -92,6 +130,11 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpPost]
         [Authorize(Roles = "Volunteer")]
+        /// <summary>
+        /// Creates a new record from the supplied request data.
+        /// </summary>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<ActionResult<VolunteerOrderDto>> Create(
             [FromBody] CreateVolunteerOrderDto dto)
         {
@@ -106,6 +149,12 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpPut("{id:guid}/progress")]
         [Authorize(Roles = "Volunteer,Admin")]
+        /// <summary>
+        /// Updates an existing record from the supplied request data.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <param name="dto">Provides the dto value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> UpdateProgress(
             Guid id,
             [FromBody] UpdateVolunteerOrderProgressDto dto)
@@ -119,6 +168,11 @@ namespace GivingChampion.API.Controllers.VolunteerOrder
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Volunteer")]
+        /// <summary>
+        /// Removes or deactivates the specified record according to business rules.
+        /// </summary>
+        /// <param name="id">Provides the id value required by the operation.</param>
+        /// <returns>The result produced by the operation.</returns>
         public async Task<IActionResult> Delete(Guid id)
         {
             await _volunteerOrderService.DeleteAsync(id);
