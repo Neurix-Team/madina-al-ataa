@@ -60,3 +60,5 @@ nunit-*.xml
 /.dotnet/.nuget/packages
 /.dotnet/.dotnet
 *.secrets
+*.env
+*.vars

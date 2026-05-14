@@ -56,39 +56,74 @@ jobs:
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
           PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
           GITHUB_SHA: ${{ github.sha }}
+
+          JWT_ISSUER: ${{ vars.JWT_ISSUER }}
+          JWT_AUDIENCE: ${{ vars.JWT_AUDIENCE }}
+          JWT_ACCESS_TOKEN_MINUTES: ${{ vars.JWT_ACCESS_TOKEN_MINUTES }}
+          CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
+          AUTH_CALLBACK_URL: ${{ vars.AUTH_CALLBACK_URL }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+
+          DEFAULTCONNECTION: ${{ secrets.DEFAULTCONNECTION }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+
         run: |
           set -Eeuo pipefail
 
           SERVER_PORT="${SERVER_PORT:-22}"
 
-          if [ -z "$SERVER_HOST" ]; then
-            echo "SERVER_HOST secret is missing"
-            exit 1
-          fi
+          require_value() {
+            local name="$1"
+            local value="${!name:-}"
 
-          if [ -z "$SERVER_USER" ]; then
-            echo "SERVER_USER secret is missing"
-            exit 1
-          fi
+            if [ -z "$value" ]; then
+              echo "$name is missing"
+              exit 1
+            fi
+          }
 
-          if [ -z "$SERVER_PASSWORD" ]; then
-            echo "SERVER_PASSWORD secret is missing"
-            exit 1
-          fi
+          require_value SERVER_HOST
+          require_value SERVER_USER
+          require_value SERVER_PASSWORD
+          require_value PROJECT_PATH
 
-          if [ -z "$PROJECT_PATH" ]; then
-            echo "PROJECT_PATH secret is missing"
-            exit 1
-          fi
+
+            echo "JWT_ISSUER length before require: ${#JWT_ISSUER}"
+            echo "JWT_AUDIENCE length before require: ${#JWT_AUDIENCE}" 
+          require_value JWT_ISSUER
+          require_value JWT_AUDIENCE
+          require_value JWT_ACCESS_TOKEN_MINUTES
+          require_value CORS_ORIGINS
+          require_value AUTH_CALLBACK_URL
+          require_value GOOGLE_CLIENT_ID
+
+          require_value DEFAULTCONNECTION
+          require_value GOOGLE_CLIENT_SECRET
+          require_value JWT_KEY
 
           if ! [[ "$SERVER_PORT" =~ ^[0-9]+$ ]]; then
             echo "SERVER_PORT must be a number"
             exit 1
           fi
 
-          PROJECT_PATH_B64="$(printf '%s' "$PROJECT_PATH" | base64 -w 0)"
-          DEPLOY_SHA_B64="$(printf '%s' "$GITHUB_SHA" | base64 -w 0)"
-          SERVER_PASSWORD_B64="$(printf '%s' "$SERVER_PASSWORD" | base64 -w 0)"
+          b64() {
+            printf '%s' "$1" | base64 | tr -d '\n'
+          }
+
+          PROJECT_PATH_B64="$(b64 "$PROJECT_PATH")"
+          DEPLOY_SHA_B64="$(b64 "$GITHUB_SHA")"
+          SERVER_PASSWORD_B64="$(b64 "$SERVER_PASSWORD")"
+
+          JWT_ISSUER_B64="$(b64 "$JWT_ISSUER")"
+          JWT_AUDIENCE_B64="$(b64 "$JWT_AUDIENCE")"
+          JWT_ACCESS_TOKEN_MINUTES_B64="$(b64 "$JWT_ACCESS_TOKEN_MINUTES")"
+          CORS_ORIGINS_B64="$(b64 "$CORS_ORIGINS")"
+          AUTH_CALLBACK_URL_B64="$(b64 "$AUTH_CALLBACK_URL")"
+          GOOGLE_CLIENT_ID_B64="$(b64 "$GOOGLE_CLIENT_ID")"
+          GOOGLE_CLIENT_SECRET_B64="$(b64 "$GOOGLE_CLIENT_SECRET")"
+          JWT_KEY_B64="$(b64 "$JWT_KEY")"
+          DEFAULTCONNECTION_B64="$(b64 "$DEFAULTCONNECTION")"
 
           echo "Connecting to $SERVER_USER@$SERVER_HOST on port $SERVER_PORT"
           echo "Project path: $PROJECT_PATH"
@@ -100,44 +135,112 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -p "$SERVER_PORT" \
             "$SERVER_USER@$SERVER_HOST" \
-            "PROJECT_PATH_B64='$PROJECT_PATH_B64' DEPLOY_SHA_B64='$DEPLOY_SHA_B64' SERVER_PASSWORD_B64='$SERVER_PASSWORD_B64' bash -s" <<'EOF'
+            "PROJECT_PATH_B64='$PROJECT_PATH_B64' \
+            DEPLOY_SHA_B64='$DEPLOY_SHA_B64' \
+            SERVER_PASSWORD_B64='$SERVER_PASSWORD_B64' \
+            JWT_ISSUER_B64='$JWT_ISSUER_B64' \
+            JWT_AUDIENCE_B64='$JWT_AUDIENCE_B64' \
+            JWT_ACCESS_TOKEN_MINUTES_B64='$JWT_ACCESS_TOKEN_MINUTES_B64' \
+            CORS_ORIGINS_B64='$CORS_ORIGINS_B64' \
+            AUTH_CALLBACK_URL_B64='$AUTH_CALLBACK_URL_B64' \
+            GOOGLE_CLIENT_ID_B64='$GOOGLE_CLIENT_ID_B64' \
+            GOOGLE_CLIENT_SECRET_B64='$GOOGLE_CLIENT_SECRET_B64' \
+            JWT_KEY_B64='$JWT_KEY_B64' \
+            DEFAULTCONNECTION_B64='$DEFAULTCONNECTION_B64' \
+            bash -s" <<'EOF'
           set -Eeuo pipefail
 
-          PROJECT_PATH="$(printf '%s' "$PROJECT_PATH_B64" | base64 -d)"
-          DEPLOY_SHA="$(printf '%s' "$DEPLOY_SHA_B64" | base64 -d)"
-          SERVER_PASSWORD="$(printf '%s' "$SERVER_PASSWORD_B64" | base64 -d)"
+          decode() {
+            printf '%s' "$1" | base64 -d
+          }
 
-          export PROJECT_PATH
-          export DEPLOY_SHA
+          PROJECT_PATH="$(decode "$PROJECT_PATH_B64")"
+          DEPLOY_SHA="$(decode "$DEPLOY_SHA_B64")"
+          SERVER_PASSWORD="$(decode "$SERVER_PASSWORD_B64")"
 
           echo "Logged in as: $(whoami)"
           echo "Validating sudo password..."
 
           echo "$SERVER_PASSWORD" | sudo -S -p '' -v
 
-          echo "Switching to root using sudo -s..."
+          echo "Switching to root..."
 
-          sudo -E -s <<'ROOT_EOF'
+          sudo -E env \
+            PROJECT_PATH_B64="$PROJECT_PATH_B64" \
+            DEPLOY_SHA_B64="$DEPLOY_SHA_B64" \
+            JWT_ISSUER_B64="$JWT_ISSUER_B64" \
+            JWT_AUDIENCE_B64="$JWT_AUDIENCE_B64" \
+            JWT_ACCESS_TOKEN_MINUTES_B64="$JWT_ACCESS_TOKEN_MINUTES_B64" \
+            CORS_ORIGINS_B64="$CORS_ORIGINS_B64" \
+            AUTH_CALLBACK_URL_B64="$AUTH_CALLBACK_URL_B64" \
+            GOOGLE_CLIENT_ID_B64="$GOOGLE_CLIENT_ID_B64" \
+            GOOGLE_CLIENT_SECRET_B64="$GOOGLE_CLIENT_SECRET_B64" \
+            JWT_KEY_B64="$JWT_KEY_B64" \
+            DEFAULTCONNECTION_B64="$DEFAULTCONNECTION_B64" \
+            bash -s <<'ROOT_EOF'
           set -Eeuo pipefail
+
+          decode() {
+            printf '%s' "$1" | base64 -d
+          }
+
+          PROJECT_PATH="$(decode "$PROJECT_PATH_B64")"
+          DEPLOY_SHA="$(decode "$DEPLOY_SHA_B64")"
+
+          JWT_ISSUER="$(decode "$JWT_ISSUER_B64")"
+          JWT_AUDIENCE="$(decode "$JWT_AUDIENCE_B64")"
+          JWT_ACCESS_TOKEN_MINUTES="$(decode "$JWT_ACCESS_TOKEN_MINUTES_B64")"
+          CORS_ORIGINS="$(decode "$CORS_ORIGINS_B64")"
+          AUTH_CALLBACK_URL="$(decode "$AUTH_CALLBACK_URL_B64")"
+          GOOGLE_CLIENT_ID="$(decode "$GOOGLE_CLIENT_ID_B64")"
+          GOOGLE_CLIENT_SECRET="$(decode "$GOOGLE_CLIENT_SECRET_B64")"
+          JWT_KEY="$(decode "$JWT_KEY_B64")"
+          DEFAULTCONNECTION="$(decode "$DEFAULTCONNECTION_B64")"
 
           echo "Running as: $(whoami)"
           echo "Deploying commit: $DEPLOY_SHA"
+
           cd "$PROJECT_PATH"
+
           echo "Fetching latest main..."
           git switch main
           git fetch
           git pull
+
           echo "Building Docker Images..."
+
           export CI=true
           export TERM=dumb
           export NO_COLOR=1
           export DOTNET_NOLOGO=1
           export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-          aspire do prepare-compose --environment production --non-interactive --nologo -l Information --pipeline-log-level information
+          echo "Aspire JWT issuer length: ${#JWT_ISSUER}"
+          echo "Aspire JWT audience length: ${#JWT_AUDIENCE}"
+          echo "Aspire access token minutes length: ${#JWT_ACCESS_TOKEN_MINUTES}"
+          echo "Aspire CORS origins length: ${#CORS_ORIGINS}"
+          echo "Aspire auth callback URL length: ${#AUTH_CALLBACK_URL}"
+          echo "Aspire Google client ID length: ${#GOOGLE_CLIENT_ID}"
+          echo "Aspire Google client secret length: ${#GOOGLE_CLIENT_SECRET}"
+          echo "Aspire JWT key length: ${#JWT_KEY}"
+          echo "Aspire DefaultConnection length: ${#DEFAULTCONNECTION}"
 
-          echo "Redepolying Docker Containers..."
+          env \
+            "Parameters__jwt-issuer=$JWT_ISSUER" \
+            "Parameters__jwt-audience=$JWT_AUDIENCE" \
+            "Parameters__jwt-access-token-minutes=$JWT_ACCESS_TOKEN_MINUTES" \
+            "Parameters__cors-origins=$CORS_ORIGINS" \
+            "Parameters__auth-callback-url=$AUTH_CALLBACK_URL" \
+            "Parameters__google-client-id=$GOOGLE_CLIENT_ID" \
+            "Parameters__google-client-secret=$GOOGLE_CLIENT_SECRET" \
+            "Parameters__jwt-key=$JWT_KEY" \
+            "Parameters__DefaultConnection=$DEFAULTCONNECTION" \
+            "ConnectionStrings__DefaultConnection=$DEFAULTCONNECTION" \
+            aspire do prepare-compose --environment production --non-interactive --nologo -l Information --pipeline-log-level information
+
+          echo "Redeploying Docker Containers..."
           docker compose --env-file .env.production up -d
+
           echo "Deployment completed."
           ROOT_EOF
           EOF
