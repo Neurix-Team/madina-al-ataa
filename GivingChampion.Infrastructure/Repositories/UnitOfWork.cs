@@ -28,9 +28,9 @@ namespace GivingChampion.Persistance.Repositories
             return (IGenericRepository<TEntity>)repository;
         }
 
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return _context.SaveChangesAsync(cancellationToken);
+            return await _context.SaveChangesAsync(cancellationToken);
         }
 
         public void Dispose()

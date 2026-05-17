@@ -295,7 +295,9 @@ namespace GivingChampion.Application.Services
             {
                 await _rewardSystemService.RewardVolunteerOrderCompletedAsync(order.Id);
             }
-
+            // NADA RAFAT
+            order.ServiceRequest = serviceRequest;
+            // NADA RAFAT
             return _mapper.Map<VolunteerOrderDto>(order);
         }
         #endregion
