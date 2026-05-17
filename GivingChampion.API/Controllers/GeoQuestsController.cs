@@ -83,7 +83,7 @@ namespace GivingChampion.API.Controllers
         /// <param name="id">Provides the id value required by the operation.</param>
         /// <param name="dto">Provides the dto value required by the operation.</param>
         /// <returns>The result produced by the operation.</returns>
-        public async Task<IActionResult> Update(Guid id, [FromQuery] UpdateGeoQuestDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGeoQuestDto dto)
         {
             var result = await _geoQuestService.UpdateAsync(id, dto);
             if (!result.Succeeded || !result.Value)
