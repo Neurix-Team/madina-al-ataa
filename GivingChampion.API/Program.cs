@@ -35,7 +35,15 @@ var jwtOptions = builder.Configuration
     .Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new string[] { "http://localhost:5173" };
+var rawCorsValue = builder.Configuration["Cors:AllowedOrigins"];
+
+var allowedOrigins = !string.IsNullOrWhiteSpace(rawCorsValue)
+    ? rawCorsValue.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    : builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+      ?? new[] { "http://localhost:5173" };
+
+Console.WriteLine($"RAW Cors:AllowedOrigins = {rawCorsValue}");
+Console.WriteLine($"Parsed allowed origins = {string.Join(" | ", allowedOrigins)}");
 
 // Add services to the container.
 
