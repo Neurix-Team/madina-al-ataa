@@ -215,9 +215,9 @@ namespace GivingChampion.Application.Services.DonationOrderService
                 donationRequest.Status = RequestStatus.Completed;
             }
 
-            await _donorRepository.UpdateAsync(donor);
-            await _donationOrderRepository.UpdateAsync(donationOrder);
-            await _donationRequestRepository.UpdateAsync(donationRequest);
+            //await _donorRepository.UpdateAsync(donor);
+            //await _donationOrderRepository.UpdateAsync(donationOrder);
+            //await _donationRequestRepository.UpdateAsync(donationRequest);
 
             await AddActivityAsync(donationOrder.Id, ActivityEntityType.DonationOrder, ActivityAction.DonationOrderApproved, $"Approved a donation order of {donationOrder.Amount} {donationOrder.Currency} for request '{donationRequest.Title}'.");
 

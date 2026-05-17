@@ -57,7 +57,6 @@ namespace GivingChampion.Persistance.Repositories
         public async Task<DonationOrder?> GetByIdAsync(Guid id)
         {
             return await _context.DonationOrders
-                .AsNoTracking()
                 .Include(d => d.Donor)
                 .Include(d => d.DonationRequest)
                 .FirstOrDefaultAsync(d =>

@@ -60,7 +60,6 @@ namespace GivingChampion.Persistance.Repositories
         public async Task<DonationRequest?> GetByIdAsync(Guid id)
         {
             return await _context.DonationRequests
-                .AsNoTracking()
                 .FirstOrDefaultAsync(dr => dr.Id == id && !dr.IsDeleted);
         }
 
