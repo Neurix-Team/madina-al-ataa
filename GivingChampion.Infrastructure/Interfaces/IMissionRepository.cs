@@ -7,7 +7,7 @@ namespace GivingChampion.Application.Interfaces
     public interface IMissionRepository
     {
         Task<Mission?> GetByIdAsync(Guid id);
-        Task<PagedList<Mission>> GetAllActiveAsync(PageParameters pageParameters);
+        Task<PagedList<Mission>> GetAllOpenAsync(PageParameters pageParameters);
         Task<PagedList<Mission>> GetByDifficultyAsync(DifficultyLevel difficulty, PageParameters pageParameters);
         Task<PagedList<Mission>> GetAvailableForLevelAsync(int userLevel, PageParameters pageParameters);
 

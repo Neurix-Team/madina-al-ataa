@@ -386,7 +386,7 @@ public class RewardSystemServiceTests
     {
         public Task<Mission?> GetByIdAsync(Guid id) => throw new NotSupportedException();
 
-        public Task<PagedList<Mission>> GetAllActiveAsync(PageParameters pageParameters) => throw new NotSupportedException();
+        public Task<PagedList<Mission>> GetAllOpenAsync(PageParameters pageParameters) => throw new NotSupportedException();
 
         public Task<PagedList<Mission>> GetByDifficultyAsync(DifficultyLevel difficulty, PageParameters pageParameters)
             => throw new NotSupportedException();

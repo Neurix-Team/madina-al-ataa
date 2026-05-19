@@ -10,6 +10,9 @@ namespace GivingChampion.Application.Validators.Auth
         {
             RuleFor(x => x.Email).ValidEmail();
             RuleFor(x => x.Password).ValidPassword();
+            RuleFor(x => x.ConfirmPassword)
+                .NotEmpty().WithMessage("Confirm password is required.")
+                .Equal(x => x.Password).WithMessage("Confirm password must match password.");
             RuleFor(x => x.Fullname).ValidFullName();
             RuleFor(x => x.BirthDate).AdultBirthDate();
         }
@@ -35,6 +38,7 @@ namespace GivingChampion.Application.Validators.Auth
                 .WithMessage("User id must be a valid GUID.");
 
             RuleFor(x => x.Newpassword).ValidPassword();
+            RuleFor(x => x.BirthDate).AdultBirthDate();
         }
     }
 

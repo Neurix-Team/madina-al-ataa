@@ -54,13 +54,15 @@ namespace GivingChampion.Persistance.Repositories
             string email,
             string password,
             string? fullName,
+            DateTime birthDate,
             CancellationToken cancellationToken = default)
         {
             var user = new ApplicationUser
             {
                 UserName = email,
                 Email = email,
-                FullName = fullName
+                FullName = fullName,
+                BirthDay = DateTime.SpecifyKind(birthDate.Date, DateTimeKind.Utc)
             };
 
             var result = await _userManager.CreateAsync(user, password);

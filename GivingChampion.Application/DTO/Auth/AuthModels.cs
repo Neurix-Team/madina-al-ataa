@@ -4,6 +4,7 @@ public sealed record RegisterRequest
 {
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
     public string Fullname { get; set; } = string.Empty;
     public DateTime BirthDate { get; set; }
 }
@@ -12,6 +13,7 @@ public sealed record CompleteSocialRegistrationRequest
 {
     public string Userid { get; set; } = string.Empty;
     public string Newpassword { get; set; } = string.Empty;
+    public DateTime BirthDate { get; set; }
 }
 
 public sealed record LoginRequest

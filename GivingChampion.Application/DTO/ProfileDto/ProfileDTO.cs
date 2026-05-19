@@ -10,6 +10,9 @@ namespace GivingChampion.Application.DTO.ProfileDto
     {
         [Key]
         public Guid Id { get; set; }
+        public string Email { get; set; }
+        public string FullName { get; set; }
+        public DateTime BirthDate { get; set; }
         public double Rating { get; set; }
 
         public int Impact { get; set; }

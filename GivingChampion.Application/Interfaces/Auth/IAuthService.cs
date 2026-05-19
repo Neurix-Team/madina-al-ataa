@@ -5,7 +5,7 @@ namespace GivingChampion.Application.Interfaces.Auth
 {
     public interface IAuthService
     {
-        Task<AuthServiceResult<TokenResponse>> RegisterAsync(
+        Task<AuthServiceResult> RegisterAsync(
             RegisterRequest request,
             CancellationToken cancellationToken = default);
 

@@ -42,7 +42,7 @@ namespace GivingChampion.API.Controllers
             return Ok(result);
         }
         [HttpGet("approved")]
-        [Authorize(Roles = "Volunteer")]
+        [AllowAnonymous]
         /// <summary>
         /// Retrieves approved records that are visible to the requesting role.
         /// </summary>
@@ -55,7 +55,7 @@ namespace GivingChampion.API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Volunteer,Admin")]
+        [AllowAnonymous]
         [HttpGet("{id:guid}")]
         /// <summary>
         /// Retrieves a single record by its identifier.

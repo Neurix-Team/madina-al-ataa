@@ -24,7 +24,7 @@ namespace GivingChampion.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
         }
 
-        public async Task<PagedList<Mission>> GetAllActiveAsync(PageParameters pageParameters)
+        public async Task<PagedList<Mission>> GetAllOpenAsync(PageParameters pageParameters)
         {
             var query = await _context.Missions
                 .Include(m => m.Location)

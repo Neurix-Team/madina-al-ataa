@@ -30,15 +30,15 @@ namespace GivingChampion.API.Controllers
 
         // Admin: Get All Active Missions
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         /// <summary>
         /// Retrieves a paged collection of records that match the request.
         /// </summary>
         /// <param name="pageParameters">Provides the pageParameters value required by the operation.</param>
         /// <returns>The result produced by the operation.</returns>
-        public async Task<ActionResult<Result<PagedList<MissionDto>>>> GetAllActive([FromQuery] PageParameters pageParameters)
+        public async Task<ActionResult<Result<PagedList<MissionDto>>>> GetAllOpenAsync([FromQuery] PageParameters pageParameters)
         {
-            var result = await _missionService.GetAllActiveAsync(pageParameters);
+            var result = await _missionService.GetAllOpenAsync(pageParameters);
             return Ok(result);
         }
 

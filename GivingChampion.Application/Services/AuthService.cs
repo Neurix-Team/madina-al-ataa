@@ -42,7 +42,7 @@ namespace GivingChampion.Application.Services
             _childRepository = childRepository;
         }
 
-        public async Task<AuthServiceResult<TokenResponse>> RegisterAsync(
+        public async Task<AuthServiceResult> RegisterAsync(
             RegisterRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -53,23 +53,30 @@ namespace GivingChampion.Application.Services
                 // 2. Check if the user is soft-deleted
                 if (existingUser.IsDeleted)
                 {
-                    return AuthServiceResult<TokenResponse>.Failure(
+                    return AuthServiceResult.Failure(
                         new ServiceError("AccountDisabled", "This account has been deactivated. Please contact support to reactivate your account."));
                 }
 
-                return AuthServiceResult<TokenResponse>.Failure(
+                return AuthServiceResult.Failure(
                     new ServiceError("DuplicateEmail", "A user with this email already exists."));
+            }
+
+            if (request.Password != request.ConfirmPassword)
+            {
+                return AuthServiceResult.Failure(
+                    new ServiceError("PasswordMismatch", "The password and confirm password do not match."));
             }
 
             var createResult = await _identityRepository.CreateLocalUserAsync(
                 request.Email,
                 request.Password,
                 request.Fullname,
+                request.BirthDate,
                 cancellationToken);
 
             if (!createResult.Succeeded || createResult.Data is null)
             {
-                return AuthServiceResult<TokenResponse>.Failure(createResult.Errors);
+                return AuthServiceResult.Failure(createResult.Errors);
             }
 
             var user = createResult.Data;
@@ -77,7 +84,7 @@ namespace GivingChampion.Application.Services
             var addRoleResult = await _identityRepository.AddToRoleAsync(user, "User", cancellationToken);
             if (!addRoleResult.Succeeded)
             {
-                return AuthServiceResult<TokenResponse>.Failure(addRoleResult.Errors);
+                return AuthServiceResult.Failure(addRoleResult.Errors);
             }
             else
             {
@@ -85,10 +92,7 @@ namespace GivingChampion.Application.Services
                 await _identityRepository.AddToRoleAsync(user, "Volunteer", cancellationToken);
             }
 
-            var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
-            var token = _jwtTokenFactory.Create(user, roles);
-
-            return AuthServiceResult<TokenResponse>.Success(token);
+            return AuthServiceResult.Success();
         }
 
         public async Task<AuthServiceResult<TokenResponse>> LoginAsync(
@@ -274,6 +278,8 @@ namespace GivingChampion.Application.Services
             // If you want this flag to mean "still needs completion", set it to false here.
             //user.IsExternal = false;
 
+            user.BirthDay = DateTime.SpecifyKind(request.BirthDate.Date, DateTimeKind.Utc);
+
             var updateResult = await _identityRepository.UpdateAsync(user, cancellationToken);
 
             if (!updateResult.Succeeded)
@@ -317,6 +323,7 @@ namespace GivingChampion.Application.Services
                 Id = user.Id,
                 Email = user.Email,
                 UserName = user.FullName,
+                BirthDay = user.BirthDay,
                 Roles = roles.ToArray()
             };
         }

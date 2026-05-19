@@ -13,6 +13,7 @@ public interface IIdentityRepository
         string email,
         string password,
         string? fullName,
+        DateTime birthDate,
         CancellationToken cancellationToken = default);
 
     Task<AuthServiceResult<ApplicationUser>> CreateExternalUserAsync(

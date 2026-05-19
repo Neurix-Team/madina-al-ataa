@@ -31,6 +31,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         /// <summary>
         /// Retrieves a paged collection of records that match the request.
         /// </summary>
@@ -46,6 +47,7 @@ namespace GivingChampion.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [AllowAnonymous]
         /// <summary>
         /// Retrieves a single record by its identifier.
         /// </summary>

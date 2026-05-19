@@ -127,10 +127,10 @@ namespace GivingChampion.Application.Services
             return Result.Success();
         }
 
-        public async Task<Result<PagedList<MissionDto>>> GetAllActiveAsync(
+        public async Task<Result<PagedList<MissionDto>>> GetAllOpenAsync(
             PageParameters pageParameters)
         {
-            var missions = await _missionRepository.GetAllActiveAsync(pageParameters);
+            var missions = await _missionRepository.GetAllOpenAsync(pageParameters);
 
             var dtos = _mapper.MapPagedList<Mission, MissionDto>(missions);
 

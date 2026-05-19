@@ -40,7 +40,7 @@ namespace GivingChampion.API.Controllers.Auth
 
         [HttpPost("register")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(Result<TokenResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AuthServiceResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
         /// <summary>
         /// Performs the Register operation.
@@ -59,7 +59,7 @@ namespace GivingChampion.API.Controllers.Auth
                 return BadRequest(new { errors = result.Errors });
             }
 
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         [HttpPost("continue-registration")]
