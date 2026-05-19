@@ -5,6 +5,7 @@ using GivingChampion.Application;
 using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Application.DTO.Auth;
 using GivingChampion.Application.Mapper;
+using GivingChampion.Persistance.Extensions;
 using GivingChampion.Application.Transformers;
 using GivingChampion.Application.Validators.Auth;
 using GivingChampion.Domain.Entities;
@@ -86,6 +87,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.SignIn.RequireConfirmedAccount = false;
 })
     .AddEntityFrameworkStores<AppDbContext>()
+    .AddUserManager<CustomUserManager>()
     .AddDefaultTokenProviders();
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 

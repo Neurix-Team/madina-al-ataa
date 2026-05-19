@@ -95,7 +95,7 @@ namespace GivingChampion.Application.Services
     LoginRequest request,
     CancellationToken cancellationToken = default)
         {
-            var user = await _identityRepository.FindByEmailAsync(request.Email, cancellationToken);
+            var user = await _identityRepository.FindByEmailCaseSensitiveAsync(request.Email, cancellationToken);
 
             // 1. Check if user exists
             if (user is null)
@@ -303,22 +303,22 @@ namespace GivingChampion.Application.Services
             return Task.FromResult(AuthServiceResult<TokenResponse>.Success(token));
         }
 
-        //public async Task<CurrentUserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default)
-        //{
-        //    var user = await _identityRepository.FindByIdAsync(UserId.ToString(), cancellationToken);
+        public async Task<CurrentUserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default)
+        {
+            var user = await _identityRepository.FindByIdAsync(UserId.ToString(), cancellationToken);
 
-        //    if (user is null)
-        //        throw new InvalidOperationException("Current user was not found.");
+            if (user is null)
+                throw new InvalidOperationException("Current user was not found.");
 
-        //    var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
+            var roles = await _identityRepository.GetRolesAsync(user, cancellationToken);
 
-        //    return new CurrentUserDto
-        //    {
-        //        Id = user.Id,
-        //        Email = user.Email,
-        //        UserName = user.UserName,
-        //        Roles = roles.ToArray()
-        //    };
-        //}
+            return new CurrentUserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                Roles = roles.ToArray()
+            };
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace GivingChampion.Application.Auth.Interfaces;
 public interface IIdentityRepository
 {
     Task<ApplicationUser?> FindByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<ApplicationUser?> FindByEmailCaseSensitiveAsync(string email, CancellationToken cancellationToken = default);
     Task<ApplicationUser?> FindByExternalLoginAsync(string provider, string providerKey, CancellationToken cancellationToken = default);
 
     Task<AuthServiceResult<ApplicationUser>> CreateLocalUserAsync(

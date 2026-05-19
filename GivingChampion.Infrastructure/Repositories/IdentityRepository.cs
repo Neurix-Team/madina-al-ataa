@@ -1,6 +1,7 @@
-﻿using GivingChampion.Application.Auth.Interfaces;
+using GivingChampion.Application.Auth.Interfaces;
 using GivingChampion.Common.Results;
 using GivingChampion.Domain.Entities;
+using GivingChampion.Persistance.Extensions;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,6 +10,7 @@ namespace GivingChampion.Persistance.Repositories
     public sealed class IdentityRepository : IIdentityRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly CustomUserManager _customUserManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IDonorRepository _donorRepository;
         private readonly IVolunteerRepository _volunteerRepository;
@@ -18,6 +20,7 @@ namespace GivingChampion.Persistance.Repositories
 
         public IdentityRepository(
             UserManager<ApplicationUser> userManager,
+            CustomUserManager customUserManager,
             RoleManager<ApplicationRole> roleManager,
             IDonorRepository donorRepository,
             IVolunteerRepository volunteerRepository,
@@ -26,6 +29,7 @@ namespace GivingChampion.Persistance.Repositories
             ILevelRepository levelRepository)
         {
             _userManager = userManager;
+            _customUserManager = customUserManager;
             _roleManager = roleManager;
             _donorRepository = donorRepository;
             _volunteerRepository = volunteerRepository;
@@ -36,6 +40,9 @@ namespace GivingChampion.Persistance.Repositories
 
         public Task<ApplicationUser?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
             => _userManager.FindByEmailAsync(email);
+
+        public Task<ApplicationUser?> FindByEmailCaseSensitiveAsync(string email, CancellationToken cancellationToken = default)
+            => _customUserManager.FindByEmailCaseSensitiveAsync(email, cancellationToken);
 
         public Task<ApplicationUser?> FindByExternalLoginAsync(
             string provider,
@@ -67,7 +74,7 @@ namespace GivingChampion.Persistance.Repositories
                 await _volunteerRepository.AddAsync(user.Id);
 
                 var profile = await _profileRepository.AddAsync(user.Id, level1.Id);
-                var avatar = await _avatarRepository.AddAsync(profile.Id);
+                _ = await _avatarRepository.AddAsync(profile.Id);
             }
 
             return result.Succeeded
@@ -94,14 +101,12 @@ namespace GivingChampion.Persistance.Repositories
 
             if (result.Succeeded)
             {
-
                 await _donorRepository.CreateAsync(user.Id);
-
                 await _volunteerRepository.AddAsync(user.Id);
 
                 var level1 = await _levelRepository.GetFirstLevelAsync();
                 var profile = await _profileRepository.AddAsync(user.Id, level1.Id);
-                var avatar = await _avatarRepository.AddAsync(profile.Id);
+                _ = await _avatarRepository.AddAsync(profile.Id);
             }
 
             return result.Succeeded

@@ -216,13 +216,13 @@ namespace GivingChampion.API.Controllers.Auth
             return Ok(result.Data);
         }
 
-        //[HttpGet("me")]
-        //[Authorize]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //public async Task<IActionResult> Me(CancellationToken cancellationToken)
-        //{
-        //    var currentUser = await _authService.GetCurrentUserAsync(cancellationToken);
-        //    return Ok(currentUser);
-        //}
+        [HttpGet("me")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Me(CancellationToken cancellationToken)
+        {
+            var currentUser = await _authService.GetCurrentUserAsync(cancellationToken);
+            return Ok(currentUser);
+        }
     }
 }

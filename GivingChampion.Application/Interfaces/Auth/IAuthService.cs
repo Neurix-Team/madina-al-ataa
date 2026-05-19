@@ -25,6 +25,6 @@ namespace GivingChampion.Application.Interfaces.Auth
             string code,
             CancellationToken cancellationToken = default);
 
-        //Task<CurrentUserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default);
+        Task<CurrentUserDto> GetCurrentUserAsync(CancellationToken cancellationToken = default);
     }
 }
