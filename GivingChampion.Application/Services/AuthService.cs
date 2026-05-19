@@ -316,7 +316,7 @@ namespace GivingChampion.Application.Services
             {
                 Id = user.Id,
                 Email = user.Email,
-                UserName = user.UserName,
+                UserName = user.FullName,
                 Roles = roles.ToArray()
             };
         }
