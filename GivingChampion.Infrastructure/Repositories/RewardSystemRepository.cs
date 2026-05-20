@@ -16,6 +16,39 @@ namespace GivingChampion.Persistance.Repositories
             _context = context;
         }
 
+        public async Task<IReadOnlyList<RewardActionData>> GetServiceRequestRewardDataAsync(
+            Guid serviceRequestId,
+            CancellationToken cancellationToken = default)
+        {
+            var orders = await _context.VolunteerOrders
+                .AsNoTracking()
+                .Include(o => o.ServiceRequest)
+                .Where(o =>
+                    o.ServiceRequestId == serviceRequestId &&
+                    !o.IsDeleted &&
+                    (o.Status == Domain.Enums.OrderStatus.Approved ||
+                     o.Status == Domain.Enums.OrderStatus.InProgress ||
+                     o.Status == Domain.Enums.OrderStatus.Completed))
+                .ToListAsync(cancellationToken);
+
+            return orders
+                .Where(o => o.ServiceRequest != null)
+                .Select(o => new RewardActionData
+                {
+                    UserId = o.UserId,
+                    SourceType = RewardSourceType.Service,
+                    SourceEntityId = o.ServiceRequestId,
+                    ActionEntityId = o.Id,
+                    XPReward = o.ServiceRequest!.XPReward,
+                    KPReward = o.ServiceRequest.KPReward,
+                    ImpactReward = o.ServiceRequest.ImpactReward,
+                    Reason = $"Completed service request: {o.ServiceRequest.Title}",
+                    CompletionTitle = o.ServiceRequest.Title,
+                    CertificateHours = o.ServiceRequest.Duration
+                })
+                .ToList();
+        }
+
         public async Task<RewardActionData?> GetVolunteerOrderRewardDataAsync(
             Guid volunteerOrderId,
             CancellationToken cancellationToken = default)
@@ -37,7 +70,9 @@ namespace GivingChampion.Persistance.Repositories
                 XPReward = order.ServiceRequest.XPReward,
                 KPReward = order.ServiceRequest.KPReward,
                 ImpactReward = order.ServiceRequest.ImpactReward,
-                Reason = $"Completed service request: {order.ServiceRequest.Title}"
+                Reason = $"Completed service request: {order.ServiceRequest.Title}",
+                CompletionTitle = order.ServiceRequest.Title,
+                CertificateHours = order.ServiceRequest.Duration
             };
         }
 

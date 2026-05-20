@@ -22,5 +22,9 @@ namespace GivingChampion.Persistance.Models
         public int ImpactReward { get; set; }
 
         public string Reason { get; set; } = string.Empty;
+
+        public string? CompletionTitle { get; set; }
+
+        public int? CertificateHours { get; set; }
     }
 }

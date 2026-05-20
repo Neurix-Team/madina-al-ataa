@@ -7,6 +7,7 @@ using GivingChampion.Application.DTO.GeoQuestDto;
 using GivingChampion.Application.DTO.UserGeoQuestDto;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Common.Results;
+using GivingChampion.Application.Interfaces.Reward;
 using GivingChampion.Domain.Entities;
 using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,7 @@ namespace GivingChampion.Application.Services
         private readonly IUserGeoQuestRepository _userGeoQuestRepository;
         private readonly IGeoQuestRepository _geoQuestRepository;
         private readonly ILocationRepository _locationRepository;
+        private readonly IRewardSystemService _rewardSystemService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -25,6 +27,7 @@ namespace GivingChampion.Application.Services
             IUserGeoQuestRepository userGeoQuestRepository,
             IGeoQuestRepository geoQuestRepository,
             ILocationRepository locationRepository,
+            IRewardSystemService rewardSystemService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
@@ -33,6 +36,7 @@ namespace GivingChampion.Application.Services
             _userGeoQuestRepository = userGeoQuestRepository;
             _geoQuestRepository = geoQuestRepository;
             _locationRepository = locationRepository;
+            _rewardSystemService = rewardSystemService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -231,10 +235,13 @@ namespace GivingChampion.Application.Services
                 throw new BadRequestException("Location verification failed.");
 
             userGeoQuest.IsLocationVerified = true;
+            userGeoQuest.IsCompleted = true;
 
             _userGeoQuestRepository.Update(userGeoQuest);
 
             await _unitOfWork.SaveChangesAsync();
+
+            await _rewardSystemService.RewardUserGeoQuestCompletedAsync(userGeoQuest.Id);
 
             return Result<string>.Success("Location verification Successful.");
         }

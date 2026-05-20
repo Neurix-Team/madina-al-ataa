@@ -55,6 +55,13 @@ namespace GivingChampion.Persistance.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(vo => vo.Id == id && !vo.IsDeleted);
         }
+
+        public async Task<VolunteerOrder?> GetByIdForUpdateAsync(Guid id)
+        {
+            return await _context.VolunteerOrders
+                .Include(vo => vo.ServiceRequest)
+                .FirstOrDefaultAsync(vo => vo.Id == id && !vo.IsDeleted);
+        }
         public async Task<PagedList<VolunteerOrder>> GetByVolunteerIdAsync(
      Guid volunteerId,
      PageParameters pageParameters)
@@ -78,6 +85,18 @@ namespace GivingChampion.Persistance.Repositories
         {
             return await _context.VolunteerOrders
                 .AnyAsync(vo => vo.Id == id && !vo.IsDeleted);
+        }
+
+        public async Task<List<VolunteerOrder>> GetEligibleByServiceRequestIdAsync(Guid serviceRequestId)
+        {
+            return await _context.VolunteerOrders
+                .Where(vo =>
+                    vo.ServiceRequestId == serviceRequestId &&
+                    !vo.IsDeleted &&
+                    (vo.Status == OrderStatus.Approved ||
+                     vo.Status == OrderStatus.InProgress ||
+                     vo.Status == OrderStatus.Completed))
+                .ToListAsync();
         }
 
         public async Task AddAsync(VolunteerOrder volunteerOrder)

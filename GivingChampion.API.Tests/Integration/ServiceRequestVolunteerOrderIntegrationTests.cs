@@ -368,6 +368,15 @@ public class ServiceRequestVolunteerOrderIntegrationTests
     private sealed class FakeRewardSystemService : IRewardSystemService
     {
         public List<Guid> RewardedVolunteerOrderIds { get; } = [];
+        public List<Guid> RewardedServiceRequestIds { get; } = [];
+
+        public Task RewardServiceRequestCompletedAsync(
+            Guid serviceRequestId,
+            CancellationToken cancellationToken = default)
+        {
+            RewardedServiceRequestIds.Add(serviceRequestId);
+            return Task.CompletedTask;
+        }
 
         public Task RewardVolunteerOrderCompletedAsync(
             Guid volunteerOrderId,

@@ -1,10 +1,12 @@
 using AutoMapper;
 using GivingChampion.API.Controllers;
 using GivingChampion.Application.Interfaces;
+using GivingChampion.Application.Interfaces.Volunteer;
 using GivingChampion.Application.Mapper;
 using GivingChampion.Application.Services;
 using GivingChampion.Persistence.Contexts;
 using GivingChampion.Persistance.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -76,12 +78,8 @@ public sealed class DatabaseTestFixture : IAsyncLifetime
     public VolunteerController CreateVolunteerController()
     {
         var context = CreateDbContext();
-        var controllerContext = CreateControllerContext(null, []);
-
-        var httpContextAccessor = new HttpContextAccessor
-        {
-            HttpContext = controllerContext.HttpContext
-        };
+        var controllerContext = TestAuthContextFactory.CreateControllerContext();
+        var httpContextAccessor = TestAuthContextFactory.CreateHttpContextAccessor();
 
         IVolunteerService service = new VolunteerService(
             new VolunteerRepository(context),

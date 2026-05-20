@@ -48,6 +48,15 @@ namespace GivingChampion.Persistance.Repositories
                 .AnyAsync(v => v.Id == volunteerId, cancellationToken);
         }
 
+        public async Task<bool> ExistsByQrCodeAsync(
+            string qrCode,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Certificates
+                .AsNoTracking()
+                .AnyAsync(c => c.QrCode == qrCode && !c.IsDeleted, cancellationToken);
+        }
+
         public async Task AddAsync(
             CertificateEntity certificate,
             CancellationToken cancellationToken = default)

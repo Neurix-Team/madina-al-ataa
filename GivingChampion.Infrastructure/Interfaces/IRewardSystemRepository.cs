@@ -6,6 +6,10 @@ namespace GivingChampion.Persistance.Interfaces
 {
     public interface IRewardSystemRepository
     {
+        Task<IReadOnlyList<RewardActionData>> GetServiceRequestRewardDataAsync(
+            Guid serviceRequestId,
+            CancellationToken cancellationToken = default);
+
         Task<RewardActionData?> GetVolunteerOrderRewardDataAsync(
             Guid volunteerOrderId,
             CancellationToken cancellationToken = default);

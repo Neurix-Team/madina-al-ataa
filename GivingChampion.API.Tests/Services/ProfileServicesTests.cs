@@ -142,9 +142,11 @@ public class UserBadgeServiceTests
             BadgeId = Guid.NewGuid()
         };
         var repository = new FakeUserBadgeRepository { UserBadgeByProfileAndBadge = existing };
+        var profileRepository = new FakeProfileRepository();
         var service = new UserBadgeService(
             new FakeUnitOfWork(),
             repository,
+            profileRepository,
             ProfileServiceTestMapper.Create(),
             TestAuthContextFactory.CreateHttpContextAccessor(Guid.NewGuid()));
 
@@ -171,9 +173,11 @@ public class UserBadgeServiceTests
         };
         var repository = new FakeUserBadgeRepository { UserBadgeByProfileAndBadge = deletedAssignment };
         var unitOfWork = new FakeUnitOfWork();
+        var profileRepository = new FakeProfileRepository();
         var service = new UserBadgeService(
             unitOfWork,
             repository,
+            profileRepository,
             ProfileServiceTestMapper.Create(),
             TestAuthContextFactory.CreateHttpContextAccessor(Guid.NewGuid()));
 
@@ -195,22 +199,29 @@ public class UserBadgeServiceTests
     public async Task GetAllByUserIdAsync_UsesAuthenticatedUserId()
     {
         var userId = Guid.NewGuid();
+        var profileId = Guid.NewGuid();
         var repository = new FakeUserBadgeRepository
         {
-            UserBadgesByUserId =
+            UserBadgesByProfileId =
             [
-                new UserBadge { Id = Guid.NewGuid(), ProfileId = Guid.NewGuid(), BadgeId = Guid.NewGuid() }
+                new UserBadge { Id = Guid.NewGuid(), ProfileId = profileId, BadgeId = Guid.NewGuid() }
             ]
+        };
+        var profileRepository = new FakeProfileRepository
+        {
+            ProfileByUserId = new DomainProfile { Id = profileId, UserId = userId }
         };
         var service = new UserBadgeService(
             new FakeUnitOfWork(),
             repository,
+            profileRepository,
             ProfileServiceTestMapper.Create(),
             TestAuthContextFactory.CreateHttpContextAccessor(userId));
 
         var result = await service.GetAllByUserIdAsync();
 
-        Assert.Equal(userId, repository.LastRequestedUserId);
+        Assert.Equal(userId, profileRepository.LastRequestedUserId);
+        Assert.Equal(profileId, repository.LastRequestedProfileId);
         Assert.Single(result);
     }
 }
@@ -227,24 +238,26 @@ public class UserLevelServiceTests
         {
             FirstOrDefaultEntity = new DomainProfile { Id = profileId, UserId = userId }
         };
-        var userLevelRepository = new FakeGenericRepository<UserLevel>
+        var userLevel = new UserLevel
         {
-            FirstOrDefaultEntity = new UserLevel
-            {
-                Id = Guid.NewGuid(),
-                ProfileId = profileId,
-                LevelId = level.Id,
-                Xp = 120,
-                Kp = 35,
-                Level = level
-            }
+            Id = Guid.NewGuid(),
+            ProfileId = profileId,
+            LevelId = level.Id,
+            Xp = 120,
+            Kp = 35,
+            Level = level
+        };
+        var userLevelRepository = new FakeUserLevelRepository
+        {
+            UserLevelByProfileId = userLevel
         };
         var unitOfWork = new FakeUnitOfWork();
         unitOfWork.RegisterRepository(profileRepository);
-        unitOfWork.RegisterRepository(userLevelRepository);
+        unitOfWork.RegisterRepository(new FakeGenericRepository<UserLevel>());
         var service = new UserLevelService(
             unitOfWork,
             new FakeProfileRepository(),
+            userLevelRepository,
             ProfileServiceTestMapper.Create(),
             TestAuthContextFactory.CreateHttpContextAccessor(userId));
 
@@ -265,6 +278,7 @@ public class UserLevelServiceTests
         var service = new UserLevelService(
             unitOfWork,
             new FakeProfileRepository(),
+            new FakeUserLevelRepository(),
             ProfileServiceTestMapper.Create(),
             TestAuthContextFactory.CreateHttpContextAccessor(Guid.NewGuid()));
 
@@ -288,9 +302,11 @@ public class UserLevelServiceTests
         var unitOfWork = new FakeUnitOfWork();
         unitOfWork.RegisterRepository(new FakeGenericRepository<DomainProfile>());
         unitOfWork.RegisterRepository(userLevelRepository);
+        var customUserLevelRepository = new FakeUserLevelRepository();
         var service = new UserLevelService(
             unitOfWork,
             new FakeProfileRepository(),
+            customUserLevelRepository,
             ProfileServiceTestMapper.Create(),
             TestAuthContextFactory.CreateHttpContextAccessor(Guid.NewGuid()));
 

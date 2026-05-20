@@ -221,7 +221,7 @@ namespace GivingChampion.Application.Services
             if (progress is <= 0 or > 100)
                 throw new BadRequestException("Progress value must be between 1 and 100.");
 
-            var order = await _volunteerOrderRepository.GetByIdAsync(orderId)
+            var order = await _volunteerOrderRepository.GetByIdForUpdateAsync(orderId)
                 ?? throw new NotFoundException($"Volunteer order with ID {orderId} was not found.");
 
             if (order.IsDeleted)
@@ -236,7 +236,7 @@ namespace GivingChampion.Application.Services
                     $"Only approved or in-progress orders can update progress. Current status is {order.Status}.");
             }
 
-            var serviceRequest = await _serviceRequestRepository.GetByIdAsync(order.ServiceRequestId)
+            var serviceRequest = await _serviceRequestRepository.GetByIdForUpdateAsync(order.ServiceRequestId)
                 ?? throw new NotFoundException($"Service request with ID {order.ServiceRequestId} was not found.");
 
             if (serviceRequest.Status == RequestStatus.Completed)
@@ -248,7 +248,7 @@ namespace GivingChampion.Application.Services
             if (progress == serviceRequest.Progress)
                 throw new BadRequestException("Progress value is already the current progress.");
 
-            var shouldRewardVolunteer = false;
+            var shouldRewardServiceRequest = false;
 
             if (order.Status == OrderStatus.Approved)
             {
@@ -272,9 +272,21 @@ namespace GivingChampion.Application.Services
 
             if (progress == 100)
             {
-                order.Status = OrderStatus.Completed;
                 serviceRequest.Status = RequestStatus.Completed;
-                shouldRewardVolunteer = true;
+                serviceRequest.Progress = 100;
+                shouldRewardServiceRequest = true;
+
+                var eligibleOrders = await _volunteerOrderRepository
+                    .GetEligibleByServiceRequestIdAsync(order.ServiceRequestId);
+
+                foreach (var eligibleOrder in eligibleOrders)
+                {
+                    if (eligibleOrder.Status != OrderStatus.Completed)
+                    {
+                        eligibleOrder.Status = OrderStatus.Completed;
+                        eligibleOrder.UpdatedAt = DateTime.UtcNow;
+                    }
+                }
 
                 await AddActivityAsync(
                     order.Id,
@@ -291,9 +303,9 @@ namespace GivingChampion.Application.Services
 
             await _unitOfWork.SaveChangesAsync();
 
-            if (shouldRewardVolunteer)
+            if (shouldRewardServiceRequest)
             {
-                await _rewardSystemService.RewardVolunteerOrderCompletedAsync(order.Id);
+                await _rewardSystemService.RewardServiceRequestCompletedAsync(serviceRequest.Id);
             }
             // NADA RAFAT
             order.ServiceRequest = serviceRequest;

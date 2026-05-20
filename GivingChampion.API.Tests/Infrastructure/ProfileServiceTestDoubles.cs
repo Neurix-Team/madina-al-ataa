@@ -148,7 +148,9 @@ internal sealed class FakeBadgeRepository : IBadgeRepository
 internal sealed class FakeUserBadgeRepository : IUserBadgeRepository
 {
     public Guid LastRequestedUserId { get; private set; }
+    public Guid LastRequestedProfileId { get; private set; }
     public List<UserBadge> UserBadgesByUserId { get; set; } = [];
+    public List<UserBadge> UserBadgesByProfileId { get; set; } = [];
     public UserBadge? UserBadgeById { get; set; }
     public UserBadge? UserBadgeByProfileAndBadge { get; set; }
     public List<UserBadge> AddedUserBadges { get; } = [];
@@ -161,7 +163,10 @@ internal sealed class FakeUserBadgeRepository : IUserBadgeRepository
     }
 
     public Task<List<UserBadge>> GetAllByProfileIdAsync(Guid profileId)
-        => throw new NotSupportedException();
+    {
+        LastRequestedProfileId = profileId;
+        return Task.FromResult(UserBadgesByProfileId);
+    }
 
     public Task<UserBadge?> GetByIdAsync(Guid id)
         => Task.FromResult(UserBadgeById);
@@ -180,15 +185,48 @@ internal sealed class FakeUserBadgeRepository : IUserBadgeRepository
 
 internal sealed class FakeProfileRepository : IProfileRepository
 {
+    public Guid LastRequestedUserId { get; private set; }
     public DomainProfile? ProfileByUserId { get; set; }
 
     public Task<List<DomainProfile>> GetAllAsync() => throw new NotSupportedException();
 
     public Task<DomainProfile?> GetByIdAsync(Guid id) => throw new NotSupportedException();
 
-    public Task<DomainProfile?> GetByUserIdAsync(Guid id) => Task.FromResult(ProfileByUserId);
+    public Task<DomainProfile?> GetByUserIdAsync(Guid id)
+    {
+        LastRequestedUserId = id;
+        return Task.FromResult(ProfileByUserId);
+    }
 
     public Task<DomainProfile> AddAsync(Guid userId, Guid levelId) => throw new NotSupportedException();
 
     public Task Update(DomainProfile profile) => throw new NotSupportedException();
+}
+
+internal sealed class FakeUserLevelRepository : IUserLevelRepository
+{
+    public Guid LastRequestedProfileId { get; private set; }
+    public List<UserLevel> UserLevels { get; set; } = [];
+    public UserLevel? UserLevelByProfileId { get; set; }
+    public UserLevel? UserLevelById { get; set; }
+    public List<UserLevel> AddedUserLevels { get; } = [];
+    public UserLevel? UpdatedUserLevel { get; private set; }
+
+    public Task<List<UserLevel>> GetAllAsync() => Task.FromResult(UserLevels);
+
+    public Task<UserLevel?> GetByProfileIdAsync(Guid profileId)
+    {
+        LastRequestedProfileId = profileId;
+        return Task.FromResult(UserLevelByProfileId);
+    }
+
+    public Task<UserLevel?> GetByIdAsync(Guid id) => Task.FromResult(UserLevelById);
+
+    public Task AddAsync(UserLevel userLevel)
+    {
+        AddedUserLevels.Add(userLevel);
+        return Task.CompletedTask;
+    }
+
+    public void Update(UserLevel userLevel) => UpdatedUserLevel = userLevel;
 }

@@ -13,6 +13,7 @@ using GivingChampion.Persistance.Interfaces;
 using Microsoft.AspNetCore.Http;
 using GivingChampion.Application.DTO.Notification;
 using GivingChampion.Application.DTO.ActivityDto;
+using GivingChampion.Application.Interfaces.Reward;
 
 namespace GivingChampion.Application.Services.DonationOrderService
 {
@@ -23,6 +24,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
         private readonly IDonorRepository _donorRepository;
         private readonly INotificationService _notificationService;
         private readonly IActivityService _activityService;
+        private readonly IRewardSystemService _rewardSystemService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
@@ -32,6 +34,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             IDonorRepository donorRepository,
             IActivityService activityService,
             INotificationService notificationService,
+            IRewardSystemService rewardSystemService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
@@ -42,6 +45,7 @@ namespace GivingChampion.Application.Services.DonationOrderService
             _donorRepository = donorRepository;
             _activityService = activityService;
             _notificationService = notificationService;
+            _rewardSystemService = rewardSystemService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -232,6 +236,8 @@ namespace GivingChampion.Application.Services.DonationOrderService
             });
 
             await _unitOfWork.SaveChangesAsync();
+
+            await _rewardSystemService.RewardDonationOrderCompletedAsync(donationOrder.Id);
 
             var updatedOrder = await _donationOrderRepository.GetByIdAsync(id);
 

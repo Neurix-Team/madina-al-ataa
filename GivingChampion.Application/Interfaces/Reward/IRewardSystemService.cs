@@ -2,6 +2,10 @@ namespace GivingChampion.Application.Interfaces.Reward
 {
     public interface IRewardSystemService
     {
+        Task RewardServiceRequestCompletedAsync(
+            Guid serviceRequestId,
+            CancellationToken cancellationToken = default);
+
         Task RewardVolunteerOrderCompletedAsync(
             Guid volunteerOrderId,
             CancellationToken cancellationToken = default);

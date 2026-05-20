@@ -18,6 +18,10 @@ namespace GivingChampion.Persistance.Interfaces
             Guid volunteerId,
             CancellationToken cancellationToken = default);
 
+        Task<bool> ExistsByQrCodeAsync(
+            string qrCode,
+            CancellationToken cancellationToken = default);
+
         Task AddAsync(
             CertificateEntity certificate,
             CancellationToken cancellationToken = default);

@@ -228,6 +228,9 @@ public class VolunteerOrdersControllerTests
         public Task<Result<PagedList<VolunteerOrderDto>>> GetPendingAsync(PageParameters pageParameters)
             => Task.FromResult(GetPendingResult ?? Result<PagedList<VolunteerOrderDto>>.Success(CreatePage()));
 
+        public Task<Result<PagedList<VolunteerOrderDto>>> GetMyOrdersAsync(PageParameters pageParameters)
+            => Task.FromResult(Result<PagedList<VolunteerOrderDto>>.Success(CreatePage()));
+
         public Task<Result<PendingVolunteerOrderCountDto>> GetPendingCountAsync()
             => Task.FromResult(GetPendingCountResult ?? Result<PendingVolunteerOrderCountDto>.Success(new PendingVolunteerOrderCountDto()));
 

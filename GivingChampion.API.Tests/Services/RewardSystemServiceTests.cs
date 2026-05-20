@@ -25,7 +25,12 @@ public class RewardSystemServiceTests
         var repository = new FakeRewardSystemRepository();
         var parser = new FakeBadgeRequirementParser();
         var unitOfWork = new FakeUnitOfWork();
-        var service = new RewardSystemService(repository, parser, unitOfWork);
+        var service = new RewardSystemService(
+            repository,
+            parser,
+            new FakeVolunteerRepository(),
+            new FakeCertificateRepository(),
+            unitOfWork);
 
         await service.RewardUserMissionCompletedAsync(Guid.NewGuid());
 
@@ -71,6 +76,8 @@ public class RewardSystemServiceTests
         var service = new RewardSystemService(
             repository,
             new FakeBadgeRequirementParser(),
+            new FakeVolunteerRepository(),
+            new FakeCertificateRepository(),
             new FakeUnitOfWork());
 
         await service.RewardUserMissionCompletedAsync(Guid.NewGuid());
@@ -145,7 +152,12 @@ public class RewardSystemServiceTests
             }
         };
         var unitOfWork = new FakeUnitOfWork();
-        var service = new RewardSystemService(repository, parser, unitOfWork);
+        var service = new RewardSystemService(
+            repository,
+            parser,
+            new FakeVolunteerRepository(),
+            new FakeCertificateRepository(),
+            unitOfWork);
 
         await service.RewardUserMissionCompletedAsync(Guid.NewGuid());
 
@@ -167,6 +179,88 @@ public class RewardSystemServiceTests
         Assert.Equal(profileId, awardedBadge.ProfileId);
         Assert.Equal(badgeId, awardedBadge.BadgeId);
         Assert.Equal(2, unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task RewardServiceRequestCompletedAsync_RewardsAllEligibleVolunteerOrders_AndCreatesCertificates()
+    {
+        var volunteerAUserId = Guid.NewGuid();
+        var volunteerBUserId = Guid.NewGuid();
+        var volunteerAId = Guid.NewGuid();
+        var volunteerBId = Guid.NewGuid();
+        var profileAId = Guid.NewGuid();
+        var profileBId = Guid.NewGuid();
+        var serviceRequestId = Guid.NewGuid();
+
+        var repository = new FakeRewardSystemRepository
+        {
+            ServiceRequestRewardData = new List<RewardActionData>
+            {
+                new()
+                {
+                    UserId = volunteerAUserId,
+                    SourceType = RewardSourceType.Service,
+                    SourceEntityId = serviceRequestId,
+                    ActionEntityId = Guid.NewGuid(),
+                    XPReward = 5,
+                    KPReward = 3,
+                    ImpactReward = 2,
+                    Reason = "Completed service request: Library support",
+                    CompletionTitle = "Library support",
+                    CertificateHours = 4
+                },
+                new()
+                {
+                    UserId = volunteerBUserId,
+                    SourceType = RewardSourceType.Service,
+                    SourceEntityId = serviceRequestId,
+                    ActionEntityId = Guid.NewGuid(),
+                    XPReward = 5,
+                    KPReward = 3,
+                    ImpactReward = 2,
+                    Reason = "Completed service request: Library support",
+                    CompletionTitle = "Library support",
+                    CertificateHours = 4
+                }
+            }
+        };
+
+        repository.ProfilesByUserId[volunteerAUserId] = new Profile
+        {
+            Id = profileAId,
+            UserId = volunteerAUserId,
+            Impact = 0,
+            UserLevel = new UserLevel { Id = Guid.NewGuid(), ProfileId = profileAId, Xp = 0, Kp = 0 }
+        };
+        repository.ProfilesByUserId[volunteerBUserId] = new Profile
+        {
+            Id = profileBId,
+            UserId = volunteerBUserId,
+            Impact = 1,
+            UserLevel = new UserLevel { Id = Guid.NewGuid(), ProfileId = profileBId, Xp = 2, Kp = 1 }
+        };
+        repository.ProfilesById[profileAId] = repository.ProfilesByUserId[volunteerAUserId]!;
+        repository.ProfilesById[profileBId] = repository.ProfilesByUserId[volunteerBUserId]!;
+
+        var volunteerRepository = new FakeVolunteerRepository();
+        volunteerRepository.VolunteersByUserId[volunteerAUserId] = new Volunteer { Id = volunteerAId, UserId = volunteerAUserId };
+        volunteerRepository.VolunteersByUserId[volunteerBUserId] = new Volunteer { Id = volunteerBId, UserId = volunteerBUserId };
+
+        var certificateRepository = new FakeCertificateRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var service = new RewardSystemService(
+            repository,
+            new FakeBadgeRequirementParser(),
+            volunteerRepository,
+            certificateRepository,
+            unitOfWork);
+
+        await service.RewardServiceRequestCompletedAsync(serviceRequestId);
+
+        Assert.Equal(2, repository.AddedRewardTransactions.Count);
+        Assert.Equal(2, certificateRepository.AddedCertificates.Count);
+        Assert.Contains(certificateRepository.AddedCertificates, certificate => certificate.IssuedTo == volunteerAId);
+        Assert.Contains(certificateRepository.AddedCertificates, certificate => certificate.IssuedTo == volunteerBId);
     }
 
     [Fact]
@@ -253,6 +347,7 @@ public class RewardSystemServiceTests
     private sealed class FakeRewardSystemRepository : IRewardSystemRepository
     {
         public RewardActionData? UserMissionRewardData { get; set; }
+        public IReadOnlyList<RewardActionData> ServiceRequestRewardData { get; set; } = [];
         public Profile? ProfileByUserId { get; set; }
         public Profile? ProfileById { get; set; }
         public UserLevel? UserLevelToReturn { get; set; }
@@ -260,6 +355,11 @@ public class RewardSystemServiceTests
         public IReadOnlyList<Badge> ActiveBadges { get; set; } = [];
         public List<RewardTransaction> AddedRewardTransactions { get; } = [];
         public List<UserBadge> AddedUserBadges { get; } = [];
+        public Dictionary<Guid, Profile?> ProfilesByUserId { get; } = [];
+        public Dictionary<Guid, Profile?> ProfilesById { get; } = [];
+
+        public Task<IReadOnlyList<RewardActionData>> GetServiceRequestRewardDataAsync(Guid serviceRequestId, CancellationToken cancellationToken = default)
+            => Task.FromResult(ServiceRequestRewardData);
 
         public Task<RewardActionData?> GetVolunteerOrderRewardDataAsync(Guid volunteerOrderId, CancellationToken cancellationToken = default)
             => Task.FromResult<RewardActionData?>(null);
@@ -274,10 +374,10 @@ public class RewardSystemServiceTests
             => Task.FromResult<RewardActionData?>(null);
 
         public Task<Profile?> GetProfileWithUserLevelByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
-            => Task.FromResult(ProfileByUserId);
+            => Task.FromResult(ProfilesByUserId.TryGetValue(userId, out var profile) ? profile : ProfileByUserId);
 
         public Task<Profile?> GetProfileWithUserLevelByIdAsync(Guid profileId, CancellationToken cancellationToken = default)
-            => Task.FromResult(ProfileById);
+            => Task.FromResult(ProfilesById.TryGetValue(profileId, out var profile) ? profile : ProfileById);
 
         public Task<UserLevel> GetOrCreateUserLevelAsync(Profile profile, CancellationToken cancellationToken = default)
             => Task.FromResult(UserLevelToReturn ?? profile.UserLevel!);
@@ -300,6 +400,47 @@ public class RewardSystemServiceTests
         public Task AddUserBadgeAsync(UserBadge userBadge, CancellationToken cancellationToken = default)
         {
             AddedUserBadges.Add(userBadge);
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeVolunteerRepository : IVolunteerRepository
+    {
+        public Dictionary<Guid, Volunteer?> VolunteersByUserId { get; } = [];
+
+        public Task<PagedList<Volunteer>> GetAllAsync(PageParameters pageParameters) => throw new NotSupportedException();
+
+        public Task<Volunteer?> GetByIdAsync(Guid id) => throw new NotSupportedException();
+
+        public Task<Volunteer?> GetByUserIdAsync(Guid userId)
+            => Task.FromResult(VolunteersByUserId.TryGetValue(userId, out var volunteer) ? volunteer : null);
+
+        public void Update(Volunteer volunteer) => throw new NotSupportedException();
+
+        public Task AddAsync(Guid userId) => throw new NotSupportedException();
+    }
+
+    private sealed class FakeCertificateRepository : ICertificateRepository
+    {
+        public HashSet<string> ExistingQrCodes { get; } = [];
+        public List<Certificate> AddedCertificates { get; } = [];
+
+        public Task<PagedList<Certificate>> GetCertificateByIdAsync(Guid volunteerId, PageParameters pageParameters, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<PagedList<Certificate>> GetAllAsync(PageParameters pageParameters, CancellationToken cancellationToken = default)
+            => throw new NotSupportedException();
+
+        public Task<bool> VolunteerExistsAsync(Guid volunteerId, CancellationToken cancellationToken = default)
+            => Task.FromResult(true);
+
+        public Task<bool> ExistsByQrCodeAsync(string qrCode, CancellationToken cancellationToken = default)
+            => Task.FromResult(ExistingQrCodes.Contains(qrCode));
+
+        public Task AddAsync(Certificate certificate, CancellationToken cancellationToken = default)
+        {
+            AddedCertificates.Add(certificate);
+            ExistingQrCodes.Add(certificate.QrCode);
             return Task.CompletedTask;
         }
     }
@@ -334,6 +475,13 @@ public class RewardSystemServiceTests
     private sealed class FakeRewardSystemService : IRewardSystemService
     {
         public List<Guid> RewardedUserMissionIds { get; } = [];
+        public List<Guid> RewardedServiceRequestIds { get; } = [];
+
+        public Task RewardServiceRequestCompletedAsync(Guid serviceRequestId, CancellationToken cancellationToken = default)
+        {
+            RewardedServiceRequestIds.Add(serviceRequestId);
+            return Task.CompletedTask;
+        }
 
         public Task RewardVolunteerOrderCompletedAsync(Guid volunteerOrderId, CancellationToken cancellationToken = default)
             => Task.CompletedTask;

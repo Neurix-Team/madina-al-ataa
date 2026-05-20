@@ -11,16 +11,38 @@ namespace GivingChampion.Application.Services
     {
         private readonly IRewardSystemRepository _rewardRepository;
         private readonly IBadgeRequirementParser _badgeRequirementParser;
+        private readonly IVolunteerRepository _volunteerRepository;
+        private readonly ICertificateRepository _certificateRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public RewardSystemService(
             IRewardSystemRepository rewardRepository,
             IBadgeRequirementParser badgeRequirementParser,
+            IVolunteerRepository volunteerRepository,
+            ICertificateRepository certificateRepository,
             IUnitOfWork unitOfWork)
         {
             _rewardRepository = rewardRepository;
             _badgeRequirementParser = badgeRequirementParser;
+            _volunteerRepository = volunteerRepository;
+            _certificateRepository = certificateRepository;
             _unitOfWork = unitOfWork;
+        }
+
+        public async Task RewardServiceRequestCompletedAsync(
+            Guid serviceRequestId,
+            CancellationToken cancellationToken = default)
+        {
+            var rewardDataItems = await _rewardRepository
+                .GetServiceRequestRewardDataAsync(serviceRequestId, cancellationToken);
+
+            foreach (var rewardData in rewardDataItems)
+            {
+                await AddRewardAndAwardBadgesAsync(
+                    rewardData,
+                    cancellationToken,
+                    issueCertificate: true);
+            }
         }
 
         public async Task RewardVolunteerOrderCompletedAsync(
@@ -30,7 +52,10 @@ namespace GivingChampion.Application.Services
             var rewardData = await _rewardRepository
                 .GetVolunteerOrderRewardDataAsync(volunteerOrderId, cancellationToken);
 
-            await AddRewardAndAwardBadgesAsync(rewardData, cancellationToken);
+            await AddRewardAndAwardBadgesAsync(
+                rewardData,
+                cancellationToken,
+                issueCertificate: true);
         }
 
         public async Task RewardDonationOrderCompletedAsync(
@@ -65,7 +90,8 @@ namespace GivingChampion.Application.Services
 
         private async Task AddRewardAndAwardBadgesAsync(
             RewardActionData? rewardData,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            bool issueCertificate = false)
         {
             if (rewardData == null)
                 return;
@@ -84,7 +110,15 @@ namespace GivingChampion.Application.Services
                     cancellationToken);
 
             if (alreadyRewarded)
+            {
+                if (issueCertificate)
+                {
+                    await EnsureVolunteerCertificateAsync(rewardData, cancellationToken);
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                }
+
                 return;
+            }
 
             var userLevel = await _rewardRepository
                 .GetOrCreateUserLevelAsync(profile, cancellationToken);
@@ -113,12 +147,64 @@ namespace GivingChampion.Application.Services
                 rewardTransaction,
                 cancellationToken);
 
+            if (issueCertificate)
+            {
+                await EnsureVolunteerCertificateAsync(rewardData, cancellationToken);
+            }
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await AwardEligibleBadgesAsync(profile.Id, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+
+        private async Task EnsureVolunteerCertificateAsync(
+            RewardActionData rewardData,
+            CancellationToken cancellationToken)
+        {
+            if (rewardData.SourceType != RewardSourceType.Service ||
+                string.IsNullOrWhiteSpace(rewardData.CompletionTitle) ||
+                rewardData.CertificateHours is null)
+            {
+                return;
+            }
+
+            var volunteer = await _volunteerRepository
+                .GetByUserIdAsync(rewardData.UserId);
+
+            if (volunteer == null)
+                return;
+
+            var qrCode = BuildVolunteerCertificateQrCode(
+                rewardData.SourceEntityId,
+                volunteer.Id);
+
+            var exists = await _certificateRepository
+                .ExistsByQrCodeAsync(qrCode, cancellationToken);
+
+            if (exists)
+                return;
+
+            var certificate = new Certificate
+            {
+                Id = Guid.NewGuid(),
+                Type = $"Volunteer Certificate - {rewardData.CompletionTitle}",
+                IssuedDate = DateTime.UtcNow,
+                IssuedTo = volunteer.Id,
+                TotalHours = Math.Max(1, rewardData.CertificateHours.Value),
+                QrCode = qrCode,
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            };
+
+            await _certificateRepository.AddAsync(certificate, cancellationToken);
+        }
+
+        private static string BuildVolunteerCertificateQrCode(
+            Guid serviceRequestId,
+            Guid volunteerId)
+            => $"service-request:{serviceRequestId}:volunteer:{volunteerId}";
 
         private async Task AwardEligibleBadgesAsync(
             Guid profileId,
