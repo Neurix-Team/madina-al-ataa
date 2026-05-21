@@ -5,8 +5,10 @@ using GivingChampion.Application.DTO.LevelDto;
 using GivingChampion.Application.DTO.UserBadge;
 using GivingChampion.Application.DTO.UserLevelDto;
 using GivingChampion.Application.Exceptions;
+using GivingChampion.Application.Mapper;
 using GivingChampion.Common.Pagination;
 using GivingChampion.Domain.Entities;
+using Microsoft.Extensions.Logging.Abstractions;
 using DomainProfile = GivingChampion.Domain.Entities.Profile;
 
 namespace GivingChampion.API.Tests.Services;
@@ -323,5 +325,37 @@ public class UserLevelServiceTests
         Assert.Equal(20, userLevel.Kp);
         Assert.Same(userLevel, userLevelRepository.UpdatedEntity);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+    }
+}
+
+public class ProfileMappingTests
+{
+    [Fact]
+    public void ProfileToDto_MapsUserFields()
+    {
+        var mapper = new AutoMapper.MapperConfiguration(
+            cfg => cfg.AddProfile<MappingProfile>(),
+            NullLoggerFactory.Instance).CreateMapper();
+
+        var birthDate = new DateTime(1998, 4, 12, 0, 0, 0, DateTimeKind.Utc);
+        var profile = new DomainProfile
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            Impact = 42,
+            Rating = 4.5,
+            User = new ApplicationUser
+            {
+                Email = "user@example.com",
+                FullName = "Test User",
+                BirthDay = birthDate
+            }
+        };
+
+        var dto = mapper.Map<GivingChampion.Application.DTO.ProfileDto.ProfileDto>(profile);
+
+        Assert.Equal("user@example.com", dto.Email);
+        Assert.Equal("Test User", dto.FullName);
+        Assert.Equal(birthDate, dto.BirthDate);
     }
 }

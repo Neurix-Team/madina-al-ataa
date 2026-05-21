@@ -278,7 +278,11 @@ namespace GivingChampion.Application.Mapper
             #region Profile Mappings
 
             CreateMap<Domain.Entities.Profile, ProfileDto>()
-                .ForMember(dest => dest.LevelNumber, opt => opt.MapFrom(src => src.UserLevel.Level.Number)).ReverseMap();
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User != null ? src.User.Email ?? string.Empty : string.Empty))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User != null ? src.User.FullName ?? string.Empty : string.Empty))
+                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.User != null ? src.User.BirthDay : default))
+                .ForMember(dest => dest.LevelNumber, opt => opt.MapFrom(src => src.UserLevel != null && src.UserLevel.Level != null ? src.UserLevel.Level.Number : (int?)null))
+                .ReverseMap();
             CreateMap<CreateProfileDto, Domain.Entities.Profile>().ReverseMap();
             CreateMap<UpdateProfileDto, Domain.Entities.Profile>().ReverseMap();
 

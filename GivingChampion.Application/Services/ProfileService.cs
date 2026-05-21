@@ -25,10 +25,12 @@ namespace GivingChampion.API.Services
         private readonly IGenericRepository<UserBadge> _userBadgeRepository;
         private readonly IGenericRepository<UserLevel> _userLevelRepository;
         private readonly IMapper _mapper;
+        private readonly IProfileRepository _customProfileRepository;
 
         public ProfileService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
+            IProfileRepository CustomProfileRepository,
             IHttpContextAccessor httpContextAccessor)
             : base(httpContextAccessor)
         {
@@ -40,6 +42,7 @@ namespace GivingChampion.API.Services
             _userBadgeRepository = unitOfWork.Repository<UserBadge>();
             _userLevelRepository = unitOfWork.Repository<UserLevel>();
             _mapper = mapper;
+            _customProfileRepository = CustomProfileRepository;
         }
 
         public async Task<Result<ProfileDto?>> GetByIdAsync(Guid id)
@@ -47,7 +50,7 @@ namespace GivingChampion.API.Services
             if (id == Guid.Empty)
                 throw new BadRequestException("Profile ID is required.");
 
-            var profile = await _profileRepository.GetByIdAsync(id);
+            var profile = await _customProfileRepository.GetByIdAsync(id);
 
             if (profile == null)
                 throw new NotFoundException($"Profile with ID {id} was not found.");
@@ -153,7 +156,7 @@ namespace GivingChampion.API.Services
         {
             var id = UserId;
 
-            var profile = await _profileRepository.FirstOrDefaultAsync(p => p.UserId == id);
+            var profile = await _customProfileRepository.GetByUserIdAsync(id);
 
             if (profile == null)
                 throw new NotFoundException($"Profile with User ID {id} was not found.");
