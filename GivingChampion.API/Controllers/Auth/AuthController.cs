@@ -176,7 +176,7 @@ namespace GivingChampion.API.Controllers.Auth
                 Provider = "Google",
                 ProviderKey = providerKey,
                 Email = principal.FindFirstValue(ClaimTypes.Email),
-                FullName = principal.FindFirstValue(ClaimTypes.Name)
+                FullName = principal.FindFirstValue(ClaimTypes.GivenName)
             };
 
             var result = await _authService.CompleteGoogleLoginAsync(externalUser, cancellationToken);
