@@ -7,6 +7,9 @@ const string ApiComposeServiceName = "givingchampion-api";
 const string ApiPublicPort = "5001";
 const string ApiContainerPort = "8080";
 const string ApiProxyDomain = "champapi.neurix.uk";
+const string MigratorImageName = "givingchampion-migrator";
+const string SeederImageName = "givingchampion-seeder";
+const string ApiImageName = "givingchampion-api";
 
 // Shared image tag for all app services
 var imageTag = builder.Configuration["IMAGE_TAG"] ?? "latest";
@@ -14,6 +17,13 @@ var imageTag = builder.Configuration["IMAGE_TAG"] ?? "latest";
 // Add Docker Compose environment
 var compose = builder.AddDockerComposeEnvironment("compose")
     .WithDashboard(dashboard => dashboard.WithHostPort(8090));
+
+var registryEndpoint = builder.AddParameter("registry-endpoint", secret: true);
+var registryRepository = builder.AddParameter("registry-repository", secret: true);
+var containerRegistry = builder.AddContainerRegistry(
+    "private-registry",
+    registryEndpoint,
+    registryRepository);
 
 // Retrieve secrets from environment variables
 var googleClientId = builder.AddParameter("google-client-id", secret: true);
@@ -51,6 +61,9 @@ else
 // Migrator service configuration
 var migrator = builder.AddProject<Projects.GivingChampion_Migrator>("migrator")
     .WithImageTag(imageTag)
+    .WithContainerRegistry(containerRegistry)
+    .WithRemoteImageName(MigratorImageName)
+    .WithRemoteImageTag(imageTag)
     .WithReference(db, "DefaultConnection")
     .WaitFor(db)
     .PublishAsDockerComposeService((resource, service) =>
@@ -61,6 +74,9 @@ var migrator = builder.AddProject<Projects.GivingChampion_Migrator>("migrator")
 // Seeder service configuration
 var seeder = builder.AddProject<Projects.GivingChampion_Seeder>("seeder")
     .WithImageTag(imageTag)
+    .WithContainerRegistry(containerRegistry)
+    .WithRemoteImageName(SeederImageName)
+    .WithRemoteImageTag(imageTag)
     .WithReference(db, "DefaultConnection")
     .WithReference(migrator)
     .WaitFor(db)
@@ -73,6 +89,9 @@ var seeder = builder.AddProject<Projects.GivingChampion_Seeder>("seeder")
 // API service configuration
 builder.AddProject<Projects.GivingChampion_API>("api")
     .WithImageTag(imageTag)
+    .WithContainerRegistry(containerRegistry)
+    .WithRemoteImageName(ApiImageName)
+    .WithRemoteImageTag(imageTag)
     .WithReference(db, "DefaultConnection")
     .WithReference(seeder)
     .WithEnvironment("Jwt__Issuer", jwtIssuer)

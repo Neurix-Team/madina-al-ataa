@@ -54,6 +54,7 @@ TestResult.xml
 nunit-*.xml
 /.vs
 *.Production
+*.env.production
 *.Production.ps1
 /.dotnet-home/.dotnet
 /.nuget-packages
@@ -63,3 +64,4 @@ nunit-*.xml
 *.env
 *.vars
 *.md
+/GivingChampion/GivingChampion.AppHost/aspire-output/.env.production

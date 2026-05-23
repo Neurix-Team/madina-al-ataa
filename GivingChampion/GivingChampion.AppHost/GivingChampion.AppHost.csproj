@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>e0b7c05b-01f1-423f-b5a1-65849c755816</UserSecretsId>
+    <NoWarn>$(NoWarn);ASPIRECOMPUTE003;ASPIREPIPELINES003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
