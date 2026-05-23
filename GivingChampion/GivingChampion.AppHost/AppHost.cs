@@ -3,6 +3,11 @@ using ModelContextProtocol.Protocol;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+const string ApiComposeServiceName = "givingchampion-api";
+const string ApiPublicPort = "5001";
+const string ApiContainerPort = "8080";
+const string ApiProxyDomain = "champapi.neurix.uk";
+
 // Shared image tag for all app services
 var imageTag = builder.Configuration["IMAGE_TAG"] ?? "latest";
 
@@ -82,8 +87,11 @@ builder.AddProject<Projects.GivingChampion_API>("api")
     .WaitForCompletion(seeder)
     .PublishAsDockerComposeService((resource, service) =>
     {
-        service.Name = "api";
-        service.Ports.Add("5001:8080");
+        service.Name = ApiComposeServiceName;
+        service.Ports.Add($"{ApiPublicPort}:{ApiContainerPort}");
+        service.Labels ??= [];
+        service.Labels["neurix.proxy.domain"] = ApiProxyDomain;
+        service.Labels["neurix.proxy.port"] = ApiPublicPort;
     });
 
 builder.Build().Run();
